@@ -3,19 +3,30 @@
 @section('title', __('messages.manage') . ' ' . __('messages.department'))
 
 @section('content')
-<div class="row mb-3">
-    <div class="col-12 mb-3">
+<div class="row mb-3 align-items-center">
+    <div class="col-12 col-md-6 mb-3 mb-md-0">
         <form action="{{ route('departments.index') }}" method="GET">
-            <div class="input-group flex-nowrap" style="max-width: 100%; width: 300px;">
-                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search') }}..." value="{{ request('search') }}">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-info" type="submit"><i class="fas fa-search"></i></button>
-                    @if(request('search'))
-                        <a href="{{ route('departments.index') }}" class="btn btn-outline-secondary"><i class="fas fa-times"></i></a>
-                    @endif
-                </div>
+            <div class="d-flex flex-nowrap align-items-center" style="gap: 8px;">
+                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search') }}..." value="{{ request('search') }}" style="flex: 1; min-width: 150px;">
+                <button class="btn btn-outline-info flex-shrink-0" type="submit"><i class="fas fa-search"></i></button>
+                @if(request('search'))
+                    <a href="{{ route('departments.index') }}" class="btn btn-outline-secondary flex-shrink-0"><i class="fas fa-times"></i></a>
+                @endif
             </div>
         </form>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="d-flex flex-nowrap justify-content-md-end align-items-center" style="gap: 8px; overflow-x: auto; padding-bottom: 2px;">
+            <button type="button" class="btn btn-sm btn-info text-nowrap flex-shrink-0" data-toggle="modal" data-target="#importModal" style="box-shadow: 0 0 10px rgba(23,162,184,0.3);">
+                <i class="fas fa-file-upload"></i> <span class="d-none d-sm-inline">{{ __('messages.import_excel') }}</span>
+            </button>
+            <a href="{{ route('departments.export') }}" class="btn btn-sm btn-success text-nowrap flex-shrink-0" style="box-shadow: 0 0 10px rgba(40,167,69,0.3);">
+                <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">{{ __('messages.export') }}</span>
+            </a>
+            <a href="{{ route('departments.create') }}" class="btn btn-sm btn-primary text-nowrap flex-shrink-0" style="box-shadow: 0 0 10px rgba(0,123,255,0.3);">
+                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">{{ __('messages.add_new') }}</span>
+            </a>
+        </div>
     </div>
 </div>
 
