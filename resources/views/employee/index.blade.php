@@ -161,12 +161,16 @@
 
 @push('scripts')
 <script>
-    // To show file name in custom file input
-    document.querySelector('.custom-file-input').addEventListener('change',function(e){
-      var fileName = document.getElementById("customFile").files[0].name;
-      var nextSibling = e.target.nextElementSibling;
-      nextSibling.innerText = fileName;
-    });
+    var fileInput = document.querySelector('.import-file-input');
+    if (fileInput) {
+        fileInput.addEventListener('change',function(e){
+            var fileName = e.target.files[0].name;
+            var nextSibling = e.target.nextElementSibling;
+            if (nextSibling && nextSibling.classList.contains('file-label-text')) {
+                nextSibling.innerText = fileName;
+            }
+        });
+    }
 
 $(document).ready(function() {
     $(document).on('click', '.status-change-btn', function(e) {
