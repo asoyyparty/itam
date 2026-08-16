@@ -1762,18 +1762,18 @@
 
       <!-- Language Dropdown -->
       <li class="nav-item dropdown">
-        <a class="nav-pill-btn dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; text-decoration: none;">
+        <a class="nav-pill-btn" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; text-decoration: none;">
           <i class="fas fa-globe" style="font-size: 0.8rem;"></i>
           <span>{{ App::getLocale() == 'id' ? 'ID' : 'EN' }}</span>
           <i class="fas fa-chevron-down" style="font-size: 0.6rem; opacity: 0.7;"></i>
         </a>
-        <div class="dropdown-menu dropdown-menu-right p-1" style="border-radius: 12px; min-width: 160px; background: #090d16; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); overflow: hidden;">
-          <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('lang.switch', 'id') }}" style="gap: 8px; font-size: 0.85rem; border-radius: 8px; transition: all 0.2s; background: {{ App::getLocale() == 'id' ? 'var(--color-accent-tint)' : 'transparent' }}; color: {{ App::getLocale() == 'id' ? 'var(--color-accent) !important' : '#e2e8f0' }};">
+        <div class="dropdown-menu dropdown-menu-right p-1" style="border-radius: 12px; min-width: 160px; background: var(--color-paper-1); border: var(--rule-soft); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); overflow: hidden;">
+          <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('lang.switch', 'id') }}" style="gap: 8px; font-size: 0.85rem; border-radius: 8px; transition: all 0.2s; background: {{ App::getLocale() == 'id' ? 'var(--color-accent-tint)' : 'transparent' }}; color: {{ App::getLocale() == 'id' ? 'var(--color-accent) !important' : 'var(--color-ink-0) !important' }};">
             <i class="fas fa-check" style="font-size: 0.75rem; visibility: {{ App::getLocale() == 'id' ? 'visible' : 'hidden' }};"></i>
             <span>Bahasa Indonesia</span>
           </a>
-          <div class="dropdown-divider my-1" style="border-top: 1px solid rgba(255, 255, 255, 0.08);"></div>
-          <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('lang.switch', 'en') }}" style="gap: 8px; font-size: 0.85rem; border-radius: 8px; transition: all 0.2s; background: {{ App::getLocale() == 'en' ? 'var(--color-accent-tint)' : 'transparent' }}; color: {{ App::getLocale() == 'en' ? 'var(--color-accent) !important' : '#e2e8f0' }};">
+          <div class="dropdown-divider my-1" style="border-top: var(--rule-soft);"></div>
+          <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('lang.switch', 'en') }}" style="gap: 8px; font-size: 0.85rem; border-radius: 8px; transition: all 0.2s; background: {{ App::getLocale() == 'en' ? 'var(--color-accent-tint)' : 'transparent' }}; color: {{ App::getLocale() == 'en' ? 'var(--color-accent) !important' : 'var(--color-ink-0) !important' }};">
             <i class="fas fa-check" style="font-size: 0.75rem; visibility: {{ App::getLocale() == 'en' ? 'visible' : 'hidden' }};"></i>
             <span>English</span>
           </a>
@@ -1792,7 +1792,7 @@
       @auth
       <!-- User Profile Dropdown Menu -->
       <li class="nav-item dropdown user-menu">
-        <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-toggle="dropdown" aria-expanded="false" style="gap: 8px; padding: 4px 10px; border-radius: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08);">
+        <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-toggle="dropdown" aria-expanded="false" style="gap: 8px; padding: 4px 10px; border-radius: 20px; background: color-mix(in oklch, var(--color-ink-0) 5%, transparent); border: 1px solid color-mix(in oklch, var(--color-ink-0) 8%, transparent);">
           <div class="user-avatar-badge" style="width: 28px; height: 28px; border-radius: 50%; background: #4f46e5; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 700; font-size: 0.8rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">
             {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
           </div>
@@ -1801,16 +1801,16 @@
           </span>
           <i class="fas fa-chevron-down ml-1" style="font-size: 0.7rem; color: var(--color-ink-3);"></i>
         </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right p-0" style="border-radius: 16px; overflow: hidden; background: #090d16; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.85); min-width: 250px;">
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right p-0" style="border-radius: 16px; overflow: hidden; background: var(--color-paper-1); border: var(--rule-soft); box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15); min-width: 250px;">
           <!-- User Header Info -->
-          <div class="p-3 text-center" style="background: rgba(79, 70, 229, 0.08); border-bottom: 1px solid rgba(255, 255, 255, 0.04);">
+          <div class="p-3 text-center" style="background: rgba(79, 70, 229, 0.04); border-bottom: var(--rule-soft);">
             <div class="mx-auto mb-2" style="width: 46px; height: 46px; border-radius: 50%; background: #4f46e5; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 700; font-size: 1.2rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
               {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
             </div>
-            <div style="font-weight: 700; font-size: 0.92rem; color: #f8fafc;">{{ Auth::user()->name ?? 'User' }}</div>
-            <div style="font-size: 0.75rem; color: #94a3b8; font-family: var(--font-mono);">{{ Auth::user()->email ?? '' }}</div>
+            <div style="font-weight: 700; font-size: 0.92rem; color: var(--color-ink-0);">{{ Auth::user()->name ?? 'User' }}</div>
+            <div style="font-size: 0.75rem; color: var(--color-ink-2); font-family: var(--font-mono);">{{ Auth::user()->email ?? '' }}</div>
             <div class="mt-2">
-              <span class="badge badge-pill" style="background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); font-size: 0.7rem; font-weight: 600; padding: 4px 10px;">
+              <span class="badge badge-pill" style="background: var(--color-accent-tint); color: var(--color-accent); border: 1px solid var(--color-accent-soft); font-size: 0.7rem; font-weight: 600; padding: 4px 10px;">
                 <i class="fas fa-user-shield mr-1"></i> {{ Auth::user()->getRoleNames()->first() ?? 'User' }}
               </span>
             </div>
@@ -1818,12 +1818,12 @@
 
           <!-- Menu Items -->
           <div class="p-2">
-            <a href="#" class="dropdown-item d-flex align-items-center py-2 px-3 rounded-lg" data-toggle="modal" data-target="#changePasswordModal" style="gap: 10px; color: #e2e8f0; font-size: 0.85rem; border-radius: 8px; transition: all 0.2s;">
+            <a href="#" class="dropdown-item d-flex align-items-center py-2 px-3 rounded-lg" data-toggle="modal" data-target="#changePasswordModal" style="gap: 10px; color: var(--color-ink-1); font-size: 0.85rem; border-radius: 8px; transition: all 0.2s;">
               <i class="fas fa-key text-warning" style="width: 18px;"></i>
               <span>Ganti Password</span>
             </a>
 
-            <div class="dropdown-divider my-1" style="border-top: 1px solid rgba(255, 255, 255, 0.08);"></div>
+            <div class="dropdown-divider my-1" style="border-top: var(--rule-soft);"></div>
 
             <a href="{{ route('logout') }}" class="dropdown-item d-flex align-items-center py-2 px-3 rounded-lg text-danger" style="gap: 10px; font-size: 0.85rem; border-radius: 8px; transition: all 0.2s;">
               <i class="fas fa-sign-out-alt" style="width: 18px;"></i>
