@@ -2281,7 +2281,7 @@
     if (!prompt || prompt.trim().length < 2) return;
 
     const btn = $('#btn-submit-ai-query');
-    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Memproses...');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> {{ App::getLocale() == "id" ? "Memproses..." : "Processing..." }}');
 
     $.ajax({
       url: "{{ route('ai.query-search') }}",
@@ -2291,7 +2291,7 @@
         prompt: prompt
       },
       success: function(response) {
-        btn.prop('disabled', false).html('<i class="fas fa-paper-plane mr-1"></i> Tanya AI');
+        btn.prop('disabled', false).html('<i class="fas fa-paper-plane mr-1"></i> {{ __("messages.ask_ai_btn") }}');
         if (response.success && response.result) {
           const res = response.result;
           $('#ai-query-summary-title').text(res.summary);
@@ -2322,7 +2322,7 @@
         }
       },
       error: function(err) {
-        btn.prop('disabled', false).html('<i class="fas fa-paper-plane mr-1"></i> Tanya AI');
+        btn.prop('disabled', false).html('<i class="fas fa-paper-plane mr-1"></i> {{ __("messages.ask_ai_btn") }}');
         console.error(err);
       }
     });
@@ -2349,23 +2349,23 @@
 <!-- AI Assistant Natural Language Search Modal -->
 <div class="modal fade" id="aiSearchModal" tabindex="-1" role="dialog" aria-labelledby="aiSearchModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-    <div class="modal-content" style="border-radius: var(--radius-xl) !important; background: var(--color-paper-0) !important; border: 1px solid var(--color-accent-soft) !important;">
-      <div class="modal-header d-flex justify-content-between align-items-center" style="border-bottom: var(--rule-soft) !important;">
-        <h5 class="modal-title font-weight-bold" id="aiSearchModalLabel" style="color: var(--color-accent); font-size: 1.1rem;">
-          <i class="fas fa-robot mr-2"></i> {{ __('messages.ai_modal_title') }}
+    <div class="modal-content" style="border-radius: var(--radius-xl) !important; background: var(--color-paper-0) !important; border: var(--rule-soft) !important; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);">
+      <div class="modal-header d-flex justify-content-between align-items-center" style="border-bottom: var(--rule-soft) !important; padding: 16px 24px !important;">
+        <h5 class="modal-title font-weight-bold d-flex align-items-center" id="aiSearchModalLabel" style="color: var(--color-accent); font-size: 1.1rem; gap: 8px;">
+          <i class="fas fa-robot"></i> <span>{{ __('messages.ai_modal_title') }}</span>
         </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="outline: none;">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="outline: none; background: transparent; border: 0; color: var(--color-ink-2); font-size: 1.4rem; padding: 0; cursor: pointer; transition: color var(--dur-fast);">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body p-4">
         <!-- Input area -->
         <div class="form-group mb-3">
-          <label class="theme-text mb-2">{{ __('messages.ai_input_label') }}</label>
+          <label class="theme-text mb-2" style="font-weight: 500;">{{ __('messages.ai_input_label') }}</label>
           <div class="input-group">
             <input type="text" id="ai-prompt-input" class="form-control theme-input py-2" placeholder="{{ __('messages.ai_placeholder') }}" style="font-size: 0.95rem; border-radius: var(--radius-md) 0 0 var(--radius-md) !important;">
             <div class="input-group-append">
-              <button class="btn btn-primary px-4" id="btn-submit-ai-query" type="button">
+              <button class="btn btn-primary px-4" id="btn-submit-ai-query" type="button" style="border-radius: 0 var(--radius-md) var(--radius-md) 0 !important; font-weight: 600;">
                 <i class="fas fa-paper-plane mr-1"></i> {{ __('messages.ask_ai_btn') }}
               </button>
             </div>
@@ -2373,23 +2373,23 @@
         </div>
 
         <!-- Quick prompt chips -->
-        <div class="mb-3 d-flex flex-wrap" style="gap: 6px;">
-          <small class="text-muted w-100 mb-1">{{ __('messages.quick_questions') }}</small>
-          <button type="button" class="btn btn-xs btn-outline-info ai-chip-btn" data-prompt="{{ __('messages.prompt_expired_laptops') }}">{{ __('messages.chip_expired_laptops') }}</button>
-          <button type="button" class="btn btn-xs btn-outline-info ai-chip-btn" data-prompt="{{ __('messages.prompt_available_ips') }}">{{ __('messages.chip_available_ips') }}</button>
-          <button type="button" class="btn btn-xs btn-outline-info ai-chip-btn" data-prompt="{{ __('messages.prompt_open_tickets') }}">{{ __('messages.chip_open_tickets') }}</button>
-          <button type="button" class="btn btn-xs btn-outline-info ai-chip-btn" data-prompt="{{ __('messages.prompt_printer_devices') }}">{{ __('messages.chip_printer_devices') }}</button>
+        <div class="mb-4 d-flex flex-wrap" style="gap: 6px; align-items: center;">
+          <small class="text-muted w-100 mb-1" style="font-size: 0.75rem; font-weight: 500;">{{ __('messages.quick_questions') }}</small>
+          <button type="button" class="ai-chip-btn" data-prompt="{{ __('messages.prompt_expired_laptops') }}">{{ __('messages.chip_expired_laptops') }}</button>
+          <button type="button" class="ai-chip-btn" data-prompt="{{ __('messages.prompt_available_ips') }}">{{ __('messages.chip_available_ips') }}</button>
+          <button type="button" class="ai-chip-btn" data-prompt="{{ __('messages.prompt_open_tickets') }}">{{ __('messages.chip_open_tickets') }}</button>
+          <button type="button" class="ai-chip-btn" data-prompt="{{ __('messages.prompt_printer_devices') }}">{{ __('messages.chip_printer_devices') }}</button>
         </div>
 
         <!-- AI Output Area -->
         <div id="ai-query-output-box" style="display: none;">
-          <hr style="border-top: var(--rule-soft);">
-          <div class="p-3 rounded mb-1" style="background: color-mix(in oklch, var(--color-accent-tint) 30%, var(--color-paper-0)); border: 1px solid color-mix(in oklch, var(--color-accent) 20%, transparent);">
-            <div class="d-flex align-items-center mb-2" style="gap: 8px;">
-              <i class="fas fa-sparkles text-info" style="font-size: 1.1rem;"></i>
-              <strong id="ai-query-summary-title" class="theme-text" style="font-size: 0.9rem;"></strong>
+          <hr style="border-top: var(--rule-soft); margin-bottom: 20px;">
+          <div class="p-3 rounded-lg" style="background: var(--color-paper-1); border: var(--rule-soft); box-shadow: var(--shadow-sm);">
+            <div class="d-flex align-items-center mb-3" style="gap: 8px;">
+              <i class="fas fa-magic" style="color: var(--color-accent); font-size: 1rem;"></i>
+              <strong id="ai-query-summary-title" class="theme-text" style="font-size: 0.9rem; font-weight: 600;"></strong>
             </div>
-            <div id="ai-query-items-container" class="mt-3" style="max-height: 340px; overflow-y: auto; padding-right: 6px;"></div>
+            <div id="ai-query-items-container" class="mt-2" style="max-height: 340px; overflow-y: auto; padding-right: 6px;"></div>
           </div>
         </div>
       </div>
@@ -2402,15 +2402,36 @@
     width: 6px;
   }
   #ai-query-items-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--color-paper-2);
     border-radius: 4px;
   }
   #ai-query-items-container::-webkit-scrollbar-thumb {
-    background: rgba(0, 240, 255, 0.3);
+    background: var(--color-accent-soft);
     border-radius: 4px;
   }
   #ai-query-items-container::-webkit-scrollbar-thumb:hover {
-    background: #00f0ff;
+    background: var(--color-accent);
+  }
+  .ai-chip-btn {
+    border: 1px solid var(--color-accent-soft) !important;
+    background: var(--color-accent-tint) !important;
+    color: var(--color-accent) !important;
+    font-weight: 500;
+    border-radius: 20px;
+    padding: 5px 12px !important;
+    font-size: 0.75rem !important;
+    transition: all var(--dur-fast) var(--ease-out) !important;
+    cursor: pointer;
+    outline: none !important;
+  }
+  .ai-chip-btn:hover {
+    transform: translateY(-1px);
+    background: var(--color-accent) !important;
+    color: var(--color-paper-0) !important;
+    box-shadow: var(--shadow-sm);
+  }
+  .modal-header .close:hover {
+    color: var(--color-danger) !important;
   }
 </style>
 
