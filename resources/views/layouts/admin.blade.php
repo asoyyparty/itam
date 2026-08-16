@@ -2436,18 +2436,18 @@
 </style>
 
 <!-- PWA Mobile Install Banner -->
-<div id="pwa-install-banner" class="shadow-lg p-3 rounded-lg" style="display: none; position: fixed; bottom: 20px; left: 20px; right: 20px; z-index: 99999; background: #0f172a; border: 1px solid #38bdf8; color: #f8fafc; border-radius: 14px;">
+<div id="pwa-install-banner" class="shadow-lg p-3 rounded-lg" style="display: none; position: fixed; bottom: 20px; left: 20px; right: 20px; z-index: 99999; background: var(--color-paper-1); border: 1px solid var(--color-accent-soft); color: var(--color-ink-0); border-radius: 14px; box-shadow: var(--shadow-lg);">
   <div class="d-flex align-items-center justify-content-between">
     <div class="d-flex align-items-center" style="gap: 12px;">
       <img src="{{ vasset('logo.png') }}" alt="ITAM" style="width: 42px; height: 42px; border-radius: 10px; object-fit: cover;">
       <div>
-        <div class="font-weight-bold" style="font-size: 0.92rem; color: #ffffff;">Install Aplikasi ITAM Enterprise</div>
-        <small class="text-muted" style="font-size: 0.75rem; color: #94a3b8 !important;">Akses cepat & pengalaman aplikasi native di HP Anda</small>
+        <div class="font-weight-bold" style="font-size: 0.92rem; color: var(--color-ink-0);">Install Aplikasi ITAM Enterprise</div>
+        <small class="text-muted" style="font-size: 0.75rem; color: var(--color-ink-2) !important;">Akses cepat & pengalaman aplikasi native di HP Anda</small>
       </div>
     </div>
     <div class="d-flex align-items-center" style="gap: 8px;">
-      <button id="pwa-install-btn" class="btn btn-sm btn-info font-weight-bold px-3 py-1" style="border-radius: 20px;"><i class="fas fa-download mr-1"></i> Install</button>
-      <button id="pwa-close-btn" class="btn btn-sm btn-outline-secondary px-2 py-1" style="border-radius: 50%; width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center;"><i class="fas fa-times text-xs"></i></button>
+      <button id="pwa-install-btn" class="btn btn-sm font-weight-bold px-3 py-1" style="border-radius: 20px; background: var(--color-accent); color: var(--color-paper-0); border: none;"><i class="fas fa-download mr-1"></i> Install</button>
+      <button id="pwa-close-btn" class="btn btn-sm px-2 py-1" style="border-radius: 50%; width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center; background: color-mix(in oklch, var(--color-ink-0) 5%, transparent); border: none; color: var(--color-ink-1);"><i class="fas fa-times text-xs"></i></button>
     </div>
   </div>
 </div>
