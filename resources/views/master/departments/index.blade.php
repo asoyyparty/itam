@@ -18,13 +18,13 @@
     <div class="col-12 col-md-6">
         <div class="d-flex flex-nowrap justify-content-md-end align-items-center" style="gap: 8px; overflow-x: auto; padding-bottom: 2px;">
             <button type="button" class="btn btn-sm btn-info text-nowrap flex-shrink-0" data-toggle="modal" data-target="#importModal" style="box-shadow: 0 0 10px rgba(23,162,184,0.3);">
-                <i class="fas fa-file-upload"></i> <span class="d-none d-sm-inline">{{ __('messages.import_excel') }}</span>
+                <i class="fas fa-file-upload"></i> <span>{{ __('messages.import_excel') }}</span>
             </button>
             <a href="{{ route('departments.export') }}" class="btn btn-sm btn-success text-nowrap flex-shrink-0" style="box-shadow: 0 0 10px rgba(40,167,69,0.3);">
-                <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">{{ __('messages.export') }}</span>
+                <i class="fas fa-file-excel"></i> <span>{{ __('messages.export') }}</span>
             </a>
             <a href="{{ route('departments.create') }}" class="btn btn-sm btn-primary text-nowrap flex-shrink-0" style="box-shadow: 0 0 10px rgba(0,123,255,0.3);">
-                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">{{ __('messages.add_new') }}</span>
+                <i class="fas fa-plus"></i> <span>{{ __('messages.add_new') }}</span>
             </a>
         </div>
     </div>
@@ -33,11 +33,6 @@
 <div class="card theme-card">
     <div class="card-header border-0 d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
         <h3 class="card-title theme-text m-0">{{ __('messages.list') }} {{ __('messages.department') }}</h3>
-        <div class="card-tools d-flex flex-nowrap" style="gap: 5px;">
-            <a href="{{ route('departments.export') }}" class="btn btn-sm btn-success text-nowrap"><i class="fas fa-file-excel"></i> <span class="d-none d-md-inline">{{ __('messages.export') }}</span></a>
-            <button type="button" class="btn btn-sm btn-info text-nowrap" data-toggle="modal" data-target="#importModal"><i class="fas fa-file-upload"></i> <span class="d-none d-md-inline">{{ __('messages.import_excel') }}</span></button>
-            <a href="{{ route('departments.create') }}" class="btn btn-sm btn-primary text-nowrap"><i class="fas fa-plus"></i> <span class="d-none d-md-inline">{{ __('messages.add_new') }}</span></a>
-        </div>
     </div>
     <div class="card-body p-0">
         <div class="theme-scroll-container table-responsive">
