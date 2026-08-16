@@ -6,6 +6,7 @@ return [
     'employee' => 'User',
     'asset' => 'Asset',
     'logout' => 'Logout',
+    'change_password' => 'Change Password',
     'ticket_status' => 'Ticket Status Distribution',
 
     // Actions

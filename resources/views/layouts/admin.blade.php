@@ -1820,14 +1820,14 @@
           <div class="p-2">
             <a href="#" class="dropdown-item d-flex align-items-center py-2 px-3 rounded-lg" data-toggle="modal" data-target="#changePasswordModal" style="gap: 10px; color: var(--color-ink-1); font-size: 0.85rem; border-radius: 8px; transition: all 0.2s;">
               <i class="fas fa-key text-warning" style="width: 18px;"></i>
-              <span>Ganti Password</span>
+              <span>{{ __('messages.change_password') }}</span>
             </a>
 
             <div class="dropdown-divider my-1" style="border-top: var(--rule-soft);"></div>
 
             <a href="{{ route('logout') }}" class="dropdown-item d-flex align-items-center py-2 px-3 rounded-lg text-danger" style="gap: 10px; font-size: 0.85rem; border-radius: 8px; transition: all 0.2s;">
               <i class="fas fa-sign-out-alt" style="width: 18px;"></i>
-              <span>Logout</span>
+              <span>{{ __('messages.logout') }}</span>
             </a>
           </div>
         </div>

@@ -6,6 +6,7 @@ return [
     'employee' => 'Pengguna',
     'asset' => 'Aset',
     'logout' => 'Keluar',
+    'change_password' => 'Ganti Password',
     'ticket_status' => 'Distribusi Status Tiket',
 
     // Actions
