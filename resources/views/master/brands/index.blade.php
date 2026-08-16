@@ -6,12 +6,14 @@
 <div class="row mb-3 align-items-center">
     <div class="col-12 col-md-6 mb-3 mb-md-0">
         <form action="{{ route('brands.index') }}" method="GET">
-            <div class="d-flex align-items-center w-100">
-                <input type="text" name="search" class="form-control theme-input mr-2" placeholder="{{ __('messages.search') }}..." value="{{ request('search') }}" style="flex: 1; min-width: 0;">
-                <button class="btn btn-outline-info flex-shrink-0" type="submit"><i class="fas fa-search"></i></button>
-                @if(request('search'))
-                    <a href="{{ route('brands.index') }}" class="btn btn-outline-secondary flex-shrink-0 ml-2"><i class="fas fa-times"></i></a>
-                @endif
+            <div class="position-relative w-100" style="max-width: 400px;">
+                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search') }}..." value="{{ request('search') }}" style="width: 100%; padding-right: 75px; border-radius: 30px; height: 40px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
+                <div class="position-absolute d-flex align-items-center" style="top: 50%; right: 5px; transform: translateY(-50%); gap: 4px;">
+                    @if(request('search'))
+                        <a href="{{ route('brands.index') }}" class="text-muted" style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; text-decoration: none;"><i class="fas fa-times"></i></a>
+                    @endif
+                    <button class="btn btn-info rounded-circle" type="submit" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border: none; box-shadow: 0 2px 6px rgba(23,162,184,0.4);"><i class="fas fa-search text-xs"></i></button>
+                </div>
             </div>
         </form>
     </div>
