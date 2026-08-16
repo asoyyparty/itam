@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Models\IpAddress;
 use App\Models\Maintenance;
 use App\Models\Ticket;
+use App\Models\ActivityLog;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -78,28 +79,7 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->get();
 
-        $activities = collect();
-        $assignments = AssetAssignment::with(['asset', 'employee'])->latest()->take(5)->get();
-        foreach ($assignments as $a) {
-            $activities->push((object) [
-                'date' => $a->created_at,
-                'operator' => 'Admin',
-                'status_event' => $a->status == 'Assigned' ? __('messages.assigned') : __('messages.returned'),
-                'badge' => $a->status == 'Assigned' ? 'success' : 'info',
-                'asset' => $a->asset ? $a->asset->name.' ('.$a->asset->asset_tag.')' : 'N/A',
-            ]);
-        }
-        $maintenances = Maintenance::with('asset')->latest()->take(5)->get();
-        foreach ($maintenances as $m) {
-            $activities->push((object) [
-                'date' => $m->created_at,
-                'operator' => 'IT Support',
-                'status_event' => __('messages.maintenance'),
-                'badge' => 'warning',
-                'asset' => $m->asset ? $m->asset->name.' ('.$m->asset->asset_tag.')' : 'N/A',
-            ]);
-        }
-        $recent_activities = $activities->sortByDesc('date')->take(5);
+        $recent_activities = $this->getRecentActivities();
 
         return view('dashboard', compact(
             'total_assets',
@@ -126,28 +106,7 @@ class DashboardController extends Controller
 
     public function activities()
     {
-        $activities = collect();
-        $assignments = AssetAssignment::with(['asset', 'employee'])->latest()->take(5)->get();
-        foreach ($assignments as $a) {
-            $activities->push((object) [
-                'date' => $a->created_at,
-                'operator' => 'Admin',
-                'status_event' => $a->status == 'Assigned' ? __('messages.assigned') : __('messages.returned'),
-                'badge' => $a->status == 'Assigned' ? 'success' : 'info',
-                'asset' => $a->asset ? $a->asset->name.' ('.$a->asset->asset_tag.')' : 'N/A',
-            ]);
-        }
-        $maintenances = Maintenance::with('asset')->latest()->take(5)->get();
-        foreach ($maintenances as $m) {
-            $activities->push((object) [
-                'date' => $m->created_at,
-                'operator' => 'IT Support',
-                'status_event' => __('messages.maintenance'),
-                'badge' => 'warning',
-                'asset' => $m->asset ? $m->asset->name.' ('.$m->asset->asset_tag.')' : 'N/A',
-            ]);
-        }
-        $recent_activities = $activities->sortByDesc('date')->take(5);
+        $recent_activities = $this->getRecentActivities();
 
         $formatted = $recent_activities->map(function ($act) {
             $isToday = $act->date->isToday();
@@ -170,5 +129,68 @@ class DashboardController extends Controller
         });
 
         return response()->json($formatted->values());
+    }
+
+    private function getRecentActivities()
+    {
+        $logs = ActivityLog::latest()->take(10)->get();
+
+        return $logs->map(function ($log) {
+            $badge = 'info';
+            if ($log->action === 'created' || $log->action === 'assigned') {
+                $badge = 'success';
+            } elseif ($log->action === 'deleted') {
+                $badge = 'danger';
+            } elseif ($log->action === 'maintenance') {
+                $badge = 'warning';
+            }
+
+            $statusEvent = $log->action;
+            switch ($log->action) {
+                case 'created':
+                    $statusEvent = __('messages.created') ?? 'Created';
+                    break;
+                case 'updated':
+                    $statusEvent = __('messages.updated') ?? 'Updated';
+                    break;
+                case 'deleted':
+                    $statusEvent = __('messages.deleted') ?? 'Deleted';
+                    break;
+                case 'assigned':
+                    $statusEvent = __('messages.assigned') ?? 'Handed Over';
+                    break;
+                case 'returned':
+                    $statusEvent = __('messages.returned') ?? 'Returned';
+                    break;
+                case 'maintenance':
+                    $statusEvent = __('messages.maintenance') ?? 'Maintenance';
+                    break;
+            }
+
+            $modelBasename = class_basename($log->model_type);
+            $targetText = $log->target_name;
+
+            if ($log->action === 'assigned' && isset($log->details['employee_name'])) {
+                $targetText = $log->target_name . ' -> ' . $log->details['employee_name'];
+            } elseif ($log->action === 'returned' && isset($log->details['employee_name'])) {
+                $targetText = $log->target_name . ' <- ' . $log->details['employee_name'];
+            } else {
+                $modelLabel = $modelBasename;
+                if ($modelBasename === 'SoftwareLicense') {
+                    $modelLabel = 'License';
+                } elseif ($modelBasename === 'PasswordVault') {
+                    $modelLabel = 'Credential';
+                }
+                $targetText = "{$modelLabel}: {$log->target_name}";
+            }
+
+            return (object) [
+                'date' => $log->created_at,
+                'operator' => $log->operator,
+                'status_event' => $statusEvent,
+                'badge' => $badge,
+                'asset' => $targetText,
+            ];
+        });
     }
 }

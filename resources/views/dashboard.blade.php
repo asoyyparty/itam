@@ -268,7 +268,7 @@
                                     <th class="text-nowrap">{{ __('messages.timestamp') }}</th>
                                     <th class="text-nowrap">{{ __('messages.operator') }}</th>
                                     <th class="text-nowrap">{{ __('messages.status_event') }}</th>
-                                    <th>{{ __('messages.target_asset') }}</th>
+                                    <th>{{ __('messages.activity_target') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="realtime-activity-tbody">

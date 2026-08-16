@@ -65,5 +65,55 @@ class AppServiceProvider extends ServiceProvider
             View::share('company_name', 'PT CBA Chemical Industry');
             View::share('company_email', 'itcbachemical23@gmail.com');
         }
+
+        // Register Model Event Listeners for Activity Logging
+        $loggableModels = [
+            \App\Models\Asset::class,
+            \App\Models\Employee::class,
+            \App\Models\Ticket::class,
+            \App\Models\IpAddress::class,
+            \App\Models\Vlan::class,
+            \App\Models\SoftwareLicense::class,
+            \App\Models\PasswordVault::class,
+            \App\Models\Vendor::class,
+            \App\Models\Location::class,
+            \App\Models\Brand::class,
+            \App\Models\Category::class,
+            \App\Models\Department::class,
+            \App\Models\User::class,
+        ];
+
+        foreach ($loggableModels as $modelClass) {
+            try {
+                $modelClass::created(function ($model) {
+                    \App\Helpers\ActivityLogger::log($model, 'created');
+                });
+                $modelClass::updated(function ($model) {
+                    \App\Helpers\ActivityLogger::log($model, 'updated');
+                });
+                $modelClass::deleted(function ($model) {
+                    \App\Helpers\ActivityLogger::log($model, 'deleted');
+                });
+            } catch (\Exception $e) {
+                logger()->error("Failed to register activity observers for {$modelClass}: " . $e->getMessage());
+            }
+        }
+
+        try {
+            \App\Models\AssetAssignment::created(function ($model) {
+                \App\Helpers\ActivityLogger::log($model, $model->status === 'Assigned' ? 'assigned' : 'returned');
+            });
+            \App\Models\AssetAssignment::updated(function ($model) {
+                if ($model->isDirty('status')) {
+                    \App\Helpers\ActivityLogger::log($model, $model->status === 'Assigned' ? 'assigned' : 'returned');
+                }
+            });
+
+            \App\Models\Maintenance::created(function ($model) {
+                \App\Helpers\ActivityLogger::log($model, 'maintenance');
+            });
+        } catch (\Exception $e) {
+            logger()->error("Failed to register special model observers: " . $e->getMessage());
+        }
     }
 }
