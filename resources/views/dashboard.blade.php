@@ -250,11 +250,13 @@
     <div class="row mt-4">
         <div class="col-md-12">
             <div class="card theme-card">
-                <div class="card-header border-0 d-flex align-items-center justify-content-between">
-                    <h3 class="card-title font-weight-bold theme-text m-0"><i class="fas fa-bolt text-warning mr-2"></i>
-                        {{ __('messages.real_time_log') }}</h3>
-                    <span class="badge badge-pill" style="font-size: 0.72rem; padding: 4px 10px; background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3);">
-                        <i class="fas fa-sync-alt fa-spin mr-1"></i> Live
+                <div class="card-header border-0 d-flex align-items-center" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; padding: 12px 16px !important;">
+                    <h3 class="card-title font-weight-bold theme-text m-0 d-flex align-items-center" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 8px !important; font-size: 1.05rem !important; width: auto !important; float: none !important; margin: 0 !important;">
+                        <i class="fas fa-bolt text-warning" style="font-size: 1rem !important;"></i>
+                        <span>{{ __('messages.real_time_log') }}</span>
+                    </h3>
+                    <span class="badge badge-pill" style="font-size: 0.65rem; padding: 4px 8px; background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); white-space: nowrap; margin: 0 !important; display: inline-flex !important; align-items: center !important; gap: 4px !important;">
+                        <i class="fas fa-sync-alt fa-spin" style="font-size: 0.65rem;"></i> Live
                     </span>
                 </div>
                 <div class="card-body p-0">

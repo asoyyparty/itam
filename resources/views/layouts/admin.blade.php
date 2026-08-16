@@ -1695,7 +1695,7 @@
   </style>
   @stack('styles')
 </head>
-<body class="hold-transition sidebar-mini layout-fixed {{ session('theme', 'dark') }}-mode" style="min-height: 100vh;">
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed {{ session('theme', 'dark') }}-mode" style="min-height: 100vh;">
 <!-- Site wrapper -->
 <div class="wrapper">
 
