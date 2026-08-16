@@ -106,7 +106,7 @@ return [
     'complete' => 'Complete',
     'incomplete' => 'Incomplete',
     'warranty_expiring' => 'Warranty Expiring',
-    'real_time_log' => 'Real-Time Activity Log',
+    'real_time_log' => 'Activity Log',
     'timestamp' => 'Timestamp',
     'operator' => 'Operator',
     'status_event' => 'Status Event',

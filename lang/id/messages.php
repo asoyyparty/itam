@@ -106,7 +106,7 @@ return [
     'complete' => 'Lengkap',
     'incomplete' => 'Belum Lengkap',
     'warranty_expiring' => 'Garansi Hampir Habis',
-    'real_time_log' => 'Log Aktivitas Waktu Nyata',
+    'real_time_log' => 'Log Aktivitas',
     'timestamp' => 'Waktu',
     'operator' => 'Operator',
     'status_event' => 'Status Kejadian',
