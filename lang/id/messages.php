@@ -424,7 +424,7 @@ return [
     'ai_assistant' => 'Tanya AI Assistant',
 
     // AI Modal & Assistant
-    'tanya_itam_ai' => 'Tanya ITAM AI',
+    'tanya_itam_ai' => 'ITAM AI',
     'ai_modal_title' => 'Tanya ITAM AI Assistant',
     'ai_input_label' => 'Tanyakan sesuatu tentang Aset, Tiket, IP Address, atau Pengguna ITAM:',
     'ai_placeholder' => 'Contoh: Berapa laptop Dell yang garansinya habis? Atau cari IP Available...',

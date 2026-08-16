@@ -1723,21 +1723,32 @@
       </li>
       @endcan
 
+      <!-- Language Dropdown -->
+      <li class="nav-item dropdown">
+        <a class="nav-pill-btn dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; text-decoration: none;">
+          <i class="fas fa-globe" style="font-size: 0.8rem;"></i>
+          <span>{{ App::getLocale() == 'id' ? 'ID' : 'EN' }}</span>
+          <i class="fas fa-chevron-down" style="font-size: 0.6rem; opacity: 0.7;"></i>
+        </a>
+        <div class="dropdown-menu dropdown-menu-right p-1" style="border-radius: 12px; min-width: 160px; background: #090d16; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); overflow: hidden;">
+          <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('lang.switch', 'id') }}" style="gap: 8px; font-size: 0.85rem; border-radius: 8px; transition: all 0.2s; background: {{ App::getLocale() == 'id' ? 'var(--color-accent-tint)' : 'transparent' }}; color: {{ App::getLocale() == 'id' ? 'var(--color-accent) !important' : '#e2e8f0' }};">
+            <i class="fas fa-check" style="font-size: 0.75rem; visibility: {{ App::getLocale() == 'id' ? 'visible' : 'hidden' }};"></i>
+            <span>Bahasa Indonesia</span>
+          </a>
+          <div class="dropdown-divider my-1" style="border-top: 1px solid rgba(255, 255, 255, 0.08);"></div>
+          <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('lang.switch', 'en') }}" style="gap: 8px; font-size: 0.85rem; border-radius: 8px; transition: all 0.2s; background: {{ App::getLocale() == 'en' ? 'var(--color-accent-tint)' : 'transparent' }}; color: {{ App::getLocale() == 'en' ? 'var(--color-accent) !important' : '#e2e8f0' }};">
+            <i class="fas fa-check" style="font-size: 0.75rem; visibility: {{ App::getLocale() == 'en' ? 'visible' : 'hidden' }};"></i>
+            <span>English</span>
+          </a>
+        </div>
+      </li>
+
       <!-- Theme Switch -->
       <li class="nav-item">
         <a class="nav-pill-btn"
            href="{{ session('theme', 'dark') == 'dark' ? route('theme.switch', 'light') : route('theme.switch', 'dark') }}"
            title="Toggle Theme">
           <i class="fas {{ session('theme', 'dark') == 'dark' ? 'fa-sun' : 'fa-moon' }}" style="font-size: 0.8rem;"></i>
-        </a>
-      </li>
-
-      <!-- Language Switch -->
-      <li class="nav-item">
-        <a class="nav-pill-btn"
-           href="{{ App::getLocale() == 'id' ? route('lang.switch', 'en') : route('lang.switch', 'id') }}">
-          <i class="fas fa-globe" style="font-size: 0.8rem;"></i>
-          <span>{{ App::getLocale() == 'id' ? 'ID' : 'EN' }}</span>
         </a>
       </li>
 

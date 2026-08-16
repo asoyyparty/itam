@@ -423,7 +423,7 @@ return [
     'ai_assistant' => 'Ask AI Assistant',
 
     // AI Modal & Assistant
-    'tanya_itam_ai' => 'Ask ITAM AI',
+    'tanya_itam_ai' => 'ITAM AI',
     'ai_modal_title' => 'Ask ITAM AI Assistant',
     'ai_input_label' => 'Ask anything about Assets, Tickets, IP Addresses, or ITAM Users:',
     'ai_placeholder' => 'Example: How many Dell laptops have expired warranty? Or search Available IP...',
