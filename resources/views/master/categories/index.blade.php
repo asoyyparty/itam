@@ -6,24 +6,26 @@
 <div class="row mb-3">
     <div class="col-12 mb-3">
         <form action="{{ route('categories.index') }}" method="GET">
-            <div class="d-flex flex-wrap gap-2" style="gap: 10px;">
-                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search') }}..." value="{{ request('search') }}" style="width: 250px;" >
-                <button class="btn btn-outline-info" type="submit" ><i class="fas fa-search"></i></button>
-                @if(request('search'))
-                    <a href="{{ route('categories.index') }}" class="btn btn-outline-secondary" ><i class="fas fa-times"></i></a>
-                @endif
+            <div class="input-group flex-nowrap" style="max-width: 100%; width: 300px;">
+                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search') }}..." value="{{ request('search') }}">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-info" type="submit"><i class="fas fa-search"></i></button>
+                    @if(request('search'))
+                        <a href="{{ route('categories.index') }}" class="btn btn-outline-secondary"><i class="fas fa-times"></i></a>
+                    @endif
+                </div>
             </div>
         </form>
     </div>
 </div>
 
 <div class="card theme-card">
-    <div class="card-header border-0">
-        <h3 class="card-title theme-text">{{ __('messages.list') }} {{ __('messages.category') }}</h3>
-        <div class="card-tools d-flex" style="gap: 10px;">
-            <a href="{{ route('categories.export') }}" class="btn btn-sm btn-success"><i class="fas fa-file-excel"></i> {{ __('messages.export') }}</a>
-            <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#importModal"><i class="fas fa-file-upload"></i> {{ __('messages.import_excel') }}</button>
-            <a href="{{ route('categories.create') }}" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> {{ __('messages.add_new') }}</a>
+    <div class="card-header border-0 d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
+        <h3 class="card-title theme-text m-0">{{ __('messages.list') }} {{ __('messages.category') }}</h3>
+        <div class="card-tools d-flex flex-nowrap" style="gap: 5px;">
+            <a href="{{ route('categories.export') }}" class="btn btn-sm btn-success text-nowrap"><i class="fas fa-file-excel"></i> <span class="d-none d-md-inline">{{ __('messages.export') }}</span></a>
+            <button type="button" class="btn btn-sm btn-info text-nowrap" data-toggle="modal" data-target="#importModal"><i class="fas fa-file-upload"></i> <span class="d-none d-md-inline">{{ __('messages.import_excel') }}</span></button>
+            <a href="{{ route('categories.create') }}" class="btn btn-sm btn-primary text-nowrap"><i class="fas fa-plus"></i> <span class="d-none d-md-inline">{{ __('messages.add_new') }}</span></a>
         </div>
     </div>
     <div class="card-body p-0">
