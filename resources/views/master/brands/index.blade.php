@@ -6,11 +6,11 @@
 <div class="row mb-3 align-items-center">
     <div class="col-12 col-md-6 mb-3 mb-md-0">
         <form action="{{ route('brands.index') }}" method="GET">
-            <div class="d-flex flex-nowrap align-items-center" style="gap: 8px;">
-                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search') }}..." value="{{ request('search') }}" style="flex: 1; min-width: 150px;">
+            <div class="d-flex align-items-center w-100">
+                <input type="text" name="search" class="form-control theme-input mr-2" placeholder="{{ __('messages.search') }}..." value="{{ request('search') }}" style="flex: 1; min-width: 0;">
                 <button class="btn btn-outline-info flex-shrink-0" type="submit"><i class="fas fa-search"></i></button>
                 @if(request('search'))
-                    <a href="{{ route('brands.index') }}" class="btn btn-outline-secondary flex-shrink-0"><i class="fas fa-times"></i></a>
+                    <a href="{{ route('brands.index') }}" class="btn btn-outline-secondary flex-shrink-0 ml-2"><i class="fas fa-times"></i></a>
                 @endif
             </div>
         </form>
