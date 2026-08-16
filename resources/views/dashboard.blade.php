@@ -21,11 +21,19 @@
         .cat-mini-card {
             border-radius: 14px !important;
             transition: all 0.25s ease-in-out !important;
+            border: var(--rule-soft) !important;
+            background: var(--color-paper-0) !important;
+        }
+        body.dark-mode .cat-mini-card {
             border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            background: #0f172a !important;
         }
         .cat-mini-card:hover {
             transform: translateY(-4px) scale(1.03) !important;
             border-color: rgba(99, 102, 241, 0.4) !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 15px rgba(99, 102, 241, 0.1) !important;
+        }
+        body.dark-mode .cat-mini-card:hover {
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(99, 102, 241, 0.2) !important;
         }
         .cat-count {
@@ -39,8 +47,22 @@
         .cat-label {
             font-size: 0.8rem !important;
             font-weight: 600 !important;
-            color: #94a3b8 !important;
+            color: var(--color-ink-2) !important;
             letter-spacing: 0.2px;
+        }
+        .mobile-activity-card {
+            background: color-mix(in oklch, var(--color-paper-1) 80%, transparent) !important;
+            border: var(--rule-soft) !important;
+            border-radius: 14px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .mobile-activity-card:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+        body.dark-mode .mobile-activity-card {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
         }
         .activity-scroll-container {
             max-height: 420px;
@@ -305,7 +327,7 @@
                     <!-- Mobile NextGen Activity Card Feed -->
                     <div class="d-block d-md-none p-3" style="max-height: 380px; overflow-y: auto; -webkit-overflow-scrolling: touch;" id="realtime-activity-mobile-feed">
                         @forelse($recent_activities as $activity)
-                            <div class="mobile-activity-card p-3 mb-2" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px;">
+                            <div class="mobile-activity-card p-3 mb-2">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
                                     <div class="font-weight-bold text-info" style="font-size: 0.85rem;">
                                         <i class="fas fa-user-circle mr-1 text-muted"></i>{{ $activity->operator }}
@@ -354,13 +376,14 @@
             var gridClr = isDark
                 ? 'color-mix(in oklch, oklch(95% 0.005 258) 8%, transparent)'
                 : 'color-mix(in oklch, oklch(18% 0.03 258) 8%, transparent)';
+            var borderClr = isDark ? 'oklch(14.0% 0.015 258)' : 'oklch(98.4% 0.005 258)';
 
             // Chart defaults — Tally
             Chart.defaults.color = isDark ? '#8892b0' : '#6a7094';
             Chart.defaults.font.family = 'DM Sans, system-ui, sans-serif';
             
             var datalabelsConfig = {
-                color: 'white',
+                color: isDark ? 'white' : 'oklch(20% 0.015 258)',
                 font: { weight: 'bold', size: 11 },
                 display: function(context) {
                     var val = context.dataset.data[context.dataIndex];
@@ -465,7 +488,7 @@
                             'oklch(72% 0.140 268 / 0.80)'
                         ],
                         borderWidth: 2,
-                        borderColor: 'oklch(98.4% 0.005 258)'
+                        borderColor: borderClr
                     }]
                 },
                 options: {
@@ -500,7 +523,7 @@
                             'oklch(68% 0.150 145 / 0.80)'
                         ],
                         borderWidth: 2,
-                        borderColor: 'oklch(98.4% 0.005 258)'
+                        borderColor: borderClr
                     }]
                 },
                 options: {
@@ -530,7 +553,7 @@
                             'oklch(58% 0.200 25  / 0.80)'  // red
                         ],
                         borderWidth: 2,
-                        borderColor: 'oklch(98.4% 0.005 258)'
+                        borderColor: borderClr
                     }]
                 },
                 options: {
@@ -578,7 +601,7 @@
                                 '</tr>';
 
                             // Mobile card feed item
-                            mobileHtml += '<div class="mobile-activity-card p-3 mb-2" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px;">' +
+                            mobileHtml += '<div class="mobile-activity-card p-3 mb-2">' +
                                 '<div class="d-flex align-items-center justify-content-between mb-2">' +
                                 '<div class="font-weight-bold text-info" style="font-size: 0.85rem;"><i class="fas fa-user-circle mr-1 text-muted"></i>' + activity.operator + '</div>' +
                                 '<span class="badge badge-' + activity.badge + '" style="font-size: 0.72rem; padding: 4px 8px; border-radius: 10px;">' + activity.status_event + '</span>' +

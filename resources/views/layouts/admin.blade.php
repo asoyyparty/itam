@@ -499,44 +499,46 @@
       transform: translateY(-1px);
     }
 
-    /* ── NextGen Vibrant Badges ────────────────────────── */
+    /* ── NextGen Vibrant Badges (Light Mode Default) ────────────────────────── */
     .badge {
       font-family: var(--font-body) !important;
       font-weight: 600;
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: var(--radius-pill);
-      font-size: 0.75rem;
-      letter-spacing: 0.3px;
+      font-size: 0.72rem;
+      letter-spacing: 0.2px;
+      display: inline-flex;
+      align-items: center;
     }
     .badge-primary, .badge-indigo {
-      background: rgba(99, 102, 241, 0.18) !important;
-      color: #818cf8 !important;
-      border: 1px solid rgba(99, 102, 241, 0.35) !important;
+      background: rgba(79, 70, 229, 0.08) !important;
+      color: oklch(49.0% 0.200 268) !important;
+      border: 1px solid rgba(79, 70, 229, 0.2) !important;
     }
     .badge-success {
-      background: rgba(16, 185, 129, 0.18) !important;
-      color: #34d399 !important;
-      border: 1px solid rgba(16, 185, 129, 0.35) !important;
+      background: rgba(16, 185, 129, 0.08) !important;
+      color: oklch(42.0% 0.140 145) !important;
+      border: 1px solid rgba(16, 185, 129, 0.2) !important;
     }
     .badge-warning {
-      background: rgba(245, 158, 11, 0.18) !important;
-      color: #fbbf24 !important;
-      border: 1px solid rgba(245, 158, 11, 0.35) !important;
+      background: rgba(217, 119, 6, 0.08) !important;
+      color: oklch(50.0% 0.140 50) !important;
+      border: 1px solid rgba(217, 119, 6, 0.2) !important;
     }
     .badge-danger {
-      background: rgba(239, 68, 68, 0.18) !important;
-      color: #f87171 !important;
-      border: 1px solid rgba(239, 68, 68, 0.35) !important;
+      background: rgba(220, 38, 38, 0.08) !important;
+      color: oklch(45.0% 0.180 25) !important;
+      border: 1px solid rgba(220, 38, 38, 0.2) !important;
     }
     .badge-info, .badge-cyan {
-      background: rgba(6, 182, 212, 0.18) !important;
-      color: #38bdf8 !important;
-      border: 1px solid rgba(6, 182, 212, 0.35) !important;
+      background: rgba(8, 145, 178, 0.08) !important;
+      color: oklch(46.0% 0.150 210) !important;
+      border: 1px solid rgba(8, 145, 178, 0.2) !important;
     }
     .badge-secondary {
-      background: rgba(148, 163, 184, 0.18) !important;
-      color: #cbd5e1 !important;
-      border: 1px solid rgba(148, 163, 184, 0.35) !important;
+      background: rgba(100, 116, 139, 0.08) !important;
+      color: oklch(40.0% 0.020 258) !important;
+      border: 1px solid rgba(100, 116, 139, 0.2) !important;
     }
 
     /* ── Clean Enterprise Button Styling ───────────────────────── */
@@ -602,12 +604,21 @@
     }
 
     /* Accent left borders for stat boxes */
-    .small-box.accent-indigo  { border-left: 3px solid var(--color-accent) !important; }
-    .small-box.accent-lime    { border-left: 3px solid var(--color-companion) !important; }
-    .small-box.accent-success { border-left: 3px solid var(--color-success) !important; }
-    .small-box.accent-warning { border-left: 3px solid var(--color-warning) !important; }
-    .small-box.accent-soft    { border-left: 3px solid var(--color-accent-soft) !important; }
-    .small-box.accent-danger  { border-left: 3px solid var(--color-danger) !important; }
+    /* Accent left borders & backgrounds for stat boxes (Light Mode) */
+    body:not(.dark-mode) .small-box.accent-indigo  { background: rgba(79, 70, 229, 0.03) !important; border: 1px solid rgba(79, 70, 229, 0.12) !important; border-left: 3px solid var(--color-accent) !important; }
+    body:not(.dark-mode) .small-box.accent-lime    { background: rgba(132, 204, 22, 0.03) !important; border: 1px solid rgba(132, 204, 22, 0.12) !important; border-left: 3px solid var(--color-companion) !important; }
+    body:not(.dark-mode) .small-box.accent-success { background: rgba(16, 185, 129, 0.03) !important; border: 1px solid rgba(16, 185, 129, 0.12) !important; border-left: 3px solid var(--color-success) !important; }
+    body:not(.dark-mode) .small-box.accent-warning { background: rgba(245, 158, 11, 0.03) !important; border: 1px solid rgba(245, 158, 11, 0.12) !important; border-left: 3px solid var(--color-warning) !important; }
+    body:not(.dark-mode) .small-box.accent-soft    { background: rgba(129, 140, 248, 0.03) !important; border: 1px solid rgba(129, 140, 248, 0.12) !important; border-left: 3px solid var(--color-accent-soft) !important; }
+    body:not(.dark-mode) .small-box.accent-danger  { background: rgba(239, 68, 68, 0.03) !important; border: 1px solid rgba(239, 68, 68, 0.12) !important; border-left: 3px solid var(--color-danger) !important; }
+
+    /* Accent left borders only for dark mode */
+    body.dark-mode .small-box.accent-indigo  { border-left: 3px solid var(--color-accent) !important; }
+    body.dark-mode .small-box.accent-lime    { border-left: 3px solid var(--color-companion) !important; }
+    body.dark-mode .small-box.accent-success { border-left: 3px solid var(--color-success) !important; }
+    body.dark-mode .small-box.accent-warning { border-left: 3px solid var(--color-warning) !important; }
+    body.dark-mode .small-box.accent-soft    { border-left: 3px solid var(--color-accent-soft) !important; }
+    body.dark-mode .small-box.accent-danger  { border-left: 3px solid var(--color-danger) !important; }
 
     /* ── Tables ─────────────────────────────────────────── */
     .table, .theme-table {
@@ -1252,10 +1263,36 @@
     body.dark-mode .dropdown-item:hover {
       background: var(--color-paper-3) !important;
     }
-    body.dark-mode .badge-success { background: oklch(20% 0.050 145) !important; color: oklch(72% 0.120 145) !important; }
-    body.dark-mode .badge-danger  { background: oklch(20% 0.040 25) !important;  color: oklch(72% 0.180 25) !important; }
-    body.dark-mode .badge-warning { background: oklch(20% 0.050 50) !important;  color: oklch(76% 0.160 50) !important; }
-    body.dark-mode .badge-secondary { background: var(--color-paper-3) !important; color: var(--color-ink-2) !important; }
+    body.dark-mode .badge-primary, body.dark-mode .badge-indigo {
+      background: rgba(99, 102, 241, 0.18) !important;
+      color: #818cf8 !important;
+      border: 1px solid rgba(99, 102, 241, 0.35) !important;
+    }
+    body.dark-mode .badge-success {
+      background: rgba(16, 185, 129, 0.18) !important;
+      color: #34d399 !important;
+      border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    }
+    body.dark-mode .badge-warning {
+      background: rgba(245, 158, 11, 0.18) !important;
+      color: #fbbf24 !important;
+      border: 1px solid rgba(245, 158, 11, 0.35) !important;
+    }
+    body.dark-mode .badge-danger {
+      background: rgba(239, 68, 68, 0.18) !important;
+      color: #f87171 !important;
+      border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    }
+    body.dark-mode .badge-info, body.dark-mode .badge-cyan {
+      background: rgba(6, 182, 212, 0.18) !important;
+      color: #38bdf8 !important;
+      border: 1px solid rgba(6, 182, 212, 0.35) !important;
+    }
+    body.dark-mode .badge-secondary {
+      background: rgba(148, 163, 184, 0.18) !important;
+      color: #cbd5e1 !important;
+      border: 1px solid rgba(148, 163, 184, 0.35) !important;
+    }
     body.dark-mode .btn-secondary, body.dark-mode .btn-default {
       background: var(--color-paper-2) !important;
     }
