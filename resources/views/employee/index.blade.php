@@ -6,35 +6,36 @@
 <div class="row mb-3">
     <div class="col-12 mb-3">
         <form action="{{ route('employees.index') }}" method="GET">
-            <div class="d-flex flex-wrap gap-2" style="gap: 10px;">
-                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search_employee') }}" value="{{ request('search') }}" style="width: 250px;" >
-                
+            <div class="d-flex flex-wrap align-items-center" style="gap: 10px;">
+            <div class="position-relative" style="width: 250px; max-width: 100%; flex: 1; min-width: 200px;">
+                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search_employee') }}" value="{{ request('search') }}" style="width: 100%; padding-right: 75px; border-radius: 30px; height: 40px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
+                <div class="position-absolute d-flex align-items-center" style="top: 50%; right: 5px; transform: translateY(-50%); gap: 4px;">
+                    @if(request('search') || request('department_id') || request('supervisor_id') || request('status'))
+                        <a href="{{ route('employees.index') }}" class="text-muted" style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; text-decoration: none;"><i class="fas fa-times"></i></a>
+                    @endif
+                    <button class="btn btn-info rounded-circle" type="submit" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border: none; box-shadow: 0 2px 6px rgba(23,162,184,0.4);"><i class="fas fa-search text-xs"></i></button>
+                </div>
+            </div>
                 <select name="department_id" class="form-control select2 theme-input" style="width: 150px;">
                     <option value="" >{{ __('messages.all_department') }}</option>
                     @foreach($departments as $dept)
                         <option value="{{ $dept->id }}"  {{ request('department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
                     @endforeach
                 </select>
-
                 <select name="supervisor_id" class="form-control select2 theme-input" style="width: 150px;">
                     <option value="" >{{ __('messages.all_supervisor') }}</option>
                     @foreach($supervisors as $sup)
                         <option value="{{ $sup->id }}"  {{ request('supervisor_id') == $sup->id ? 'selected' : '' }}>{{ $sup->name }}</option>
                     @endforeach
                 </select>
-
                 <select name="status" class="form-control select2 theme-input" style="width: 150px;">
                     <option value="" >{{ __('messages.all_status') }}</option>
                     <option value="Active"  {{ request('status') == 'Active' ? 'selected' : '' }}>{{ __('messages.active') }}</option>
                     <option value="Inactive"  {{ request('status') == 'Inactive' ? 'selected' : '' }}>{{ __('messages.inactive') }}</option>
                 </select>
-
-                <button class="btn btn-outline-info" type="submit" ><i class="fas fa-search"></i></button>
-                @if(request('search') || request('department_id') || request('supervisor_id') || request('status'))
-                    <a href="{{ route('employees.index') }}" class="btn btn-outline-secondary" ><i class="fas fa-times"></i></a>
-                @endif
-            </div>
-        </form>
+            
+        </div>
+    </form>
     </div>
     <div class="col-12 text-right">
         <button type="button" class="btn btn-sm btn-success mr-2" data-toggle="modal" data-target="#importModal" style="box-shadow: 0 0 10px rgba(40,167,69,0.3);">

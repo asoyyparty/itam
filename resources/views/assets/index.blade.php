@@ -6,29 +6,34 @@
 <div class="row mb-3">
     <div class="col-12 mb-3">
         <form action="{{ route('assets.index') }}" method="GET">
-            <div class="d-flex flex-wrap gap-2" style="gap: 10px;">
-                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search_asset') }}" value="{{ request('search') }}"   style="width: 250px;">
+            <div class="d-flex flex-wrap align-items-center" style="gap: 10px;">
+            <div class="position-relative" style="width: 250px; max-width: 100%; flex: 1; min-width: 200px;">
+                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search_asset') }}" value="{{ request('search') }}" style="width: 100%; padding-right: 75px; border-radius: 30px; height: 40px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
+                <div class="position-absolute d-flex align-items-center" style="top: 50%; right: 5px; transform: translateY(-50%); gap: 4px;">
+                    @if(request('search') || request('category_id') || request('brand_id') || request('location_id') || request('status'))
+                        <a href="{{ route('assets.index') }}" class="text-muted" style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; text-decoration: none;"><i class="fas fa-times"></i></a>
+                    @endif
+                    <button class="btn btn-info rounded-circle" type="submit" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border: none; box-shadow: 0 2px 6px rgba(23,162,184,0.4);"><i class="fas fa-search text-xs"></i></button>
+                </div>
+            </div>
 <select name="category_id" class="form-control select2 theme-input" style="width: 150px;">
                     <option value="" >{{ __('messages.all_category') }}</option>
                     @foreach($categories as $cat)
                         <option value="{{ $cat->id }}"  {{ request('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
                     @endforeach
                 </select>
-
                 <select name="brand_id" class="form-control select2 theme-input" style="width: 150px;">
                     <option value="" >{{ __('messages.all_brand') }}</option>
                     @foreach($brands as $brand)
                         <option value="{{ $brand->id }}"  {{ request('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
                     @endforeach
                 </select>
-                
                 <select name="location_id" class="form-control select2 theme-input" style="width: 150px;">
                     <option value="" >{{ __('messages.all_location') }}</option>
                     @foreach($locations as $loc)
                         <option value="{{ $loc->id }}"  {{ request('location_id') == $loc->id ? 'selected' : '' }}>{{ $loc->name }}</option>
                     @endforeach
                 </select>
-
                 <select name="status" class="form-control select2 theme-input" style="width: 150px;">
                     <option value="" >{{ __('messages.all_status') }}</option>
                     <option value="Available"  {{ str_contains(request('status') ?? '', 'Available') ? 'selected' : '' }}>{{ __('messages.available') }}</option>
@@ -37,13 +42,9 @@
                     <option value="Retired"  {{ request('status') == 'Retired' ? 'selected' : '' }}>{{ __('messages.retired') }}</option>
                     <option value="Missing"  {{ request('status') == 'Missing' ? 'selected' : '' }}>{{ __('messages.missing') }}</option>
                 </select>
-
-                <button class="btn btn-outline-info" type="submit" ><i class="fas fa-search"></i></button>
-                @if(request('search') || request('category_id') || request('brand_id') || request('location_id') || request('status'))
-                    <a href="{{ route('assets.index') }}" class="btn btn-outline-secondary" ><i class="fas fa-times"></i></a>
-                @endif
-            </div>
-        </form>
+            
+        </div>
+    </form>
     </div>
     <div class="col-12 text-right mt-2 mt-md-0 d-flex justify-content-end align-items-center flex-wrap" style="gap: 8px;">
         <a href="{{ route('assets.create') }}" class="btn btn-sm btn-outline-info" title="Pindai Dokumen Nota/Faktur 1-Klik">

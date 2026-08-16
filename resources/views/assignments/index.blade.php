@@ -6,22 +6,25 @@
 <div class="row mb-3">
     <div class="col-12 mb-3">
         <form action="{{ route('assignments.index') }}" method="GET">
-            <div class="d-flex flex-wrap gap-2" style="gap: 10px;">
-                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search') }}..." value="{{ request('search') }}" style="width: 250px;" >
+            <div class="d-flex flex-wrap align-items-center" style="gap: 10px;">
+            <div class="position-relative" style="width: 250px; max-width: 100%; flex: 1; min-width: 200px;">
+                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search') }}..." value="{{ request('search') }}" style="width: 100%; padding-right: 75px; border-radius: 30px; height: 40px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
+                <div class="position-absolute d-flex align-items-center" style="top: 50%; right: 5px; transform: translateY(-50%); gap: 4px;">
+                    @if(request()->anyFilled(['search', 'status', 'date']))
+                        <a href="{{ route('assignments.index') }}" class="text-muted" style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; text-decoration: none;"><i class="fas fa-times"></i></a>
+                    @endif
+                    <button class="btn btn-info rounded-circle" type="submit" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border: none; box-shadow: 0 2px 6px rgba(23,162,184,0.4);"><i class="fas fa-search text-xs"></i></button>
+                </div>
+            </div>
                 <input type="date" name="date" class="form-control theme-input" value="{{ request('date') }}" style="width: 150px;" >
-                
                 <select name="status" class="form-control select2 theme-input" style="width: 180px;" >
                     <option value="" >{{ __('messages.all_status') }}</option>
                     <option value="Assigned"  {{ request('status') == 'Assigned' ? 'selected' : '' }}>{{ __('messages.assigned') }}</option>
                     <option value="Returned"  {{ request('status') == 'Returned' ? 'selected' : '' }}>{{ __('messages.returned') ?? 'Returned' }}</option>
                 </select>
-                
-                <button type="submit" class="btn btn-outline-info" ><i class="fas fa-search"></i></button>
-                @if(request()->anyFilled(['search', 'status', 'date']))
-                    <a href="{{ route('assignments.index') }}" class="btn btn-outline-secondary" ><i class="fas fa-undo"></i> {{ __('messages.reset') }}</a>
-                @endif
-            </div>
-        </form>
+            
+        </div>
+    </form>
     </div>
     
     <div class="col-12 d-flex justify-content-end">
