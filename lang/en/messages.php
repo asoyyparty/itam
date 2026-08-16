@@ -7,7 +7,7 @@ return [
     'asset' => 'Asset',
     'logout' => 'Logout',
     'change_password' => 'Change Password',
-    'ticket_status' => 'Ticket Status Distribution',
+    'ticket_status' => 'Ticket Status',
 
     // Actions
     'add_new' => 'Add New',

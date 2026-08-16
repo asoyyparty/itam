@@ -7,7 +7,7 @@ return [
     'asset' => 'Aset',
     'logout' => 'Keluar',
     'change_password' => 'Ganti Password',
-    'ticket_status' => 'Distribusi Status Tiket',
+    'ticket_status' => 'Status Tiket',
 
     // Actions
     'add_new' => 'Tambah Baru',
