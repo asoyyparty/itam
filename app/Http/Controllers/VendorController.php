@@ -5,8 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
 
-class VendorController extends Controller
+class VendorController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_master_data', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+        ];
+    }
+
     public function index()
     {
         $vendors = Vendor::orderBy('name')->get();

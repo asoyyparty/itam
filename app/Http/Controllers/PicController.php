@@ -5,8 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Pic;
 use Illuminate\Http\Request;
 
-class PicController extends Controller
+class PicController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_master_data', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+        ];
+    }
+
     public function index()
     {
         $pics = Pic::orderBy('name')->get();

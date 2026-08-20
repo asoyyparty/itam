@@ -8,8 +8,15 @@ use App\Models\Department;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
-class DepartmentController extends Controller
+class DepartmentController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_master_data', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+        ];
+    }
+
     public function index(Request $request)
     {
         $query = Department::query();
@@ -66,9 +73,9 @@ class DepartmentController extends Controller
         return redirect()->route('departments.index', request()->query())->with('success', __('messages.deleted_success'));
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        return Excel::download(new DepartmentExport, 'departments.xlsx');
+        return Excel::download(new DepartmentExport($request), 'departments_' . date('Ymd_His') . '.xlsx');
     }
 
     public function importExcel(Request $request)

@@ -5,8 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Vlan;
 use Illuminate\Http\Request;
 
-class VlanController extends Controller
+class VlanController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_network', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+        ];
+    }
+
     public function index(Request $request)
     {
         $query = Vlan::query();

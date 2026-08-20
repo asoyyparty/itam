@@ -21,9 +21,11 @@
     </form>
     </div>
     <div class="col-sm-6 text-right">
-        <a href="{{ route('software_licenses.create') }}" class="btn btn-sm btn-primary">
-            <i class="fas fa-plus"></i> {{ __('messages.add_license') }}
+        @can('action_manage_settings')
+<a href="{{ route('software_licenses.create') }}" class="btn btn-sm btn-primary">
+            {{ __('messages.add_license') }}
         </a>
+@endcan
     </div>
 </div>
 
@@ -83,12 +85,16 @@
                         <td class="theme-text">{{ Str::limit($lic->notes, 35) }}</td>
                         <td class="theme-text">
                             <div class="d-flex justify-content-center" style="gap: 8px;">
-                                <a href="{{ route('software_licenses.edit', array_merge([$lic->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;" title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('software_licenses.destroy', array_merge([$lic->id], request()->query())) }}" method="POST" class="d-inline">
+                                @can('action_manage_settings')
+<a href="{{ route('software_licenses.edit', array_merge([$lic->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;" title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
+@endcan
+                                @can('action_manage_settings')
+<form action="{{ route('software_licenses.destroy', array_merge([$lic->id], request()->query())) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-delete action-btn btn-outline-danger" style="border: 1px solid rgba(220, 53, 69, 0.3); background: rgba(220, 53, 69, 0.15); color: #dc3545;" title="{{ __('messages.delete') }}" data-confirm-message="{{ __('messages.confirm_delete') }}"><i class="fas fa-trash"></i></button>
                                 </form>
+@endcan
                             </div>
                         </td>
                     </tr>

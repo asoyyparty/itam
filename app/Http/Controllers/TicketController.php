@@ -10,19 +10,34 @@ use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
-class TicketController extends Controller
+class TicketController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_tickets', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+        ];
+    }
+
     public function index(Request $request)
     {
         $query = Ticket::with(['employee', 'asset']);
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where('ticket_number', 'like', "%$search%")
-                ->orWhere('title', 'like', "%$search%")
-                ->orWhereHas('employee', function ($q) use ($search) {
-                    $q->where('name', 'like', "%$search%");
-                });
+            $query->where(function($q) use ($search) {
+                $q->where('ticket_number', 'like', "%$search%")
+                  ->orWhere('title', 'like', "%$search%")
+                  ->orWhereHas('employee', function ($q2) use ($search) {
+                      $q2->where('name', 'like', "%$search%");
+                  })
+                  ->orWhereHas('pic', function ($q2) use ($search) {
+                      $q2->where('name', 'like', "%$search%");
+                  })
+                  ->orWhereHas('asset', function ($q2) use ($search) {
+                      $q2->where('name', 'like', "%$search%")->orWhere('asset_tag', 'like', "%$search%");
+                  });
+            });
         }
 
         if ($request->has('status') && $request->status != '') {
@@ -177,9 +192,9 @@ class TicketController extends Controller
         return response()->json(['success' => true, 'message' => 'Status updated successfully.', 'status' => $ticket->status]);
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        return Excel::download(new TicketExport, 'tickets.xlsx');
+        return Excel::download(new TicketExport($request), 'tickets_' . date('Ymd_His') . '.xlsx');
     }
 
     private function getTicketTitleTemplates()

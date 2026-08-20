@@ -5,7 +5,7 @@
 @section('content')
 <div class="row mb-3">
     <div class="col-12 d-flex justify-content-end">
-        <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addPicModal"><i class="fas fa-plus"></i> {{ __('messages.add_pic') }}</button>
+        <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addPicModal">{{ __('messages.add_pic') }}</button>
     </div>
 </div>
 
@@ -28,10 +28,12 @@
                         <td class="theme-text">
                             <div class="d-flex justify-content-center" style="gap: 8px;">
                                 <button type="button" class="btn action-btn btn-outline-info" style="border: 1px solid rgba(23, 162, 184, 0.3); background: rgba(23, 162, 184, 0.15); color: #17a2b8;" title="{{ __('messages.edit') }}" data-toggle="modal" data-target="#editPicModal-{{ $pic->id }}"><i class="fas fa-edit"></i></button>
-                                <form action="{{ route('pics.destroy', $pic->id) }}" method="POST" class="d-inline">
+                                @can('action_manage_master_data')
+<form action="{{ route('pics.destroy', $pic->id) }}" method="POST" class="d-inline">
                                     @csrf @method('DELETE')
                                     <button class="btn btn-delete action-btn btn-outline-danger" style="border: 1px solid rgba(220, 53, 69, 0.3); background: rgba(220, 53, 69, 0.15); color: #dc3545;" title="{{ __('messages.delete') }}" data-confirm-message="{{ __('messages.confirm_delete') }}"><i class="fas fa-trash"></i></button>
                                 </form>
+@endcan
                             </div>
                         </td>
                     </tr>

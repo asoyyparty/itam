@@ -127,21 +127,36 @@
 
 <!-- Asset Health Table Card -->
 <div class="card theme-card shadow-sm mb-4">
-    <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
-        <h5 class="card-title font-weight-bold mb-0 theme-text">
+    <style>
+        .filter-tabs-container::-webkit-scrollbar { display: none; }
+        .mobile-health-card {
+            background: var(--color-paper-0);
+            border: var(--rule-soft);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        body.dark-mode .mobile-health-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+    </style>
+
+    <div class="card-header bg-transparent d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center py-3">
+        <h5 class="card-title font-weight-bold mb-3 mb-md-0 theme-text">
             <i class="fas fa-list-ol mr-2 text-info"></i> {{ __('messages.asset_health_risk_list') }}
         </h5>
         
         <!-- Filter Tabs -->
-        <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
-            <a href="{{ route('predictive-health.index', ['status' => 'all']) }}" class="btn btn-sm {{ $statusFilter == 'all' ? 'btn-info' : 'btn-outline-secondary' }}" style="border-radius: 20px; font-weight: 600; padding: 4px 14px;">{{ __('messages.all') }} ({{ $summary['total_assets'] }})</a>
-            <a href="{{ route('predictive-health.index', ['status' => 'Critical']) }}" class="btn btn-sm {{ $statusFilter == 'Critical' ? 'btn-danger' : 'btn-outline-danger' }}" style="border-radius: 20px; font-weight: 600; padding: 4px 14px;">Critical ({{ $summary['critical_count'] }})</a>
-            <a href="{{ route('predictive-health.index', ['status' => 'Warning']) }}" class="btn btn-sm {{ $statusFilter == 'Warning' ? 'btn-warning' : 'btn-outline-warning' }}" style="border-radius: 20px; font-weight: 600; padding: 4px 14px;">Warning ({{ $summary['warning_count'] }})</a>
-            <a href="{{ route('predictive-health.index', ['status' => 'Healthy']) }}" class="btn btn-sm {{ $statusFilter == 'Healthy' ? 'btn-success' : 'btn-outline-success' }}" style="border-radius: 20px; font-weight: 600; padding: 4px 14px;">Healthy ({{ $summary['healthy_count'] }})</a>
+        <div class="filter-tabs-container" style="width: 100%; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 8px;">
+            <a href="{{ route('predictive-health.index', ['status' => 'all']) }}" class="btn btn-sm {{ $statusFilter == 'all' ? 'btn-info' : 'btn-outline-secondary' }}" style="display: inline-block; border-radius: 20px; font-weight: 600; padding: 4px 14px; margin-right: 6px;">{{ __('messages.all') }} ({{ $summary['total_assets'] }})</a>
+            <a href="{{ route('predictive-health.index', ['status' => 'Critical']) }}" class="btn btn-sm {{ $statusFilter == 'Critical' ? 'btn-danger' : 'btn-outline-danger' }}" style="display: inline-block; border-radius: 20px; font-weight: 600; padding: 4px 14px; margin-right: 6px;">Critical ({{ $summary['critical_count'] }})</a>
+            <a href="{{ route('predictive-health.index', ['status' => 'Warning']) }}" class="btn btn-sm {{ $statusFilter == 'Warning' ? 'btn-warning' : 'btn-outline-warning' }}" style="display: inline-block; border-radius: 20px; font-weight: 600; padding: 4px 14px; margin-right: 6px;">Warning ({{ $summary['warning_count'] }})</a>
+            <a href="{{ route('predictive-health.index', ['status' => 'Healthy']) }}" class="btn btn-sm {{ $statusFilter == 'Healthy' ? 'btn-success' : 'btn-outline-success' }}" style="display: inline-block; border-radius: 20px; font-weight: 600; padding: 4px 14px;">Healthy ({{ $summary['healthy_count'] }})</a>
         </div>
     </div>
 
-    <div class="health-scroll-container table-responsive">
+    <!-- Desktop Table View -->
+    <div class="health-scroll-container table-responsive d-none d-md-block">
         <table class="table table-hover align-middle mb-0 theme-table">
             <thead class="bg-light">
                 <tr>
@@ -199,12 +214,64 @@
                 @empty
                     <tr>
                         <td colspan="6" class="text-center py-4 text-muted">
-                            Tidak ada data aset untuk kategori risiko ini.
+                            {{ __('messages.no_data') }}
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
+    </div>
+    
+    <!-- Mobile Feed View -->
+    <div class="d-block d-md-none p-3" style="max-height: calc(100vh - 220px); overflow-y: auto; -webkit-overflow-scrolling: touch;">
+        @forelse($assets as $asset)
+            @php $h = $asset->health_data; @endphp
+            <div class="mobile-health-card p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div style="flex: 1; padding-right: 10px;">
+                        <a href="{{ route('assets.show', $asset->id) }}" class="font-weight-bold theme-text d-block text-truncate" style="font-size: 0.95rem; max-width: 200px;">
+                            {{ $asset->name }}
+                        </a>
+                        <div class="mt-1 d-flex flex-wrap" style="gap: 4px;">
+                            <span class="badge badge-secondary px-2 py-1" style="font-size: 0.7rem;">{{ $asset->asset_tag }}</span>
+                            <span class="badge badge-outline-secondary px-2 py-1" style="font-size: 0.7rem;">{{ $asset->category->name ?? __('messages.asset') }}</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <strong style="color: {{ $h['text_color'] }}; font-size: 1.1rem;">{{ $h['health_score'] }}%</strong>
+                        <div class="mt-1">
+                            <span class="badge {{ $h['badge_class'] }} px-2 py-1" style="font-size: 0.7rem;">{{ $h['status'] }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="health-score-bar-bg my-3" style="height: 6px;">
+                    <div class="health-score-bar-fill" style="width: {{ $h['health_score'] }}%; background-color: {{ $h['text_color'] }};"></div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div style="font-size: 0.8rem;">
+                        <div class="text-muted mb-1">{{ __('messages.remaining_useful_life') }}: <span class="font-weight-bold theme-text">{{ $h['remaining_life'] }}</span></div>
+                        <div class="text-muted">
+                            <i class="far fa-user mr-1"></i> 
+                            @if($asset->currentAssignment && $asset->currentAssignment->employee)
+                                {{ $asset->currentAssignment->employee->name }}
+                            @else
+                                {{ __('messages.not_assigned') }}
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" class="btn btn-sm btn-outline-info btn-block btn-audit-asset" data-asset-id="{{ $asset->id }}" style="border-radius: 8px;">
+                    <i class="fas fa-magic mr-1"></i> {{ __('messages.ai_audit') }}
+                </button>
+            </div>
+        @empty
+            <div class="text-center py-4 text-muted">
+                {{ __('messages.no_data') }}
+            </div>
+        @endforelse
     </div>
 </div>
 

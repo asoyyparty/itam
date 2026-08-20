@@ -28,7 +28,9 @@
     </div>
     
     <div class="col-12 d-flex justify-content-end">
-        <a href="{{ route('assignments.create') }}" class="btn btn-sm btn-primary" ><i class="fas fa-handshake"></i> {{ __('messages.assign_asset') }}</a>
+        @can('action_manage_assignments')
+<a href="{{ route('assignments.create') }}" class="btn btn-sm btn-primary" >{{ __('messages.assign_asset') }}</a>
+@endcan
     </div>
 </div>
 
@@ -60,7 +62,8 @@
                         <td class="theme-text">{{ $assignment->return_date ? \Carbon\Carbon::parse($assignment->return_date)->locale(app()->getLocale())->translatedFormat('l, d F Y') : '-' }}</td>
                         <td class="theme-text">
                             <div class="dropdown">
-                                <button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $assignment->id }}" style="box-shadow: none;">
+                                @can('action_manage_assignments')
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $assignment->id }}" style="box-shadow: none;">
                                     @if($assignment->status == 'Assigned')
                                         <span class="badge badge-primary status-badge" style="box-shadow: 0 0 8px rgba(0,123,255,0.5);">{{ __('messages.assigned') }}</span>
                                     @else
@@ -71,6 +74,19 @@
                                     <a class="dropdown-item status-change-btn text-primary" href="#" data-status="Assigned">{{ __('messages.assigned') }}</a>
                                     <a class="dropdown-item status-change-btn text-success" href="#" data-status="Returned">{{ __('messages.returned') ?? 'Returned' }}</a>
                                 </div>
+@else
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $assignment->id }}" style="box-shadow: none;">
+                                    @if($assignment->status == 'Assigned')
+                                        <span class="badge badge-primary status-badge" style="box-shadow: 0 0 8px rgba(0,123,255,0.5);">{{ __('messages.assigned') }}</span>
+                                    @else
+                                        <span class="badge badge-success status-badge" style="box-shadow: 0 0 8px rgba(40,167,69,0.5);">{{ __('messages.returned') ?? 'Returned' }}</span>
+                                    @endif
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" >
+                                    <a class="dropdown-item status-change-btn text-primary" href="#" data-status="Assigned">{{ __('messages.assigned') }}</a>
+                                    <a class="dropdown-item status-change-btn text-success" href="#" data-status="Returned">{{ __('messages.returned') ?? 'Returned' }}</a>
+                                </div>
+@endcan
                             </div>
                         </td>
                         <td class="theme-text">
@@ -80,11 +96,15 @@
                                 @else
                                     <button type="button" class="btn action-btn" style="visibility: hidden;"><i class="fas fa-undo"></i></button>
                                 @endif
-                                <a href="{{ route('assignments.edit', array_merge([$assignment->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;"  title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('assignments.destroy', array_merge([$assignment->id], request()->query())) }}" method="POST" class="d-inline">
+                                @can('action_manage_assignments')
+<a href="{{ route('assignments.edit', array_merge([$assignment->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;"  title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
+@endcan
+                                @can('action_manage_assignments')
+<form action="{{ route('assignments.destroy', array_merge([$assignment->id], request()->query())) }}" method="POST" class="d-inline">
                                     @csrf @method('DELETE')
                                     <button class="btn btn-delete action-btn btn-outline-danger" style="border: 1px solid rgba(220, 53, 69, 0.3); background: rgba(220, 53, 69, 0.15); color: #dc3545;"  title="{{ __('messages.delete') }}" data-confirm-message="{{ __('messages.confirm_delete') }}"><i class="fas fa-trash"></i></button>
                                 </form>
+@endcan
                             </div>
                         </td>
                     </tr>
@@ -175,12 +195,12 @@ $(document).ready(function() {
                     }
                     setTimeout(function() { location.reload(); }, 1000); // Reload to update action buttons and date correctly
                 } else {
-                    alert(response.message || 'Error updating status.');
+                    Swal.fire({ icon: 'error', text: response.message || 'Error updating status.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
                     badge.html(originalHtml);
                 }
             },
             error: function(xhr) {
-                alert('Error updating status.');
+                Swal.fire({ icon: 'error', text: 'Error updating status.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
                 badge.html(originalHtml);
             }
         });

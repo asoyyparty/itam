@@ -23,14 +23,22 @@ class TelegramBotController extends Controller
     /**
      * Inbound Telegram Webhook Router
      */
-    public function handleWebhook(Request $request): JsonResponse
+    public function handleWebhook(Request $request, ?string $botType = null): JsonResponse
     {
         $data = $request->all();
-        Log::info('Telegram Webhook Received:', $data);
+        Log::info("Telegram Webhook Received [Bot: {$botType}]:", $data);
+
+        // Resolve token corresponding to the receiving bot
+        $token = null;
+        if ($botType === 'ip') {
+            $token = \App\Models\Setting::where('key', 'telegram_ip_bot_token')->value('value') ?: env('TELEGRAM_BOT_TOKEN');
+        } elseif ($botType === 'primary') {
+            $token = \App\Models\Setting::where('key', 'telegram_bot_token')->value('value') ?: env('TELEGRAM_BOT_TOKEN');
+        }
 
         // 1. Handle Callback Query (Inline Button Click)
         if (isset($data['callback_query'])) {
-            $this->handleCallbackQuery($data['callback_query']);
+            $this->handleCallbackQuery($data['callback_query'], $token);
             return response()->json(['status' => 'callback_processed']);
         }
 
@@ -39,7 +47,7 @@ class TelegramBotController extends Controller
             $chatId = $data['message']['chat']['id'];
             $text = trim($data['message']['text']);
 
-            $this->processCommand($chatId, $text, $data['message']);
+            $this->processCommand($chatId, $text, $data['message'], $token);
             return response()->json(['status' => 'command_processed']);
         }
 
@@ -49,7 +57,7 @@ class TelegramBotController extends Controller
     /**
      * Process Telegram Bot Command Router
      */
-    protected function processCommand(int|string $chatId, string $text, array $messageData): void
+    protected function processCommand(int|string $chatId, string $text, array $messageData, ?string $token = null): void
     {
         $parts = explode(' ', $text, 2);
         $command = mb_strtolower($parts[0]);
@@ -59,36 +67,36 @@ class TelegramBotController extends Controller
             case '/start':
             case '/help':
             case '/menu':
-                $this->sendHelpMenu($chatId);
+                $this->sendHelpMenu($chatId, $token);
                 break;
 
             case '/cek':
             case '/asset':
-                $this->handleAssetLookup($chatId, $param);
+                $this->handleAssetLookup($chatId, $param, $token);
                 break;
 
             case '/ip':
-                $this->handleIpLookup($chatId, $param);
+                $this->handleIpLookup($chatId, $param, $token);
                 break;
 
             case '/tiket':
             case '/ticket':
-                $this->handleTicketList($chatId);
+                $this->handleTicketList($chatId, $token);
                 break;
 
             case '/ai':
             case '/tanya':
-                $this->handleAiQuery($chatId, $param);
+                $this->handleAiQuery($chatId, $param, $token);
                 break;
 
             case '/chatid':
             case '/id':
-                $this->botService->sendMessage($chatId, "📌 <b>Chat ID Anda:</b> <code>{$chatId}</code>");
+                $this->botService->sendMessage($chatId, "📌 <b>Chat ID Anda:</b> <code>{$chatId}</code>", null, $token);
                 break;
 
             default:
                 if (str_starts_with($command, '/')) {
-                    $this->botService->sendMessage($chatId, "⚠️ Perintah <code>{$command}</code> tidak dikenali. Ketik /help untuk melihat daftar perintah.");
+                    $this->botService->sendMessage($chatId, "⚠️ Perintah <code>{$command}</code> tidak dikenali. Ketik /help untuk melihat daftar perintah.", null, $token);
                 }
                 break;
         }
@@ -97,7 +105,7 @@ class TelegramBotController extends Controller
     /**
      * Help Menu
      */
-    protected function sendHelpMenu(int|string $chatId): void
+    protected function sendHelpMenu(int|string $chatId, ?string $token = null): void
     {
         $msg = "<b>🤖 SELAMAT DATANG DI ITAM BOT ASSISTANT 🤖</b>\n\n";
         $msg .= "Berikut daftar perintah yang dapat Anda gunakan:\n\n";
@@ -108,16 +116,16 @@ class TelegramBotController extends Controller
         $msg .= "📌 <b>/id</b> - Cek Telegram Chat ID Anda\n\n";
         $msg .= "<i>Chat ID Anda saat ini: <code>{$chatId}</code></i>";
 
-        $this->botService->sendMessage($chatId, $msg);
+        $this->botService->sendMessage($chatId, $msg, null, $token);
     }
 
     /**
      * Asset Lookup Command
      */
-    protected function handleAssetLookup(int|string $chatId, string $query): void
+    protected function handleAssetLookup(int|string $chatId, string $query, ?string $token = null): void
     {
         if (empty($query)) {
-            $this->botService->sendMessage($chatId, "⚠️ Harap masukkan Tag Aset atau Nama Perangkat.\nContoh: <code>/cek AST-2026-001</code>");
+            $this->botService->sendMessage($chatId, "⚠️ Harap masukkan Tag Aset atau Nama Perangkat.\nContoh: <code>/cek AST-2026-001</code>", null, $token);
             return;
         }
 
@@ -127,7 +135,7 @@ class TelegramBotController extends Controller
             ->first();
 
         if (!$asset) {
-            $this->botService->sendMessage($chatId, "❌ Aset dengan kata kunci '<b>{$query}</b>' tidak ditemukan.");
+            $this->botService->sendMessage($chatId, "❌ Aset dengan kata kunci '<b>{$query}</b>' tidak ditemukan.", null, $token);
             return;
         }
 
@@ -146,16 +154,16 @@ class TelegramBotController extends Controller
         $msg .= "<b>Sisa Usia:</b> {$health['remaining_life']}\n";
         $msg .= "<b>Rekomendasi AI:</b>\n" . htmlspecialchars($health['recommendation']);
 
-        $this->botService->sendMessage($chatId, $msg);
+        $this->botService->sendMessage($chatId, $msg, null, $token);
     }
 
     /**
      * IP Lookup Command
      */
-    protected function handleIpLookup(int|string $chatId, string $ipQuery): void
+    protected function handleIpLookup(int|string $chatId, string $ipQuery, ?string $token = null): void
     {
         if (empty($ipQuery)) {
-            $this->botService->sendMessage($chatId, "⚠️ Harap masukkan Alamat IP.\nContoh: <code>/ip 192.168.6.28</code>");
+            $this->botService->sendMessage($chatId, "⚠️ Harap masukkan Alamat IP.\nContoh: <code>/ip 192.168.6.28</code>", null, $token);
             return;
         }
 
@@ -164,7 +172,7 @@ class TelegramBotController extends Controller
             ->first();
 
         if (!$ip) {
-            $this->botService->sendMessage($chatId, "❌ Alamat IP '<b>{$ipQuery}</b>' tidak terdaftar dalam database IPAM.");
+            $this->botService->sendMessage($chatId, "❌ Alamat IP '<b>{$ipQuery}</b>' tidak terdaftar dalam database IPAM.", null, $token);
             return;
         }
 
@@ -178,13 +186,13 @@ class TelegramBotController extends Controller
         $msg .= "<b>Terikat Aset:</b> " . ($ip->asset ? $ip->asset->name . " ({$ip->asset->asset_tag})" : '-') . "\n";
         $msg .= "<b>Terikat Pegawai:</b> " . ($ip->employee ? $ip->employee->name : '-') . "\n";
 
-        $this->botService->sendMessage($chatId, $msg);
+        $this->botService->sendMessage($chatId, $msg, null, $token);
     }
 
     /**
      * Active Helpdesk Ticket List Command
      */
-    protected function handleTicketList(int|string $chatId): void
+    protected function handleTicketList(int|string $chatId, ?string $token = null): void
     {
         $tickets = Ticket::with('employee')
             ->whereIn('status', ['Open', 'In Progress'])
@@ -193,7 +201,7 @@ class TelegramBotController extends Controller
             ->get();
 
         if ($tickets->isEmpty()) {
-            $this->botService->sendMessage($chatId, "🎉 Tidak ada tiket kendala aktif saat ini. Semua kendala IT telah terselesaikan!");
+            $this->botService->sendMessage($chatId, "🎉 Tidak ada tiket kendala aktif saat ini. Semua kendala IT telah terselesaikan!", null, $token);
             return;
         }
 
@@ -216,16 +224,16 @@ class TelegramBotController extends Controller
             ];
         }
 
-        $this->botService->sendMessage($chatId, $msg, $keyboard);
+        $this->botService->sendMessage($chatId, $msg, $keyboard, $token);
     }
 
     /**
      * Tanya ITAM AI Query Command
      */
-    protected function handleAiQuery(int|string $chatId, string $query): void
+    protected function handleAiQuery(int|string $chatId, string $query, ?string $token = null): void
     {
         if (empty($query)) {
-            $this->botService->sendMessage($chatId, "🤖 <i>Halo! Saya Tanya ITAM AI. Silakan tulis pertanyaan Anda.</i>\nContoh: <code>/ai Berapa jumlah PC yang berisiko tinggi?</code>");
+            $this->botService->sendMessage($chatId, "🤖 <i>Halo! Saya Tanya ITAM AI. Silakan tulis pertanyaan Anda.</i>\nContoh: <code>/ai Berapa jumlah PC yang berisiko tinggi?</code>", null, $token);
             return;
         }
 
@@ -247,13 +255,13 @@ class TelegramBotController extends Controller
             $answer .= "Untuk analisis lebih mendalam mengenai unit atau subnet tertentu, Anda dapat menggunakan perintah <code>/cek [Tag_Aset]</code> atau <code>/ip [Alamat_IP]</code>.";
         }
 
-        $this->botService->sendMessage($chatId, $answer);
+        $this->botService->sendMessage($chatId, $answer, null, $token);
     }
 
     /**
      * Inline Keyboard Callback Handler
      */
-    protected function handleCallbackQuery(array $callback): void
+    protected function handleCallbackQuery(array $callback, ?string $token = null): void
     {
         $chatId = $callback['message']['chat']['id'] ?? null;
         $data = $callback['data'] ?? '';
@@ -265,40 +273,40 @@ class TelegramBotController extends Controller
             $ticket = Ticket::find($ticketId);
             if ($ticket) {
                 $ticket->update(['status' => 'In Progress']);
-                $this->botService->sendMessage($chatId, "⚙️ Status Tiket <code>{$ticket->ticket_number}</code> berhasil diubah menjadi <b>IN PROGRESS</b>.");
+                $this->botService->sendMessage($chatId, "⚙️ Status Tiket <code>{$ticket->ticket_number}</code> berhasil diubah menjadi <b>IN PROGRESS</b>.", null, $token);
             }
         } elseif (str_starts_with($data, 'ticket_resolve_')) {
             $ticketId = (int) str_replace('ticket_resolve_', '', $data);
             $ticket = Ticket::find($ticketId);
             if ($ticket) {
                 $ticket->update(['status' => 'Resolved', 'completed_at' => now()]);
-                $this->botService->sendMessage($chatId, "✅ Status Tiket <code>{$ticket->ticket_number}</code> telah ditandai <b>RESOLVED (SELESAI)</b>.");
+                $this->botService->sendMessage($chatId, "✅ Status Tiket <code>{$ticket->ticket_number}</code> telah ditandai <b>RESOLVED (SELESAI)</b>.", null, $token);
             }
         } elseif (str_starts_with($data, 'resolve_anom_')) {
             $ipId = (int) str_replace('resolve_anom_', '', $data);
             $ip = IpAddress::find($ipId);
             if ($ip) {
                 $ip->update(['is_online' => false]);
-                $this->botService->sendMessage($chatId, "✅ Anomali IP <code>{$ip->ip_address}</code> telah ditandai <b>REMEDIATED (RESOLVED)</b>.");
+                $this->botService->sendMessage($chatId, "✅ Anomali IP <code>{$ip->ip_address}</code> telah ditandai <b>REMEDIATED (RESOLVED)</b>.", null, $token);
             }
         } elseif (str_starts_with($data, 'register_rogue_')) {
             $ipId = (int) str_replace('register_rogue_', '', $data);
             $ip = IpAddress::find($ipId);
             if ($ip) {
-                $this->botService->sendMessage($chatId, "➕ IP <code>{$ip->ip_address}</code> siap didaftarkan. Buka portal ITAM web pada menu <b>Katalog Aset -> Tambah Aset</b>.");
+                $this->botService->sendMessage($chatId, "➕ IP <code>{$ip->ip_address}</code> siap didaftarkan. Buka portal ITAM web pada menu <b>Katalog Aset -> Tambah Aset</b>.", null, $token);
             }
         } elseif (str_starts_with($data, 'reping_ip_')) {
             $ipId = (int) str_replace('reping_ip_', '', $data);
             $ip = IpAddress::find($ipId);
             if ($ip) {
                 $statusEmoji = $ip->is_online ? '🟢 ONLINE' : '🔴 OFFLINE';
-                $this->botService->sendMessage($chatId, "🔄 <b>HASIL RE-PING TELEMETRY:</b>\nIP <code>{$ip->ip_address}</code> saat ini <b>{$statusEmoji}</b>.");
+                $this->botService->sendMessage($chatId, "🔄 <b>HASIL RE-PING TELEMETRY:</b>\nIP <code>{$ip->ip_address}</code> saat ini <b>{$statusEmoji}</b>.", null, $token);
             }
         } elseif (str_starts_with($data, 'ip_info_')) {
             $ipId = (int) str_replace('ip_info_', '', $data);
             $ip = IpAddress::find($ipId);
             if ($ip) {
-                $this->handleIpLookup($chatId, $ip->ip_address);
+                $this->handleIpLookup($chatId, $ip->ip_address, $token);
             }
         }
     }
@@ -308,21 +316,62 @@ class TelegramBotController extends Controller
      */
     public function sendTestNotification(Request $request): JsonResponse
     {
-        $chatId = $request->input('chat_id') ?: env('TELEGRAM_ADMIN_CHAT_ID');
+        $primaryToken = \App\Models\Setting::where('key', 'telegram_bot_token')->value('value') ?: env('TELEGRAM_BOT_TOKEN', '');
+        $primaryChatId = \App\Models\Setting::where('key', 'telegram_chat_id')->value('value') ?: env('TELEGRAM_ADMIN_CHAT_ID', '');
 
-        if (empty($chatId)) {
-            return response()->json(['success' => false, 'message' => 'Chat ID Telegram belum diatur.']);
+        $ipToken = \App\Models\Setting::where('key', 'telegram_ip_bot_token')->value('value') ?: '';
+        $ipChatId = \App\Models\Setting::where('key', 'telegram_ip_chat_id')->value('value') ?: '';
+
+        if (empty($primaryToken) || empty($primaryChatId)) {
+            return response()->json(['success' => false, 'message' => 'Token Bot Utama atau Chat ID belum diatur.']);
         }
 
-        $msg = "<b>🔔 ITAM TELEGRAM TEST NOTIFICATION 🔔</b>\n\n";
-        $msg .= "Koneksi Bot Telegram ITAM Enterprise berhasil terhubung dengan sistem secara sempurna!\n";
-        $msg .= "<i>Waktu Pengujian: " . date('Y-m-d H:i:s') . "</i>";
+        $results = [];
 
-        $success = $this->botService->sendMessage($chatId, $msg);
+        // 1. Test Primary Bot (Activity Log & Main)
+        $msgPrimary = "<b>🔔 ITAM TELEGRAM TEST NOTIFICATION (BOT UTAMA / ACTIVITY LOG) 🔔</b>\n\n";
+        $msgPrimary .= "Koneksi Bot Telegram Utama berhasil terhubung dengan sistem secara sempurna!\n";
+        $msgPrimary .= "<i>Waktu Pengujian: " . date('Y-m-d H:i:s') . "</i>";
+
+        $resPrimary = $this->botService->sendMessage($primaryChatId, $msgPrimary, null, $primaryToken);
+        $results['primary'] = [
+            'name' => 'Bot Utama / Activity Log',
+            'success' => $resPrimary
+        ];
+
+        // 2. Test IP Address Bot (If dedicated IP bot token or IP chat ID is configured)
+        if (!empty($ipToken) || !empty($ipChatId)) {
+            $targetIpToken = !empty($ipToken) ? $ipToken : $primaryToken;
+            $targetIpChatId = !empty($ipChatId) ? $ipChatId : $primaryChatId;
+
+            $msgIp = "<b>🌐 ITAM TELEGRAM TEST NOTIFICATION (BOT KHUSUS IP ADDRESS) 🌐</b>\n\n";
+            $msgIp .= "Koneksi Bot Telegram Khusus IP Address & Jaringan berhasil terhubung!\n";
+            $msgIp .= "<i>Waktu Pengujian: " . date('Y-m-d H:i:s') . "</i>";
+
+            $resIp = $this->botService->sendMessage($targetIpChatId, $msgIp, null, $targetIpToken);
+            $results['ip_bot'] = [
+                'name' => 'Bot Khusus IP Address',
+                'success' => $resIp
+            ];
+        }
+
+        $allSuccessful = true;
+        $statusMessages = [];
+
+        foreach ($results as $item) {
+            if ($item['success']) {
+                $statusMessages[] = "🟢 " . $item['name'] . ": Berhasil";
+            } else {
+                $allSuccessful = false;
+                $statusMessages[] = "🔴 " . $item['name'] . ": Gagal";
+            }
+        }
+
+        $finalMsg = implode(' | ', $statusMessages);
 
         return response()->json([
-            'success' => $success,
-            'message' => $success ? 'Pesan pengujian Telegram berhasil terkirim!' : 'Gagal mengirim pesan Telegram. Periksa Token & Chat ID.'
+            'success' => $allSuccessful,
+            'message' => "Hasil Uji Coba: " . $finalMsg
         ]);
     }
 }

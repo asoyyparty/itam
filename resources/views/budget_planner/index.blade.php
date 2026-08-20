@@ -100,7 +100,7 @@
             </a>
         @endforeach
         <a href="{{ route('budget-planner.export', ['year' => $selectedYear]) }}" class="btn btn-sm btn-success year-pill-btn ml-2" title="{{ __('messages.export_budget') }} CSV">
-            <i class="fas fa-file-excel mr-1"></i> {{ __('messages.export_budget') }} {{ $selectedYear }}
+            {{ __('messages.export_budget') }} {{ $selectedYear }}
         </a>
     </div>
 </div>

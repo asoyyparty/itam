@@ -313,7 +313,14 @@
                                                 {{ $activity->status_event }}
                                             </span>
                                         </td>
-                                        <td class="theme-text" style="min-width: 140px;">{{ $activity->asset }}</td>
+                                        <td class="theme-text" style="min-width: 180px;">
+                                            <div style="font-weight: 600;">{{ $activity->asset }}</div>
+                                            @if(!empty($activity->details_text))
+                                                <div class="mt-1" style="font-size: 0.76rem; color: var(--color-ink-3);">
+                                                    <i class="fas fa-info-circle text-info mr-1"></i>{{ $activity->details_text }}
+                                                </div>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -336,9 +343,14 @@
                                         {{ $activity->status_event }}
                                     </span>
                                 </div>
-                                <div class="mb-2" style="font-size: 0.875rem; font-weight: 600; color: var(--color-ink-0);">
+                                <div class="mb-1" style="font-size: 0.875rem; font-weight: 600; color: var(--color-ink-0);">
                                     <i class="fas fa-cube text-accent mr-1"></i> {{ $activity->asset }}
                                 </div>
+                                @if(!empty($activity->details_text))
+                                    <div class="mb-2" style="font-size: 0.76rem; color: var(--color-ink-3);">
+                                        <i class="fas fa-info-circle text-info mr-1"></i>{{ $activity->details_text }}
+                                    </div>
+                                @endif
                                 <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 0.75rem; font-family: var(--font-mono);">
                                     <span>
                                         <i class="far fa-clock mr-1"></i>
@@ -586,6 +598,8 @@
                         var mobileHtml = '';
 
                         data.forEach(function (activity) {
+                            var detailsSubHtml = activity.details_text ? '<div class="mt-1" style="font-size: 0.76rem; color: var(--color-ink-3);"><i class="fas fa-info-circle text-info mr-1"></i>' + activity.details_text + '</div>' : '';
+
                             // Desktop table row
                             tableHtml += '<tr>' +
                                 '<td class="theme-text text-nowrap">' +
@@ -597,7 +611,7 @@
                                 activity.status_event +
                                 '</span>' +
                                 '</td>' +
-                                '<td class="theme-text" style="min-width: 140px;">' + activity.asset + '</td>' +
+                                '<td class="theme-text" style="min-width: 180px;"><div style="font-weight: 600;">' + activity.asset + '</div>' + detailsSubHtml + '</td>' +
                                 '</tr>';
 
                             // Mobile card feed item
@@ -606,7 +620,8 @@
                                 '<div class="font-weight-bold text-info" style="font-size: 0.85rem;"><i class="fas fa-user-circle mr-1 text-muted"></i>' + activity.operator + '</div>' +
                                 '<span class="badge badge-' + activity.badge + '" style="font-size: 0.72rem; padding: 4px 8px; border-radius: 10px;">' + activity.status_event + '</span>' +
                                 '</div>' +
-                                '<div class="mb-2" style="font-size: 0.875rem; font-weight: 600; color: var(--color-ink-0);"><i class="fas fa-cube text-accent mr-1"></i> ' + activity.asset + '</div>' +
+                                '<div class="mb-1" style="font-size: 0.875rem; font-weight: 600; color: var(--color-ink-0);"><i class="fas fa-cube text-accent mr-1"></i> ' + activity.asset + '</div>' +
+                                (activity.details_text ? '<div class="mb-2" style="font-size: 0.76rem; color: var(--color-ink-3);"><i class="fas fa-info-circle text-info mr-1"></i>' + activity.details_text + '</div>' : '') +
                                 '<div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 0.75rem; font-family: var(--font-mono);">' +
                                 '<span><i class="far fa-clock mr-1"></i>' + activity.timestamp + '</span>' +
                                 '</div>' +

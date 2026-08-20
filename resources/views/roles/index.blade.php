@@ -9,7 +9,7 @@
     </div>
     <div class="col-md-4 text-md-right mt-3 mt-md-0">
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addRoleModal">
-            <i class="fas fa-plus mr-1"></i> {{ __('messages.add_role') }}
+            {{ __('messages.add_role') }}
         </button>
     </div>
 </div>
@@ -33,17 +33,21 @@
                     </td>
                     <td class="text-center">
                         <div class="btn-group" role="group">
-                            <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-sm btn-outline-primary" title="{{ __('messages.manage_permissions') }}">
+                            @can('action_manage_settings')
+<a href="{{ route('roles.edit', $role->id) }}" class="btn btn-sm btn-outline-primary" title="{{ __('messages.manage_permissions') }}">
                                 <i class="fas fa-user-shield"></i>
                             </a>
+@endcan
                             @if(!in_array($role->name, ['Super Admin', 'Admin', 'User']))
-                            <form action="{{ route('roles.destroy', $role->id) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('messages.delete_role_confirm') }}');">
+                            @can('action_manage_settings')
+<form action="{{ route('roles.destroy', $role->id) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('messages.delete_role_confirm') }}');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('messages.delete') }}">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
+@endcan
                             @endif
                         </div>
                     </td>

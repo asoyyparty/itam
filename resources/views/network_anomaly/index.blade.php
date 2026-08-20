@@ -203,7 +203,7 @@
                             <div class="d-flex justify-content-end" style="gap: 6px;">
                                 @if(str_contains($anom['type'], 'Rogue') || str_contains($anom['type'], 'Perangkat'))
                                     <button type="button" class="btn btn-sm btn-outline-info btn-register-rogue" data-ip-id="{{ $anom['ip_id'] }}" title="{{ __('messages.register_asset') }}">
-                                        <i class="fas fa-plus-circle mr-1"></i> {{ __('messages.register_asset') }}
+                                        {{ __('messages.register_asset') }}
                                     </button>
                                 @endif
                                 <button type="button" class="btn btn-sm btn-outline-success btn-resolve-anomaly" data-ip-id="{{ $anom['ip_id'] }}" title="{{ __('messages.remediate') }}">
@@ -242,12 +242,12 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.success) {
                     btn.closest('tr').fadeOut(300, function() { $(this).remove(); });
-                    toastr ? toastr.success(response.message) : alert(response.message);
+                    toastr ? toastr.success(response.message) : Swal.fire({ icon: 'error', text: response.message, toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
                 }
             },
             error: function() {
                 btn.prop('disabled', false).html('<i class="fas fa-check-circle mr-1"></i> {{ __("messages.remediate") }}');
-                alert('Gagal menyelesaikan anomali.');
+                Swal.fire({ icon: 'error', text: 'Gagal menyelesaikan anomali.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
             }
         });
     });

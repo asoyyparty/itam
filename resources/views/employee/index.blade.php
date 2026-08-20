@@ -38,15 +38,19 @@
     </form>
     </div>
     <div class="col-12 text-right">
-        <button type="button" class="btn btn-sm btn-success mr-2" data-toggle="modal" data-target="#importModal" style="box-shadow: 0 0 10px rgba(40,167,69,0.3);">
-            <i class="fas fa-file-excel"></i> {{ __('messages.import_excel') }}
+        @can('action_manage_employees')
+<button type="button" class="btn btn-sm btn-success mr-2" data-toggle="modal" data-target="#importModal" style="box-shadow: 0 0 10px rgba(40,167,69,0.3);">
+            {{ __('messages.import_excel') }}
         </button>
-        <a href="{{ route('employees.export') }}" class="btn btn-sm btn-warning mr-2" style="box-shadow: 0 0 10px rgba(255,193,7,0.3);">
-            <i class="fas fa-download"></i> {{ __('messages.export') }}
+@endcan
+        <a href="{{ route('employees.export', request()->query()) }}" class="btn btn-sm btn-warning mr-2" style="box-shadow: 0 0 10px rgba(255,193,7,0.3);">
+            {{ __('messages.export') }}
         </a>
-        <a href="{{ route('employees.create') }}" class="btn btn-sm btn-primary" >
-            <i class="fas fa-user-plus"></i> {{ __('messages.add') }} {{ __('messages.employee') }}
+        @can('action_manage_employees')
+<a href="{{ route('employees.create') }}" class="btn btn-sm btn-primary" >
+            {{ __('messages.add') }} {{ __('messages.employee') }}
         </a>
+@endcan
     </div>
 </div>
 
@@ -74,7 +78,9 @@
                         <th>{{ __('messages.name') }}</th>
                         <th>{{ __('messages.email') }}</th>
                         <th>{{ __('messages.anydesk_id') ?? 'AnyDesk ID' }}</th>
+                        <th>AnyDesk Password</th>
                         <th>{{ __('messages.pc_username') }}</th>
+                        <th>PC Password</th>
                         <th>{{ __('messages.status') }}</th>
                         <th width="150" class="text-center">{{ __('messages.actions') }}</th>
                     </tr>
@@ -82,15 +88,18 @@
                 <tbody>
                     @forelse($employees as $emp)
                     <tr>
-                        <td class="theme-text">{{ $loop->iteration }}</td>
+                        <td class="theme-text">{{ $employees->firstItem() + $loop->index }}</td>
                         <td class="text-info font-weight-bold">{{ $emp->employee_id }}</td>
                         <td class="theme-text"><a href="{{ route('employees.show', $emp) }}" class="text-info font-weight-bold">{{ $emp->name }}</a></td>
                         <td class="theme-text">{{ $emp->email ?? '-' }}</td>
                         <td class="theme-text text-success font-weight-bold"><code>{{ $emp->anydesk_id ?? '-' }}</code></td>
+                        <td class="theme-text text-success"><code>{{ $emp->anydesk_password ?? '-' }}</code></td>
                         <td class="theme-text text-warning font-weight-bold"><code>{{ $emp->login_username ?? '-' }}</code></td>
+                        <td class="theme-text text-warning"><code>{{ $emp->login_password ?? '-' }}</code></td>
                         <td class="theme-text">
                             <div class="dropdown">
-                                <button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $emp->id }}" style="box-shadow: none;">
+                                @can('action_manage_employees')
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $emp->id }}" style="box-shadow: none;">
                                     @if($emp->status == 'Active')
                                         <span class="badge badge-success status-badge" style="box-shadow: 0 0 8px rgba(40,167,69,0.5);">{{ __('messages.active') }}</span>
                                     @else
@@ -101,26 +110,53 @@
                                     <a class="dropdown-item status-change-btn text-success" href="#" data-status="Active">{{ __('messages.active') }}</a>
                                     <a class="dropdown-item status-change-btn text-danger" href="#" data-status="Inactive">{{ __('messages.inactive') }}</a>
                                 </div>
+@else
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $emp->id }}" style="box-shadow: none;">
+                                    @if($emp->status == 'Active')
+                                        <span class="badge badge-success status-badge" style="box-shadow: 0 0 8px rgba(40,167,69,0.5);">{{ __('messages.active') }}</span>
+                                    @else
+                                        <span class="badge badge-danger status-badge" style="box-shadow: 0 0 8px rgba(220,53,69,0.5);">{{ __('messages.inactive') }}</span>
+                                    @endif
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" >
+                                    <a class="dropdown-item status-change-btn text-success" href="#" data-status="Active">{{ __('messages.active') }}</a>
+                                    <a class="dropdown-item status-change-btn text-danger" href="#" data-status="Inactive">{{ __('messages.inactive') }}</a>
+                                </div>
+@endcan
                             </div>
                         </td>
                         <td class="theme-text">
                             <div class="d-flex justify-content-center" style="gap: 8px;">
-                                <a href="{{ route('employees.edit', array_merge([$emp->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;"  title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
-                            <form action="{{ route('employees.destroy', array_merge([$emp->id], request()->query())) }}" method="POST" class="d-inline">
+                                @can('action_manage_employees')
+<a href="{{ route('employees.edit', array_merge([$emp->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;"  title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
+@endcan
+                            @can('action_manage_employees')
+<form action="{{ route('employees.destroy', array_merge([$emp->id], request()->query())) }}" method="POST" class="d-inline">
                                 @csrf @method('DELETE')
                                 <button class="btn btn-delete action-btn btn-outline-danger" style="border: 1px solid rgba(220, 53, 69, 0.3); background: rgba(220, 53, 69, 0.15); color: #dc3545;"  title="{{ __('messages.delete') }}" data-confirm-message="{{ __('messages.confirm_delete') }}"><i class="fas fa-trash"></i></button>
                             </form>
+@endcan
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">{{ __('messages.no_data') }}</td>
+                        <td colspan="10" class="text-center text-muted py-4">{{ __('messages.no_data') }}</td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+        @if($employees->hasPages())
+            <div class="card-footer d-flex justify-content-between align-items-center flex-wrap py-2" style="background: transparent; border-top: 1px solid rgba(255,255,255,0.08); gap: 10px;">
+                <div class="text-muted small">
+                    Showing {{ $employees->firstItem() ?? 0 }} to {{ $employees->lastItem() ?? 0 }} of {{ $employees->total() }} entries
+                </div>
+                <div>
+                    {{ $employees->links() }}
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 
@@ -211,7 +247,7 @@ $(document).ready(function() {
                 }
             },
             error: function(xhr) {
-                alert('Error updating status.');
+                Swal.fire({ icon: 'error', text: 'Error updating status.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
                 badge.html(originalHtml);
             }
         });

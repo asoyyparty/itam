@@ -125,6 +125,7 @@ class DashboardController extends Controller
                 'status_event' => $act->status_event,
                 'badge' => $act->badge,
                 'asset' => $act->asset,
+                'details_text' => $act->details_text ?? '',
             ];
         });
 
@@ -184,12 +185,30 @@ class DashboardController extends Controller
                 $targetText = "{$modelLabel}: {$log->target_name}";
             }
 
+            $detailsText = '';
+            if (is_array($log->details)) {
+                if (!empty($log->details['diffs']) && is_array($log->details['diffs'])) {
+                    $parts = [];
+                    foreach ($log->details['diffs'] as $diff) {
+                        $parts[] = "{$diff['field']}: {$diff['old']} ➔ {$diff['new']}";
+                    }
+                    $detailsText = implode(' | ', $parts);
+                } elseif (!empty($log->details['summary']) && is_array($log->details['summary'])) {
+                    $parts = [];
+                    foreach ($log->details['summary'] as $k => $v) {
+                        $parts[] = "{$k}: {$v}";
+                    }
+                    $detailsText = implode(' | ', $parts);
+                }
+            }
+
             return (object) [
                 'date' => $log->created_at,
                 'operator' => $log->operator,
                 'status_event' => $statusEvent,
                 'badge' => $badge,
                 'asset' => $targetText,
+                'details_text' => $detailsText,
             ];
         });
     }

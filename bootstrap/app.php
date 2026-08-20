@@ -33,10 +33,25 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, $request) {
-            if (\Illuminate\Support\Facades\Auth::check()) {
-                return redirect()->route('dashboard')->with('status', 'Sesi Anda telah diperbarui.');
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, $request) {
+            if ($e->getStatusCode() === 419) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => 'Sesi kedaluwarsa. Silakan refresh halaman.'], 419);
+                }
+                if (\Illuminate\Support\Facades\Auth::check()) {
+                    return redirect()->route('dashboard')->with('warning', 'Sesi Anda telah diperbarui.');
+                }
+                return redirect()->route('login')->with('warning', 'Sesi login telah kedaluwarsa. Silakan coba masuk kembali.');
             }
-            return redirect()->route('login')->with('status', 'Sesi login telah diperbarui. Silakan coba masuk kembali.');
+        });
+
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Sesi kedaluwarsa. Silakan refresh halaman.'], 419);
+            }
+            if (\Illuminate\Support\Facades\Auth::check()) {
+                return redirect()->route('dashboard')->with('warning', 'Sesi Anda telah diperbarui.');
+            }
+            return redirect()->route('login')->with('warning', 'Sesi login telah kedaluwarsa. Silakan coba masuk kembali.');
         });
     })->create();

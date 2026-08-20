@@ -7,7 +7,7 @@
     <div class="card-header border-0 d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
         <h3 class="card-title theme-text m-0">{{ __('messages.list') }} {{ __('messages.vendor') }}</h3>
         <div class="card-tools">
-            <a href="{{ route('vendors.create') }}" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> {{ __('messages.add_new') }}</a>
+            <a href="{{ route('vendors.create') }}" class="btn btn-sm btn-primary">{{ __('messages.add_new') }}</a>
         </div>
     </div>
     <div class="card-body p-0">

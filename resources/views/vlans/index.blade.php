@@ -21,9 +21,11 @@
     </form>
     </div>
     <div class="col-sm-6 text-right">
-        <a href="{{ route('vlans.create') }}" class="btn btn-sm btn-primary">
-            <i class="fas fa-plus"></i> {{ __('messages.add_vlan') }}
+        @can('action_manage_network')
+<a href="{{ route('vlans.create') }}" class="btn btn-sm btn-primary">
+            {{ __('messages.add_vlan') }}
         </a>
+@endcan
     </div>
 </div>
 
@@ -66,7 +68,8 @@
                         <td class="theme-text">{{ $vlan->gateway ?? '-' }}</td>
                         <td class="theme-text">
                             <div class="dropdown">
-                                <button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $vlan->id }}" style="box-shadow: none;">
+                                @can('action_manage_network')
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $vlan->id }}" style="box-shadow: none;">
                                     @if($vlan->status == 'Active')
                                         <span class="badge badge-success status-badge" style="box-shadow: 0 0 8px rgba(40,167,69,0.5);">{{ __('messages.active') }}</span>
                                     @else
@@ -77,17 +80,34 @@
                                     <a class="dropdown-item status-change-btn text-success" href="#" data-status="Active">{{ __('messages.active') }}</a>
                                     <a class="dropdown-item status-change-btn text-danger" href="#" data-status="Inactive">{{ __('messages.inactive') }}</a>
                                 </div>
+@else
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $vlan->id }}" style="box-shadow: none;">
+                                    @if($vlan->status == 'Active')
+                                        <span class="badge badge-success status-badge" style="box-shadow: 0 0 8px rgba(40,167,69,0.5);">{{ __('messages.active') }}</span>
+                                    @else
+                                        <span class="badge badge-danger status-badge" style="box-shadow: 0 0 8px rgba(220,53,69,0.5);">{{ __('messages.inactive') }}</span>
+                                    @endif
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" >
+                                    <a class="dropdown-item status-change-btn text-success" href="#" data-status="Active">{{ __('messages.active') }}</a>
+                                    <a class="dropdown-item status-change-btn text-danger" href="#" data-status="Inactive">{{ __('messages.inactive') }}</a>
+                                </div>
+@endcan
                             </div>
                         </td>
                         <td class="theme-text">{{ Str::limit($vlan->notes, 30) }}</td>
                         <td class="theme-text">
                             <div class="d-flex justify-content-center" style="gap: 8px;">
-                                <a href="{{ route('vlans.edit', array_merge([$vlan->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;" title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('vlans.destroy', array_merge([$vlan->id], request()->query())) }}" method="POST" class="d-inline">
+                                @can('action_manage_network')
+<a href="{{ route('vlans.edit', array_merge([$vlan->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;" title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
+@endcan
+                                @can('action_manage_network')
+<form action="{{ route('vlans.destroy', array_merge([$vlan->id], request()->query())) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-delete action-btn btn-outline-danger" style="border: 1px solid rgba(220, 53, 69, 0.3); background: rgba(220, 53, 69, 0.15); color: #dc3545;" title="{{ __('messages.delete') }}" data-confirm-message="{{ __('messages.confirm_delete') }}"><i class="fas fa-trash"></i></button>
                                 </form>
+@endcan
                             </div>
                         </td>
                     </tr>
@@ -143,7 +163,7 @@ $(document).ready(function() {
                 }
             },
             error: function(xhr) {
-                alert('Error updating status.');
+                Swal.fire({ icon: 'error', text: 'Error updating status.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
                 badge.html(originalHtml);
             }
         });

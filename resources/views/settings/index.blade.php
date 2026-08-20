@@ -184,6 +184,13 @@
                                 'border' => 'rgba(16, 185, 129, 0.3)',
                                 'subtitle' => 'Gateway Fonnte, Wablas, & HTTP API',
                             ],
+                            'telegram' => [
+                                'icon' => 'fab fa-telegram-plane',
+                                'color' => '#3b82f6',
+                                'bg' => 'rgba(59, 130, 246, 0.15)',
+                                'border' => 'rgba(59, 130, 246, 0.3)',
+                                'subtitle' => 'Bot & Channel Notifikasi Telegram',
+                            ],
                         ];
                     @endphp
 
@@ -241,6 +248,7 @@
         <div class="card settings-card">
             <form action="{{ route('settings.updateAll') }}" method="POST">
                 @csrf
+                <input type="hidden" name="active_tab" id="active_tab_input" value="{{ request('active_tab', '#v-pills-general') }}">
                 <div class="card-body p-4">
                     <div class="tab-content" id="v-pills-tabContent">
                         @php $first = true; @endphp
@@ -296,7 +304,7 @@
                                                     <option value="wablas" {{ $setting->value == 'wablas' ? 'selected' : '' }}>Wablas API Gateway</option>
                                                     <option value="generic" {{ $setting->value == 'generic' ? 'selected' : '' }}>Custom HTTP Webhook Gateway</option>
                                                 </select>
-                                            @elseif(in_array($setting->key, ['gemini_api_key', 'openai_api_key', 'whatsapp_api_token']))
+                                            @elseif(in_array($setting->key, ['gemini_api_key', 'openai_api_key', 'whatsapp_api_token', 'telegram_bot_token']))
                                                 <div class="input-group">
                                                     <input type="password" id="input-{{ $setting->key }}" name="{{ $setting->key }}" class="form-control theme-input" value="{{ $setting->value }}" placeholder="Masukkan Token / API Key..." {{ ($group == 'ai' && !$isSuperAdmin) ? 'disabled' : '' }}>
                                                     <div class="input-group-append">
@@ -310,12 +318,41 @@
                                             @elseif($setting->key == 'ip_offline_email_time')
                                                  <input type="time" name="{{ $setting->key }}" class="form-control theme-input" style="width: 160px;" value="{{ $setting->value ?: '08:00' }}">
                                                  <small class="text-muted d-block mt-1"><i class="fas fa-clock mr-1"></i> Jam eksekusi harian laporan email IP Offline (Default: 08:00)</small>
+                                            @elseif($setting->key == 'ip_offline_email_recipients')
+                                                 <input type="text" name="{{ $setting->key }}" class="form-control theme-input" value="{{ $setting->value }}" placeholder="Contoh: admin@perusahaan.com, it@perusahaan.com">
+                                                 <small class="text-muted d-block mt-1"><i class="fas fa-envelope mr-1"></i> Alamat email tujuan (pisahkan dengan koma jika lebih dari satu). Kosongkan untuk mengirim ke semua Super Admin.</small>
                                             @elseif($setting->key == 'whatsapp_admin_phone')
                                                  <input type="text" name="{{ $setting->key }}" class="form-control theme-input" value="{{ $setting->value }}" placeholder="Contoh: 081234567890">
                                                  <small class="text-muted d-block mt-1"><i class="fas fa-phone-alt mr-1"></i> Nomor telepon WhatsApp Admin/Penerima Alert (misal: 081234567890)</small>
                                             @elseif($setting->key == 'whatsapp_api_url')
                                                  <input type="text" name="{{ $setting->key }}" class="form-control theme-input" value="{{ $setting->value }}" placeholder="https://api.fonnte.com/send">
                                                  <small class="text-muted d-block mt-1"><i class="fas fa-link mr-1"></i> URL Endpoint API (Fonnte: https://api.fonnte.com/send | Wablas: https://kudus.wablas.com/api/send-message)</small>
+                                            @elseif($setting->key == 'telegram_bot_token')
+                                                  <div class="input-group">
+                                                      <input type="password" name="{{ $setting->key }}" id="input-{{ $setting->key }}" class="form-control theme-input" value="{{ $setting->value }}" placeholder="Contoh: 8863536570:AAFeE...">
+                                                      <div class="input-group-append">
+                                                          <button class="btn btn-outline-secondary toggle-key-btn" type="button" data-target="input-{{ $setting->key }}">
+                                                              <i class="fas fa-eye"></i>
+                                                          </button>
+                                                      </div>
+                                                  </div>
+                                                  <small class="text-muted d-block mt-1"><i class="fas fa-robot mr-1"></i> Bot utama untuk log aktivitas sistem, tiket helpdesk, dan asisten AI.</small>
+                                             @elseif($setting->key == 'telegram_chat_id')
+                                                  <input type="text" name="{{ $setting->key }}" class="form-control theme-input" value="{{ $setting->value }}" placeholder="Contoh: 8679359045">
+                                                  <small class="text-muted d-block mt-1"><i class="fas fa-users mr-1"></i> ID Grup / Channel atau User Telegram tujuan untuk Log Aktivitas Utama.</small>
+                                             @elseif($setting->key == 'telegram_ip_bot_token')
+                                                  <div class="input-group">
+                                                      <input type="password" name="{{ $setting->key }}" id="input-{{ $setting->key }}" class="form-control theme-input" value="{{ $setting->value }}" placeholder="Kosongkan jika ingin menggunakan Bot Utama">
+                                                      <div class="input-group-append">
+                                                          <button class="btn btn-outline-secondary toggle-key-btn" type="button" data-target="input-{{ $setting->key }}">
+                                                              <i class="fas fa-eye"></i>
+                                                          </button>
+                                                      </div>
+                                                  </div>
+                                                  <small class="text-muted d-block mt-1"><i class="fas fa-network-wired mr-1"></i> Bot terpisah khusus notifikasi IP Offline/Online (Kosongkan jika ingin gabung dengan Bot Utama).</small>
+                                             @elseif($setting->key == 'telegram_ip_chat_id')
+                                                  <input type="text" name="{{ $setting->key }}" class="form-control theme-input" value="{{ $setting->value }}" placeholder="Kosongkan jika ingin menggunakan Chat ID Utama">
+                                                  <small class="text-muted d-block mt-1"><i class="fas fa-users-cog mr-1"></i> ID Grup / Channel Telegram khusus Notifikasi IP Address (Kosongkan jika ingin menggunakan Chat ID Utama).</small>
                                             @elseif($setting->type == 'boolean')
                                                 <select name="{{ $setting->key }}" class="form-control theme-input" style="width: 150px;" {{ ($group == 'ai' && !$isSuperAdmin) ? 'disabled' : '' }}>
                                                     <option value="1"  {{ $setting->value == '1' ? 'selected' : '' }}>{{ __('messages.enabled') }}</option>
@@ -337,6 +374,15 @@
                                         <div id="test-wa-result" class="mt-3"></div>
                                     </div>
                                 @endif
+                                @if($group == 'telegram')
+                                    <div class="mt-4 pt-3 border-top" style="border-color: rgba(255,255,255,0.08) !important;">
+                                        <button type="button" id="btn-test-telegram" class="btn btn-outline-primary px-4 py-2" style="border-radius: 10px; font-weight: 600; color: #3b82f6; border-color: #3b82f6;">
+                                            <i class="fab fa-telegram-plane mr-2 fa-lg"></i> {{ __('messages.test_telegram') ?? 'Kirim Pesan Pengujian Telegram' }}
+                                        </button>
+                                        <span id="test-tg-spinner" class="spinner-border spinner-border-sm text-primary ml-2 d-none" role="status"></span>
+                                        <div id="test-tg-result" class="mt-3"></div>
+                                    </div>
+                                @endif
                             </div>
                             @php $first = false; @endphp
                         @endforeach
@@ -344,7 +390,7 @@
                 </div>
                 <div class="card-footer bg-transparent border-0 text-right pb-4 pr-4">
                     <button type="submit" class="btn btn-primary px-4 py-2" style="border-radius: 10px; font-weight: 600; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);">
-                        <i class="fas fa-save mr-2"></i> {{ __('messages.save_all_settings') }}
+                        <i class="fas fa-save mr-2"></i> {{ __('messages.save') }}
                     </button>
                 </div>
             </form>
@@ -355,6 +401,27 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
+    // Tab Persistence Logic
+    $('a[data-toggle="pill"]').on('shown.bs.tab', function(e) {
+        const target = $(e.target).attr('href');
+        if (target) {
+            $('#active_tab_input').val(target);
+            localStorage.setItem('active_settings_tab', target);
+            if (history.replaceState) {
+                history.replaceState(null, null, target);
+            }
+        }
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeTabFromUrl = urlParams.get('active_tab');
+    let targetTab = activeTabFromUrl || window.location.hash || localStorage.getItem('active_settings_tab');
+
+    if (targetTab && $('a[href="' + targetTab + '"]').length) {
+        $('a[href="' + targetTab + '"]').tab('show');
+        $('#active_tab_input').val(targetTab);
+    }
+
     $('.toggle-key-btn').click(function() {
         const targetId = $(this).data('target');
         const input = $('#' + targetId);
@@ -369,10 +436,52 @@ $(document).ready(function() {
         }
     });
 
+    $('#btn-test-telegram').click(function() {
+        const botToken = $('input[name="telegram_bot_token"]').val();
+        const chatId = $('input[name="telegram_chat_id"]').val();
+        
+        if (!botToken || !chatId) {
+            Swal.fire({ icon: 'error', text: 'Harap isi Bot Token dan Chat ID Telegram terlebih dahulu!', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
+            return;
+        }
+
+        const btn = $(this);
+        const spinner = $('#test-tg-spinner');
+        const resultDiv = $('#test-tg-result');
+
+        btn.prop('disabled', true);
+        spinner.removeClass('d-none');
+        resultDiv.html('');
+
+        $.ajax({
+            url: '{{ route("settings.telegram.test") }}',
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                telegram_bot_token: botToken,
+                telegram_chat_id: chatId
+            },
+            success: function(res) {
+                btn.prop('disabled', false);
+                spinner.addClass('d-none');
+                if (res.success) {
+                    resultDiv.html('<div class="alert alert-success mt-2 mb-0" style="border-radius: 10px;"><i class="fas fa-check-circle mr-2"></i> ' + res.message + '</div>');
+                } else {
+                    resultDiv.html('<div class="alert alert-danger mt-2 mb-0" style="border-radius: 10px;"><i class="fas fa-exclamation-triangle mr-2"></i> ' + (res.message || 'Error') + '</div>');
+                }
+            },
+            error: function(xhr) {
+                btn.prop('disabled', false);
+                spinner.addClass('d-none');
+                resultDiv.html('<div class="alert alert-danger mt-2 mb-0" style="border-radius: 10px;"><i class="fas fa-times-circle mr-2"></i> Terjadi kesalahan koneksi saat menguji pesan Telegram.</div>');
+            }
+        });
+    });
+
     $('#btn-test-whatsapp').click(function() {
         const adminPhone = $('input[name="whatsapp_admin_phone"]').val();
         if (!adminPhone) {
-            alert('Harap isi Nomor WhatsApp Admin Penerima Alert terlebih dahulu!');
+            Swal.fire({ icon: 'error', text: 'Harap isi Nomor WhatsApp Admin Penerima Alert terlebih dahulu!', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
             return;
         }
 

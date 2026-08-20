@@ -25,6 +25,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        date_default_timezone_set(config('app.timezone', 'Asia/Jakarta'));
+        \Carbon\Carbon::setLocale('id');
+
         Paginator::useBootstrapFive();
 
         if (env('APP_ENV') !== 'local' || request()->header('x-forwarded-proto') === 'https') {

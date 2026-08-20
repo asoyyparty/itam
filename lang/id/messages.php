@@ -45,6 +45,7 @@ return [
     'all_category' => 'Semua Kategori',
     'all_brand' => 'Semua Merek',
     'all_location' => 'Semua Lokasi',
+    'all_year' => 'Semua Tahun',
     'all_department' => 'Semua Divisi',
     'all_supervisor' => 'Semua Supervisor',
     'health' => 'Kesehatan',
@@ -219,7 +220,7 @@ return [
     'description_details' => 'Deskripsi / Detail',
     'network_details' => 'Detail Jaringan',
     'configuration' => 'Konfigurasi',
-    'save_all_settings' => 'Simpan Semua Pengaturan',
+    'save_all_settings' => 'Simpan',
     'enabled' => 'Diaktifkan',
     'disabled' => 'Dinonaktifkan',
     'ip_offline_email_notification' => 'Notifikasi Email IP Offline',
@@ -234,6 +235,7 @@ return [
     'assigned_employee' => 'User',
     'ip_management' => 'Manajemen IP Address',
     'search_ip' => 'Cari IP, User, Aset...',
+    'all_ping_status' => 'Semua Status Ping',
     'search_ticket' => 'Cari nomor tiket, judul...',
     'all_priority' => 'Semua Prioritas',
     'returned' => 'Dikembalikan',
@@ -357,6 +359,8 @@ return [
     'vlan_config' => 'Konfigurasi VLAN',
     'software_license' => 'Lisensi Software',
     'ping_device' => 'Tes Ping Perangkat',
+    'ping_all_used' => 'Ping Used IP',
+    'ping_batch_completed' => 'Ping Batch Selesai!',
     'ping_online' => 'Ping Berhasil! Perangkat Online.',
     'ping_offline' => 'Ping Gagal! Perangkat Offline.',
     'ping_error' => 'Gagal mengeksekusi perintah ping.',
@@ -418,9 +422,9 @@ return [
     'enter_pic_name' => 'Masukkan nama PIC',
 
     // Advanced AI & Network Features
-    'predictive_health' => 'Maintenance Prediktif',
-    'network_anomalies' => 'Monitoring & Anomali Jaringan',
-    'budget_planner' => 'Perencanaan Anggaran IT',
+    'predictive_health' => 'Pemeliharaan Prediktif',
+    'network_anomalies' => 'Monitoring Jaringan',
+    'budget_planner' => 'Anggaran IT',
     'ocr_scan' => 'Scan OCR 1-Klik',
     'ai_assistant' => 'Tanya AI Assistant',
 
@@ -448,8 +452,8 @@ return [
     'ocr_loading_title' => 'Sedang memindai dokumen dengan AI Vision OCR...',
     'ocr_loading_subtitle' => 'Mengekstrak serial number, merk, tanggal, DO, & spesifikasi hardware...',
 
-    'predictive_health' => 'Predictive Maintenance',
-    'predictive_health_title' => 'Maintenance Prediktif & Analisis Kesehatan Aset',
+    'predictive_health' => 'Pemeliharaan Prediktif',
+    'predictive_health_title' => 'Pemeliharaan Prediktif & Analisis Kesehatan Aset',
     'predictive_health_desc' => 'Analisis kesehatan AI berbasis multi-faktor umur, garansi, frekuensi tiket, biaya perawatan, & spesifikasi.',
     'total_analyzed_assets' => 'TOTAL ASET ANALISIS',
     'registered_assets_desc' => 'Aset terdaftar dalam database',
@@ -489,7 +493,7 @@ return [
     'ai_audit_btn' => 'Diagnosa Audit AI',
 
     // Network Anomaly Detection
-    'network_anomaly_title' => 'Monitoring Jaringan Pintar & Deteksi Anomali',
+    'network_anomaly_title' => 'Monitoring Jaringan Pintar',
     'network_anomaly_desc' => 'Pemantauan telemetri IP real-time, pendeteksian konflik IP/MAC, perangkat liar (rogue devices), dan lonjakan latensi jaringan.',
     'network_health_score' => 'SKOR KESEHATAN JARANGAN',
     'active_critical_anomalies' => 'ANOMALI KRITIS',
@@ -515,7 +519,7 @@ return [
     'all_filter' => 'Semua',
 
     // IT Budget Planner
-    'budget_planner_title' => 'Laporan Anggaran & Perencanaan Siklus IT',
+    'budget_planner_title' => 'Laporan Anggaran IT',
     'budget_planner_desc' => 'Proyeksi kebutuhan dana belanja IT, peremajaan unit tua (replacement), biaya perawatan, dan lisensi software 5 tahunan (2026 - 2030).',
     'fiscal_year' => 'Tahun Fiskal',
     'export_budget' => 'Export Anggaran',
@@ -551,5 +555,15 @@ return [
     'whatsapp_api_url' => 'URL Endpoint API WhatsApp Gateway',
     'whatsapp_admin_phone' => 'Nomor WhatsApp Admin Penerima Alert',
     'test_whatsapp' => 'Kirim Pesan Pengujian WhatsApp',
+    // Telegram Settings
+    'telegram_settings' => 'Pengaturan Telegram',
+    'telegram_configuration' => 'Konfigurasi Bot Telegram',
+    'telegram_enabled' => 'Status Notifikasi Telegram',
+    'telegram_bot_token' => 'Token Bot Telegram Utama / Activity Log',
+    'telegram_chat_id' => 'ID Grup / Chat Telegram Utama / Activity Log',
+    'telegram_admin_chat_id' => 'ID Admin Telegram Utama',
+    'telegram_ip_bot_token' => 'Token Bot Telegram Khusus IP Address (Opsional)',
+    'telegram_ip_chat_id' => 'Telegram Chat ID Khusus Alert IP Address (Opsional)',
+    'test_telegram' => 'Kirim Pesan Pengujian Telegram',
+    'ip_offline_email_recipients' => 'Penerima Email IP Offline',
 ];
-

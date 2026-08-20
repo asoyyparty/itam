@@ -12,8 +12,15 @@ use App\Models\Location;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
-class EmployeeController extends Controller
+class EmployeeController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_employees', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+        ];
+    }
+
     public function index(Request $request)
     {
         $query = Employee::with(['department']);
@@ -42,7 +49,7 @@ class EmployeeController extends Controller
         // Get only employees who are supervisors
         $supervisors = Employee::whereIn('id', Employee::whereNotNull('supervisor_id')->pluck('supervisor_id')->unique())->orderBy('name')->get();
 
-        $employees = $query->orderBy('name')->get();
+        $employees = $query->orderBy('name')->paginate(25)->withQueryString();
 
         return view('employee.index', compact('employees', 'departments', 'supervisors'));
     }
@@ -136,8 +143,8 @@ class EmployeeController extends Controller
         return response()->json(['success' => true, 'message' => 'Status updated successfully.', 'status' => $emp->status]);
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        return Excel::download(new EmployeeExport, 'employees.xlsx');
+        return Excel::download(new EmployeeExport($request), 'employees_' . date('Ymd_His') . '.xlsx');
     }
 }

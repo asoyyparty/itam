@@ -20,13 +20,13 @@
     <div class="col-12 col-md-6">
         <div class="d-flex flex-nowrap justify-content-md-end align-items-center" style="gap: 8px; overflow-x: auto; padding-bottom: 2px;">
             <button type="button" class="btn btn-sm btn-info text-nowrap flex-shrink-0" data-toggle="modal" data-target="#importModal" style="box-shadow: 0 0 10px rgba(23,162,184,0.3);">
-                <i class="fas fa-file-upload"></i> <span>{{ __('messages.import_excel') }}</span>
+                <span>{{ __('messages.import_excel') }}</span>
             </button>
-            <a href="{{ route('departments.export') }}" class="btn btn-sm btn-success text-nowrap flex-shrink-0" style="box-shadow: 0 0 10px rgba(40,167,69,0.3);">
-                <i class="fas fa-file-excel"></i> <span>{{ __('messages.export') }}</span>
+            <a href="{{ route('departments.export', request()->query()) }}" class="btn btn-sm btn-success text-nowrap flex-shrink-0" style="box-shadow: 0 0 10px rgba(40,167,69,0.3);">
+                <span>{{ __('messages.export') }}</span>
             </a>
             <a href="{{ route('departments.create') }}" class="btn btn-sm btn-primary text-nowrap flex-shrink-0" style="box-shadow: 0 0 10px rgba(0,123,255,0.3);">
-                <i class="fas fa-plus"></i> <span>{{ __('messages.add_new') }}</span>
+                <span>{{ __('messages.add_new') }}</span>
             </a>
         </div>
     </div>

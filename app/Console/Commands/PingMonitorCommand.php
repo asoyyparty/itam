@@ -37,8 +37,8 @@ class PingMonitorCommand extends Command
         $interval = (int) $this->option('interval') ?: 30;
 
         if ($isOnce) {
-            $this->info("🚀 Executing Daily IP Ping Sweep & Telegram Report (11:00 AM)...");
-            $this->runSingleSweep($telegramBot, true);
+            $this->info("🚀 Executing Single IP Ping Sweep...");
+            $this->runSingleSweep($telegramBot);
             return 0;
         }
 
@@ -47,7 +47,7 @@ class PingMonitorCommand extends Command
 
         while (true) {
             $startTime = microtime(true);
-            $this->runSingleSweep($telegramBot, false);
+            $this->runSingleSweep($telegramBot);
             $elapsed = round(microtime(true) - $startTime, 2);
 
             $sleepSeconds = max(1, $interval - (int) $elapsed);
@@ -60,15 +60,19 @@ class PingMonitorCommand extends Command
     /**
      * Run a single sweep over all IP Addresses
      */
-    private function runSingleSweep(TelegramBotService $telegramBot, bool $isDailyReport): void
+    private function runSingleSweep(TelegramBotService $telegramBot): void
     {
         $startTime = microtime(true);
-        $ips = IpAddress::with(['asset', 'employee', 'vlan'])->get();
+        $ips = IpAddress::where('status', 'Used')
+            ->whereHas('vlan', function ($q) {
+                $q->where('status', 'Active');
+            })
+            ->with(['asset', 'employee', 'vlan'])
+            ->get();
 
         $totalCount = count($ips);
         $onlineCount = 0;
         $offlineCount = 0;
-        $offlineAssignedDevices = [];
 
         foreach ($ips as $ip) {
             $pingResult = $this->pingSingleIp($ip->ip_address);
@@ -78,7 +82,7 @@ class PingMonitorCommand extends Command
             $ip->processStateNotification($isOnline, 'Terdeteksi Offline saat pemindaian audit jaringan.');
 
             // Update status in DB
-            $ip->update([
+            $ip->updateQuietly([
                 'is_online' => $isOnline,
                 'last_ping_at' => now(),
             ]);
@@ -87,62 +91,12 @@ class PingMonitorCommand extends Command
                 $onlineCount++;
             } else {
                 $offlineCount++;
-                if ($ip->asset) {
-                    $offlineAssignedDevices[] = [
-                        'ip' => $ip->ip_address,
-                        'name' => $ip->asset->name,
-                        'tag' => $ip->asset->asset_tag,
-                        'user' => $ip->employee ? $ip->employee->name : '-',
-                    ];
-                }
             }
         }
 
         $elapsed = round(microtime(true) - $startTime, 2);
         $timestamp = date('H:i:s');
         $this->info("[{$timestamp}] Ping Sweep Done in {$elapsed}s. Total: {$totalCount} | Online: {$onlineCount} | Offline: {$offlineCount}");
-
-        // If daily report execution (11:00 AM)
-        if ($isDailyReport) {
-            $msg = "<b>📊 LAPORAN AUDIT JARINGAN HARIAN (11:00 AM) 📊</b>\n\n";
-            $msg .= "<b>Waktu Audit:</b> " . date('Y-m-d H:i:s') . "\n";
-            $msg .= "<b>Total IP Di-Audit:</b> {$totalCount} IP\n";
-            $msg .= "<b>Status Online:</b> 🟢 <b>{$onlineCount} IP</b>\n";
-            $msg .= "<b>Status Offline:</b> 🔴 <b>{$offlineCount} IP</b>\n\n";
-
-            if (!empty($offlineAssignedDevices)) {
-                $msg .= "<b>⚠️ Aset Terdaftar yang Offline (" . count($offlineAssignedDevices) . " unit):</b>\n";
-                $count = 0;
-                foreach ($offlineAssignedDevices as $dev) {
-                    $count++;
-                    if ($count > 10) {
-                        $msg .= "<i>...dan " . (count($offlineAssignedDevices) - 10) . " aset terdaftar lainnya.</i>\n";
-                        break;
-                    }
-                    $msg .= "• <code>{$dev['ip']}</code> - " . htmlspecialchars($dev['name']) . " (Tag: {$dev['tag']})\n";
-                }
-            } else {
-                $msg .= "✅ <i>Semua aset terdaftar berfungsi normal dan merespon Ping dengan baik.</i>";
-            }
-
-            $chatId = env('TELEGRAM_ADMIN_CHAT_ID');
-            if ($chatId) {
-                $sent = $telegramBot->sendMessage($chatId, $msg);
-                if ($sent) {
-                    $this->info("SUCCESS: Daily 11:00 AM Telegram report sent successfully!");
-                }
-            }
-
-            try {
-                $waMsg = str_replace(['<b>', '</b>', '<i>', '</i>', '<code>', '</code>'], ['*', '*', '_', '_', '`', '`'], $msg);
-                $waSent = app(\App\Services\WhatsAppService::class)->sendMessage(null, $waMsg);
-                if ($waSent) {
-                    $this->info("SUCCESS: Daily 11:00 AM WhatsApp report sent successfully!");
-                }
-            } catch (\Exception $e) {
-                Log::error('WhatsApp daily report error: ' . $e->getMessage());
-            }
-        }
     }
 
     /**

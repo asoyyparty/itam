@@ -14,8 +14,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
-class AssetController extends Controller
+class AssetController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_assets', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+        ];
+    }
+
     public function importExcel(Request $request)
     {
         $request->validate([
@@ -29,6 +36,8 @@ class AssetController extends Controller
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
             Excel::import(new AssetsImport, $request->file('file'));
+
+            \Illuminate\Support\Facades\Cache::forget('master_asset_years');
 
             return back()->with('success', 'Assets successfully imported and replaced!');
         } catch (\Exception $e) {
@@ -47,9 +56,9 @@ class AssetController extends Controller
         return response()->json(['success' => true, 'message' => 'Status updated successfully.', 'status' => $asset->status]);
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        return Excel::download(new AssetsExport, 'assets_'.date('Ymd_His').'.xlsx');
+        return Excel::download(new AssetsExport($request), 'assets_'.date('Ymd_His').'.xlsx');
     }
 
     public function generateTag(Request $request)
@@ -132,10 +141,40 @@ class AssetController extends Controller
                 $query->where('status', $request->status);
             }
         }
+        $yearFilter = $request->input('date_received') ?: $request->input('year');
+        if ($yearFilter != '') {
+            $query->where(function ($q) use ($yearFilter) {
+                $q->whereYear('date_received', $yearFilter)
+                  ->orWhere(function ($q2) use ($yearFilter) {
+                      $q2->whereNull('date_received')->whereYear('created_at', $yearFilter);
+                  });
+            });
+        }
 
         $categories = \Illuminate\Support\Facades\Cache::remember('master_categories_all', 3600, fn() => Category::orderBy('name')->get());
         $brands = \Illuminate\Support\Facades\Cache::remember('master_brands_all', 3600, fn() => Brand::orderBy('name')->get());
         $locations = \Illuminate\Support\Facades\Cache::remember('master_locations_all', 3600, fn() => Location::orderBy('name')->get());
+
+        $years = \Illuminate\Support\Facades\Cache::remember('master_asset_years', 3600, function () {
+            $dbYears = Asset::whereNotNull('date_received')
+                ->selectRaw('YEAR(date_received) as yr')
+                ->distinct()
+                ->pluck('yr')
+                ->filter()
+                ->map(fn($y) => (int)$y)
+                ->toArray();
+
+            $createdYears = Asset::selectRaw('YEAR(created_at) as yr')
+                ->distinct()
+                ->pluck('yr')
+                ->filter()
+                ->map(fn($y) => (int)$y)
+                ->toArray();
+
+            $allYears = array_unique(array_merge($dbYears, $createdYears, [(int)date('Y')]));
+            rsort($allYears);
+            return array_values($allYears);
+        });
 
         $assets = $query->orderBy('asset_tag', 'asc')->get();
 
@@ -145,7 +184,7 @@ class AssetController extends Controller
             return $asset;
         });
 
-        return view('assets.index', compact('assets', 'categories', 'brands', 'locations'));
+        return view('assets.index', compact('assets', 'categories', 'brands', 'locations', 'years'));
     }
 
     public function create(Request $request)
@@ -225,6 +264,8 @@ class AssetController extends Controller
                 }
             }
 
+            \Illuminate\Support\Facades\Cache::forget('master_asset_years');
+
             return redirect()->route('assets.index', $request->query())->with('success', $quantity > 1 ? $quantity.' Assets successfully created.' : __('messages.created_success'));
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Failed to create asset: '.$e->getMessage());
@@ -256,6 +297,8 @@ class AssetController extends Controller
             $asset->update($data);
             $this->saveSpecifications($asset, $request);
 
+            \Illuminate\Support\Facades\Cache::forget('master_asset_years');
+
             return redirect()->route('assets.index', $request->query())->with('success', __('messages.updated_success'));
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Failed to update asset: '.$e->getMessage());
@@ -265,6 +308,8 @@ class AssetController extends Controller
     public function destroy(Asset $asset, Request $request)
     {
         $asset->delete();
+
+        \Illuminate\Support\Facades\Cache::forget('master_asset_years');
 
         return redirect()->route('assets.index', $request->query())->with('success', __('messages.deleted_success'));
     }

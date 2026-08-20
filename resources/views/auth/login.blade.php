@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>ITAM Enterprise | Sign In</title>
 
   <!-- Favicon -->
@@ -418,6 +419,16 @@
         <i class="fas fa-check-circle mr-2"></i> {{ session('status') }}
       </div>
     @endif
+    @if (session('warning'))
+      <div class="alert" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24;">
+        <i class="fas fa-exclamation-triangle mr-2"></i> {{ session('warning') }}
+      </div>
+    @endif
+    @if (session('error'))
+      <div class="alert" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171;">
+        <i class="fas fa-exclamation-circle mr-2"></i> {{ session('error') }}
+      </div>
+    @endif
 
     <form method="POST" action="{{ route('login') }}">
       @csrf
@@ -518,6 +529,22 @@
           localStorage.removeItem('itam_remembered_username');
         }
       });
+    }
+  });
+
+  // Automatically reload page if idle for > 15 minutes or tab returns from background/sleep to ensure fresh CSRF token
+  let lastActiveTime = Date.now();
+  function checkSessionFreshness() {
+    if (Date.now() - lastActiveTime > 15 * 60 * 1000) {
+      window.location.reload();
+    }
+    lastActiveTime = Date.now();
+  }
+
+  window.addEventListener('focus', checkSessionFreshness);
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      checkSessionFreshness();
     }
   });
 

@@ -1725,9 +1725,129 @@
       .cat-mini-card h3, .cat-mini-card .cat-count {
         font-size: 1.25rem !important;
       }
-      .cat-mini-card span, .cat-mini-card .cat-label {
-        font-size: 0.7rem !important;
-      }
+    }
+
+    /* Global Floating ITAM AI Button */
+    .floating-quick-actions {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1045;
+      pointer-events: none;
+    }
+
+    .btn-floating-action {
+      pointer-events: auto;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .btn-floating-ai {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #a855f7 100%);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #ffffff !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.45), 0 0 20px rgba(168, 85, 247, 0.3);
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+    }
+
+    .btn-floating-ai:hover {
+      transform: translateY(-3px) scale(1.1);
+      box-shadow: 0 12px 35px rgba(99, 102, 241, 0.65), 0 0 28px rgba(168, 85, 247, 0.5) !important;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.6; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .pulse-dot {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+
+    /* Header Pushmenu Toggle Button Refinement */
+    .pushmenu-btn {
+      width: 36px !important;
+      height: 36px !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 10px !important;
+      background: color-mix(in oklch, var(--color-ink-0) 5%, transparent) !important;
+      border: 1px solid color-mix(in oklch, var(--color-ink-0) 10%, transparent) !important;
+      color: var(--color-ink-1) !important;
+      font-size: 0.95rem !important;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+      outline: none !important;
+      box-shadow: none !important;
+      margin-left: 6px !important;
+      cursor: pointer !important;
+    }
+
+    .pushmenu-btn:hover,
+    .pushmenu-btn:focus,
+    .pushmenu-btn:active {
+      background: color-mix(in oklch, var(--color-ink-0) 12%, transparent) !important;
+      color: var(--color-accent) !important;
+      border-color: var(--color-accent-soft) !important;
+      transform: scale(1.05);
+      outline: none !important;
+      box-shadow: 0 0 0 3px var(--color-accent-tint) !important;
+    }
+
+    /* Compact Content Wrapper Flex Layout */
+    .content-wrapper {
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: calc(100vh - 57px) !important;
+    }
+
+    section.content {
+      flex: 1 0 auto !important;
+    }
+
+    /* Clean Compact Footer - Zero Excess Empty Space */
+    .main-footer,
+    body.dark-mode .main-footer,
+    body.light-mode .main-footer,
+    .dark-mode .main-footer,
+    .light-mode .main-footer {
+      position: static !important;
+      background: transparent !important;
+      background-color: transparent !important;
+      border: none !important;
+      border-left: none !important;
+      border-right: none !important;
+      border-bottom: none !important;
+      border-top: none !important;
+      box-shadow: none !important;
+      padding: 0.5rem 1rem 0.6rem 1rem !important;
+      margin-top: 0.75rem !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      margin-bottom: 0 !important;
+      font-size: 0.78rem;
+      color: var(--color-ink-2) !important;
+      text-align: center !important;
+    }
+
+    .main-footer a {
+      color: var(--color-accent) !important;
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .main-footer a:hover {
+      text-decoration: underline;
+      opacity: 0.85;
     }
   </style>
   @stack('styles')
@@ -1739,10 +1859,10 @@
   <!-- Navbar -->
   <nav class="main-header navbar navbar-expand navbar-light">
     <!-- Left: toggle -->
-    <ul class="navbar-nav">
+    <ul class="navbar-nav align-items-center">
       <li class="nav-item">
-        <a class="nav-link" data-widget="pushmenu" href="#" role="button" style="color: var(--color-ink-1);">
-          <i class="fas fa-bars" style="font-size: 1rem;"></i>
+        <a class="nav-link pushmenu-btn" data-widget="pushmenu" href="#" role="button" title="Toggle Navigation Sidebar">
+          <i class="fas fa-bars"></i>
         </a>
       </li>
     </ul>
@@ -1750,15 +1870,13 @@
     <!-- Right: controls -->
     <ul class="navbar-nav ml-auto" style="gap: 8px; padding-right: 12px; display: flex; align-items: center; flex-direction: row;">
 
-      @can('action_ai_assistant')
-      <!-- Tanya ITAM AI Button -->
-      <li class="nav-item">
-        <button type="button" class="nav-pill-btn" data-toggle="modal" data-target="#aiSearchModal" style="border: 1px solid var(--color-accent-soft); background: var(--color-accent-tint); color: var(--color-accent) !important; font-weight: 600;">
-          <i class="fas fa-magic" style="color: var(--color-accent);"></i>
-          <span>{{ __('messages.tanya_itam_ai') }}</span>
-        </button>
+      <!-- Real-Time Jakarta (WIB) Clock Pill -->
+      <li class="nav-item d-none d-sm-block">
+        <div class="nav-pill-btn" style="border: 1px solid rgba(59, 130, 246, 0.25); background: rgba(59, 130, 246, 0.08); color: var(--color-ink-0) !important; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600; cursor: default;" title="Waktu Nyata Jakarta (WIB)">
+          <i class="far fa-clock text-info" style="font-size: 0.8rem;"></i>
+          <span id="header-jakarta-clock">--:--:-- WIB</span>
+        </div>
       </li>
-      @endcan
 
       <!-- Language Dropdown -->
       <li class="nav-item dropdown">
@@ -1778,15 +1896,6 @@
             <span>English</span>
           </a>
         </div>
-      </li>
-
-      <!-- Theme Switch -->
-      <li class="nav-item">
-        <a class="nav-pill-btn"
-           href="{{ session('theme', 'dark') == 'dark' ? route('theme.switch', 'light') : route('theme.switch', 'dark') }}"
-           title="Toggle Theme">
-          <i class="fas {{ session('theme', 'dark') == 'dark' ? 'fa-sun' : 'fa-moon' }}" style="font-size: 0.8rem;"></i>
-        </a>
       </li>
 
       @auth
@@ -1818,6 +1927,19 @@
 
           <!-- Menu Items -->
           <div class="p-2">
+            <!-- Theme Toggle Option -->
+            <a href="{{ session('theme', 'dark') == 'dark' ? route('theme.switch', 'light') : route('theme.switch', 'dark') }}" 
+               class="dropdown-item d-flex align-items-center justify-content-between py-2 px-3 rounded-lg" 
+               style="gap: 10px; color: var(--color-ink-1); font-size: 0.85rem; border-radius: 8px; transition: all 0.2s;">
+              <div class="d-flex align-items-center" style="gap: 10px;">
+                <i class="fas {{ session('theme', 'dark') == 'dark' ? 'fa-sun text-warning' : 'fa-moon text-info' }}" style="width: 18px;"></i>
+                <span>{{ session('theme', 'dark') == 'dark' ? 'Mode Terang' : 'Mode Gelap' }}</span>
+              </div>
+              <span class="badge badge-pill" style="font-size: 0.7rem; background: var(--color-paper-2); color: var(--color-ink-2); font-weight: 600;">
+                {{ session('theme', 'dark') == 'dark' ? 'Light' : 'Dark' }}
+              </span>
+            </a>
+
             <a href="#" class="dropdown-item d-flex align-items-center py-2 px-3 rounded-lg" data-toggle="modal" data-target="#changePasswordModal" style="gap: 10px; color: var(--color-ink-1); font-size: 0.85rem; border-radius: 8px; transition: all 0.2s;">
               <i class="fas fa-key text-warning" style="width: 18px;"></i>
               <span>{{ __('messages.change_password') }}</span>
@@ -2124,16 +2246,15 @@
     </section>
 
     <!-- Main Footer -->
-    <footer class="main-footer">
-      <!-- <div class="float-right d-none d-sm-block">
-        <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-ink-3);">v1.0.0</span>
-      </div> -->
-      <strong style="color: var(--color-ink-1);">
-        &copy; {{ date('Y') }}
-        <span style="color: var(--color-accent);">{{ $app_name ?? 'ITAM Enterprise' }}</span>
-        — {{ $company_name ?? 'ITAM Enterprise' }}
-      </strong>
-      <span style="color: var(--color-ink-3); margin-left: 4px;">Asoyy Dev.</span>
+    <footer class="main-footer text-center">
+      <div class="container-fluid">
+        <div style="font-size: 0.8rem; color: var(--color-ink-1); font-weight: 500;">
+          &copy; {{ date('Y') }}
+          <a href="{{ route('dashboard') }}" style="color: var(--color-accent); font-weight: 600; text-decoration: none;">{{ $app_name ?? 'ITAM Enterprise' }}</a>
+          <span style="color: var(--color-ink-2); font-weight: 400; margin-left: 4px;">{{ $company_name ?? 'Team IT Pabrik' }}</span>
+          <span style="color: var(--color-ink-3); margin-left: 6px;">Asoyy Dev.</span>
+        </div>
+      </div>
     </footer>
   </div>
   <!-- /.content-wrapper -->
@@ -2559,15 +2680,50 @@
           icon: 'success',
           title: 'Berhasil!',
           text: 'Password Anda telah berhasil diperbarui.',
-          timer: 3000,
-          showConfirmButton: false,
-          background: '#0f172a',
-          color: '#f8fafc'
         });
       }
     });
   @endif
+
+  function updateJakartaClock() {
+    const clockEl = document.getElementById('header-jakarta-clock');
+    if (!clockEl) return;
+    const now = new Date();
+    try {
+      const formatter = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      clockEl.textContent = formatter.format(now).replace(/\./g, ':') + ' WIB';
+    } catch (e) {
+      clockEl.textContent = now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID') + ' WIB';
+    }
+  }
+  setInterval(updateJakartaClock, 1000);
+  document.addEventListener('DOMContentLoaded', updateJakartaClock);
 </script>
+
+<!-- Floating Quick Actions (ITAM AI Button Only) -->
+<div class="floating-quick-actions">
+  @can('action_ai_assistant')
+  <!-- ITAM AI Floating Button (Icon Only) -->
+  <button type="button" 
+          class="btn-floating-action btn-floating-ai" 
+          data-toggle="modal" 
+          data-target="#aiSearchModal" 
+          title="Tanya ITAM AI Assistant">
+    <i class="fas fa-magic" style="font-size: 1.15rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));"></i>
+    <span class="pulse-dot" style="position: absolute; top: 3px; right: 3px; width: 9px; height: 9px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399;"></span>
+  </button>
+  @endcan
+</div>
 
 @stack('scripts')
 </body>

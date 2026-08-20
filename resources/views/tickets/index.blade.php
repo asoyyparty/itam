@@ -8,7 +8,7 @@
         <form action="{{ route('tickets.index') }}" method="GET">
             <div class="d-flex flex-wrap align-items-center" style="gap: 10px;">
             <div class="position-relative" style="width: 250px; max-width: 100%; flex: 1; min-width: 200px;">
-                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search_ticket') }}" value="{{ request('search') }}" style="width: 100%; padding-right: 75px; border-radius: 30px; height: 40px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
+                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search_ticket') ?? 'Search ticket, title, name, PIC, or asset...' }}" value="{{ request('search') }}" style="width: 100%; padding-right: 75px; border-radius: 30px; height: 40px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
                 <div class="position-absolute d-flex align-items-center" style="top: 50%; right: 5px; transform: translateY(-50%); gap: 4px;">
                     @if(request()->anyFilled(['search', 'status', 'priority', 'category']))
                         <a href="{{ route('tickets.index') }}" class="text-muted" style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; text-decoration: none;"><i class="fas fa-times"></i></a>
@@ -44,8 +44,10 @@
     </div>
     
     <div class="col-12 d-flex justify-content-end" style="gap: 10px;">
-        <a href="{{ route('tickets.export') }}" class="btn btn-sm btn-success"><i class="fas fa-file-excel"></i> {{ __('messages.export') }}</a>
-        <a href="{{ route('tickets.create') }}" class="btn btn-sm btn-primary" ><i class="fas fa-plus"></i> {{ __('messages.create_ticket') }}</a>
+        <a href="{{ route('tickets.export', request()->query()) }}" class="btn btn-sm btn-success">{{ __('messages.export') }}</a>
+        @can('action_manage_tickets')
+<a href="{{ route('tickets.create') }}" class="btn btn-sm btn-primary" >{{ __('messages.create_ticket') }}</a>
+@endcan
     </div>
 </div>
 
@@ -91,7 +93,8 @@
                         </td>
                         <td class="theme-text">
                             <div class="dropdown">
-                                <button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-ticket-id="{{ $ticket->id }}" style="box-shadow: none;">
+                                @can('action_manage_tickets')
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-ticket-id="{{ $ticket->id }}" style="box-shadow: none;">
                                     @switch($ticket->status)
                                         @case('Open') <span class="badge badge-primary status-badge" style="box-shadow: 0 0 8px rgba(0,123,255,0.5);">{{ __('messages.open') ?? 'Open' }}</span> @break
                                         @case('In Progress') <span class="badge badge-warning status-badge" style="box-shadow: 0 0 8px rgba(255,193,7,0.5);">{{ __('messages.in_progress') ?? 'In Progress' }}</span> @break
@@ -105,6 +108,22 @@
                                     <a class="dropdown-item status-change-btn text-success" href="#" data-status="Resolved">{{ __('messages.resolved') ?? 'Resolved' }}</a>
                                     <a class="dropdown-item status-change-btn text-secondary" href="#" data-status="Closed">{{ __('messages.closed') ?? 'Closed' }}</a>
                                 </div>
+@else
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-ticket-id="{{ $ticket->id }}" style="box-shadow: none;">
+                                    @switch($ticket->status)
+                                        @case('Open') <span class="badge badge-primary status-badge" style="box-shadow: 0 0 8px rgba(0,123,255,0.5);">{{ __('messages.open') ?? 'Open' }}</span> @break
+                                        @case('In Progress') <span class="badge badge-warning status-badge" style="box-shadow: 0 0 8px rgba(255,193,7,0.5);">{{ __('messages.in_progress') ?? 'In Progress' }}</span> @break
+                                        @case('Resolved') <span class="badge badge-success status-badge" style="box-shadow: 0 0 8px rgba(40,167,69,0.5);">{{ __('messages.resolved') ?? 'Resolved' }}</span> @break
+                                        @case('Closed') <span class="badge badge-secondary status-badge">{{ __('messages.closed') ?? 'Closed' }}</span> @break
+                                    @endswitch
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" >
+                                    <a class="dropdown-item status-change-btn text-primary" href="#" data-status="Open">{{ __('messages.open') ?? 'Open' }}</a>
+                                    <a class="dropdown-item status-change-btn text-warning" href="#" data-status="In Progress">{{ __('messages.in_progress') ?? 'In Progress' }}</a>
+                                    <a class="dropdown-item status-change-btn text-success" href="#" data-status="Resolved">{{ __('messages.resolved') ?? 'Resolved' }}</a>
+                                    <a class="dropdown-item status-change-btn text-secondary" href="#" data-status="Closed">{{ __('messages.closed') ?? 'Closed' }}</a>
+                                </div>
+@endcan
                             </div>
                         </td>
                         <td class="theme-text" style="white-space: nowrap;">
@@ -115,11 +134,15 @@
                         </td>
                         <td class="theme-text">
                             <div class="d-flex justify-content-center" style="gap: 8px;">
-                                <a href="{{ route('tickets.edit', array_merge(['ticket' => $ticket->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;"  title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('tickets.destroy', array_merge(['ticket' => $ticket->id], request()->query())) }}" method="POST" class="d-inline">
+                                @can('action_manage_tickets')
+<a href="{{ route('tickets.edit', array_merge(['ticket' => $ticket->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;"  title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
+@endcan
+                                @can('action_manage_tickets')
+<form action="{{ route('tickets.destroy', array_merge(['ticket' => $ticket->id], request()->query())) }}" method="POST" class="d-inline">
                                     @csrf @method('DELETE')
                                     <button class="btn btn-delete action-btn btn-outline-danger" style="border: 1px solid rgba(220, 53, 69, 0.3); background: rgba(220, 53, 69, 0.15); color: #dc3545;"  title="{{ __('messages.delete') }}" data-confirm-message="{{ __('messages.confirm_delete') }}"><i class="fas fa-trash"></i></button>
                                 </form>
+@endcan
                             </div>
                         </td>
                     </tr>
@@ -185,7 +208,7 @@ $(document).ready(function() {
                 }
             },
             error: function(xhr) {
-                alert('Error updating status. Please try again.');
+                Swal.fire({ icon: 'error', text: 'Error updating status. Please try again.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
                 badge.html(originalHtml);
             }
         });

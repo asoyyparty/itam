@@ -882,7 +882,7 @@ $(document).ready(function () {
                 $('#ocrLoadingState').hide();
                 $('#ocrInitialState').show();
                 const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Gagal memindai dokumen.';
-                alert(msg);
+                Swal.fire({ icon: 'error', text: msg, toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
             }
         });
     }

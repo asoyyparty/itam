@@ -28,7 +28,12 @@ class PingAllIps extends Command
      */
     public function handle()
     {
-        $ips = IpAddress::with('asset')->get();
+        $ips = IpAddress::where('status', 'Used')
+            ->whereHas('vlan', function ($q) {
+                $q->where('status', 'Active');
+            })
+            ->with('asset')
+            ->get();
         $offlineIps = [];
 
         $this->info('Starting ping for '.$ips->count().' IP addresses...');
@@ -51,7 +56,7 @@ class PingAllIps extends Command
 
             foreach ($ips as $ip) {
                 $isOnline = isset($aliveMap[$ip->ip_address]);
-                $ip->update([
+                $ip->updateQuietly([
                     'is_online' => $isOnline,
                     'last_ping_at' => now(),
                 ]);
@@ -80,7 +85,7 @@ class PingAllIps extends Command
                 exec($command, $outcome, $status);
                 $isOnline = ($status === 0);
 
-                $ip->update([
+                $ip->updateQuietly([
                     'is_online' => $isOnline,
                     'last_ping_at' => now(),
                 ]);
@@ -100,9 +105,38 @@ class PingAllIps extends Command
         if (count($offlineIps) > 0) {
             $this->info('Sending notification for '.count($offlineIps).' offline IPs...');
 
-            $superAdmins = User::role('Super Admin')->get();
-            foreach ($superAdmins as $admin) {
-                $admin->notify(new OfflineIpNotification($offlineIps));
+            $customRecipients = \App\Models\Setting::where('key', 'ip_offline_email_recipients')->value('value');
+            if (!empty(trim($customRecipients))) {
+                $emails = array_map('trim', explode(',', $customRecipients));
+                foreach ($emails as $email) {
+                    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        \Illuminate\Support\Facades\Notification::route('mail', $email)
+                            ->notify(new OfflineIpNotification($offlineIps));
+                    }
+                }
+            } else {
+                $superAdmins = User::role('Super Admin')->get();
+                foreach ($superAdmins as $admin) {
+                    $admin->notify(new OfflineIpNotification($offlineIps));
+                }
+            }
+
+            // Send Telegram Notification
+            try {
+                $telegramBot = app(\App\Services\TelegramBotService::class);
+                $msg = "<b>🔴 LAPORAN HARIAN IP OFFLINE (11:00 AM) 🔴</b>\n\n";
+                $msg .= "Sistem mendeteksi ada <b>".count($offlineIps)."</b> IP Address yang saat ini tidak dapat dihubungi (Offline):\n\n";
+                foreach ($offlineIps as $ip) {
+                    $details = "• <code>{$ip['ip_address']}</code>";
+                    if (! empty($ip['name'])) {
+                        $details .= ' - '.htmlspecialchars($ip['name']);
+                    }
+                    $msg .= $details."\n";
+                }
+                $msg .= "\n<i>Silakan periksa perangkat terkait.</i>";
+                $telegramBot->sendMessage(null, $msg);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Error sending Telegram notification in PingAllIps: '.$e->getMessage());
             }
 
             $this->info('Notification sent.');

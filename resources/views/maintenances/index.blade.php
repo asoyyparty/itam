@@ -28,8 +28,10 @@
     </div>
     
     <div class="col-12 d-flex justify-content-end" style="gap: 10px;">
-        <a href="{{ route('maintenances.export') }}" class="btn btn-sm btn-success"><i class="fas fa-file-excel"></i> {{ __('messages.export') }}</a>
-        <a href="{{ route('maintenances.create') }}" class="btn btn-sm btn-primary" ><i class="fas fa-tools"></i> {{ __('messages.log_maintenance') }}</a>
+        <a href="{{ route('maintenances.export', request()->query()) }}" class="btn btn-sm btn-success">{{ __('messages.export') }}</a>
+        @can('action_manage_maintenance')
+<a href="{{ route('maintenances.create') }}" class="btn btn-sm btn-primary" >{{ __('messages.log_maintenance') }}</a>
+@endcan
     </div>
 </div>
 
@@ -64,7 +66,8 @@
                         </td>
                         <td class="theme-text">
                             <div class="dropdown">
-                                <button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $maintenance->id }}" style="box-shadow: none;">
+                                @can('action_manage_maintenance')
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $maintenance->id }}" style="box-shadow: none;">
                                     @if($maintenance->status == 'Ongoing')
                                         <span class="badge badge-warning status-badge" style="box-shadow: 0 0 8px rgba(255,193,7,0.5);">{{ __('messages.ongoing') }}</span>
                                     @elseif($maintenance->status == 'Completed')
@@ -78,6 +81,22 @@
                                     <a class="dropdown-item status-change-btn text-success" href="#" data-status="Completed">{{ __('messages.completed') }}</a>
                                     <a class="dropdown-item status-change-btn text-secondary" href="#" data-status="Cancelled">{{ __('messages.cancelled') }}</a>
                                 </div>
+@else
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $maintenance->id }}" style="box-shadow: none;">
+                                    @if($maintenance->status == 'Ongoing')
+                                        <span class="badge badge-warning status-badge" style="box-shadow: 0 0 8px rgba(255,193,7,0.5);">{{ __('messages.ongoing') }}</span>
+                                    @elseif($maintenance->status == 'Completed')
+                                        <span class="badge badge-success status-badge" style="box-shadow: 0 0 8px rgba(40,167,69,0.5);">{{ __('messages.completed') }}</span>
+                                    @else
+                                        <span class="badge badge-secondary status-badge">{{ __('messages.cancelled') }}</span>
+                                    @endif
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" >
+                                    <a class="dropdown-item status-change-btn text-warning" href="#" data-status="Ongoing">{{ __('messages.ongoing') }}</a>
+                                    <a class="dropdown-item status-change-btn text-success" href="#" data-status="Completed">{{ __('messages.completed') }}</a>
+                                    <a class="dropdown-item status-change-btn text-secondary" href="#" data-status="Cancelled">{{ __('messages.cancelled') }}</a>
+                                </div>
+@endcan
                             </div>
                         </td>
                         <td class="theme-text">
@@ -85,11 +104,15 @@
                                 @if($maintenance->status == 'Ongoing')
                                     <button type="button" class="btn btn-sm d-flex align-items-center justify-content-center" style="background: rgba(40, 167, 69, 0.15); color: #28a745; border: 1px solid rgba(40, 167, 69, 0.3); border-radius: 8px; width: 32px; height: 32px;" title="{{ __('messages.complete_maintenance') }}" data-toggle="modal" data-target="#completeModal{{ $maintenance->id }}"><i class="fas fa-check"></i></button>
                                 @endif
-                                <a href="{{ route('maintenances.edit', array_merge([$maintenance->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;"  title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('maintenances.destroy', array_merge([$maintenance->id], request()->query())) }}" method="POST" class="d-inline">
+                                @can('action_manage_maintenance')
+<a href="{{ route('maintenances.edit', array_merge([$maintenance->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;"  title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
+@endcan
+                                @can('action_manage_maintenance')
+<form action="{{ route('maintenances.destroy', array_merge([$maintenance->id], request()->query())) }}" method="POST" class="d-inline">
                                     @csrf @method('DELETE')
                                     <button class="btn btn-delete action-btn btn-outline-danger" style="border: 1px solid rgba(220, 53, 69, 0.3); background: rgba(220, 53, 69, 0.15); color: #dc3545;"  title="{{ __('messages.delete') }}" data-confirm-message="{{ __('messages.confirm_delete') }}"><i class="fas fa-trash"></i></button>
                                 </form>
+@endcan
                             </div>
                         </td>
                     </tr>
@@ -180,12 +203,12 @@ $(document).ready(function() {
                     }
                     setTimeout(function() { location.reload(); }, 1000); // Reload to update action buttons and date correctly
                 } else {
-                    alert(response.message || 'Error updating status.');
+                    Swal.fire({ icon: 'error', text: response.message || 'Error updating status.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
                     badge.html(originalHtml);
                 }
             },
             error: function(xhr) {
-                alert('Error updating status.');
+                Swal.fire({ icon: 'error', text: 'Error updating status.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
                 badge.html(originalHtml);
             }
         });

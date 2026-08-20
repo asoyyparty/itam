@@ -45,6 +45,7 @@ return [
     'all_category' => 'All Categories',
     'all_brand' => 'All Brands',
     'all_location' => 'All Locations',
+    'all_year' => 'All Years',
     'all_department' => 'All Divisions',
     'all_supervisor' => 'All Supervisors',
     'health' => 'Health',
@@ -218,7 +219,7 @@ return [
     'description_details' => 'Description / Details',
     'network_details' => 'Network Details',
     'configuration' => 'Configuration',
-    'save_all_settings' => 'Save All Settings',
+    'save_all_settings' => 'Save',
     'enabled' => 'Enabled',
     'disabled' => 'Disabled',
     'ip_offline_email_notification' => 'IP Offline Email Notification',
@@ -233,6 +234,7 @@ return [
     'assigned_employee' => 'User',
     'ip_management' => 'IP Addresses Management',
     'search_ip' => 'Search IP, User, Asset...',
+    'all_ping_status' => 'All Ping Status',
     'search_ticket' => 'Search ticket number, title...',
     'all_priority' => 'All Priority',
     'returned' => 'Returned',
@@ -356,6 +358,8 @@ return [
     'vlan_config' => 'VLAN Config',
     'software_license' => 'Software License',
     'ping_device' => 'Ping Device',
+    'ping_all_used' => 'Ping Used IP',
+    'ping_batch_completed' => 'Batch Ping Completed!',
     'ping_online' => 'Ping Successful! Device is Online.',
     'ping_offline' => 'Ping Failed! Device is Offline.',
     'ping_error' => 'Error executing ping command.',
@@ -418,8 +422,8 @@ return [
 
     // Advanced AI & Network Features
     'predictive_health' => 'Predictive Maintenance',
-    'network_anomalies' => 'Network Monitoring & Anomalies',
-    'budget_planner' => 'IT Budget & Lifecycle Planner',
+    'network_anomalies' => 'Network Monitoring',
+    'budget_planner' => 'IT Budget',
     'ocr_scan' => 'Scan OCR 1-Click',
     'ai_assistant' => 'Ask AI Assistant',
 
@@ -487,7 +491,7 @@ return [
     'ai_audit_btn' => 'AI Audit Diagnosis',
 
     // Network Anomaly Detection
-    'network_anomaly_title' => 'Smart Network Monitoring & Anomaly Detection',
+    'network_anomaly_title' => 'Smart Network Monitoring',
     'network_anomaly_desc' => 'Real-time IP telemetry monitoring, IP/MAC conflict detection, rogue devices, and latency spikes.',
     'network_health_score' => 'NETWORK HEALTH SCORE',
     'active_critical_anomalies' => 'CRITICAL ANOMALIES',
@@ -513,7 +517,7 @@ return [
     'all_filter' => 'All',
 
     // IT Budget Planner
-    'budget_planner_title' => 'IT Budget Report & Lifecycle Planner',
+    'budget_planner_title' => 'IT Budget Report',
     'budget_planner_desc' => '5-year IT spending forecast, asset replacement, maintenance costs, and software license renewals.',
     'fiscal_year' => 'Fiscal Year',
     'export_budget' => 'Export Budget Proposal',
@@ -549,5 +553,15 @@ return [
     'whatsapp_api_url' => 'WhatsApp API Gateway Endpoint URL',
     'whatsapp_admin_phone' => 'Alert Recipient WhatsApp Number',
     'test_whatsapp' => 'Send Test WhatsApp Message',
+    // Telegram Settings
+    'telegram_settings' => 'Telegram Settings',
+    'telegram_configuration' => 'Telegram Bot Configuration',
+    'telegram_enabled' => 'Telegram Notification Status',
+    'telegram_bot_token' => 'Primary Telegram Bot Token / Activity Log',
+    'telegram_chat_id' => 'Primary Telegram Chat ID / Activity Log',
+    'telegram_admin_chat_id' => 'Primary Telegram Admin Chat ID',
+    'telegram_ip_bot_token' => 'Dedicated IP Address Telegram Bot Token (Optional)',
+    'telegram_ip_chat_id' => 'Dedicated IP Address Telegram Chat ID (Optional)',
+    'test_telegram' => 'Send Test Message Telegram',
+    'ip_offline_email_recipients' => 'IP Offline Email Recipients',
 ];
-

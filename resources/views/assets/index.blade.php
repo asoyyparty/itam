@@ -10,12 +10,18 @@
             <div class="position-relative" style="width: 250px; max-width: 100%; flex: 1; min-width: 200px;">
                 <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search_asset') }}" value="{{ request('search') }}" style="width: 100%; padding-right: 75px; border-radius: 30px; height: 40px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
                 <div class="position-absolute d-flex align-items-center" style="top: 50%; right: 5px; transform: translateY(-50%); gap: 4px;">
-                    @if(request('search') || request('category_id') || request('brand_id') || request('location_id') || request('status'))
+                    @if(request('search') || request('category_id') || request('brand_id') || request('location_id') || request('status') || request('date_received') || request('year'))
                         <a href="{{ route('assets.index') }}" class="text-muted" style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; text-decoration: none;"><i class="fas fa-times"></i></a>
                     @endif
                     <button class="btn btn-info rounded-circle" type="submit" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border: none; box-shadow: 0 2px 6px rgba(23,162,184,0.4);"><i class="fas fa-search text-xs"></i></button>
                 </div>
             </div>
+                <select name="date_received" class="form-control select2 theme-input" style="width: 140px;" title="Filter Tahun">
+                    <option value="">{{ __('messages.all_year') ?? 'Semua Tahun' }}</option>
+                    @foreach($years as $yr)
+                        <option value="{{ $yr }}" {{ (request('date_received') == $yr || request('year') == $yr) ? 'selected' : '' }}>{{ $yr }}</option>
+                    @endforeach
+                </select>
 <select name="category_id" class="form-control select2 theme-input" style="width: 150px;">
                     <option value="" >{{ __('messages.all_category') }}</option>
                     @foreach($categories as $cat)
@@ -47,17 +53,21 @@
     </form>
     </div>
     <div class="col-12 text-right mt-2 mt-md-0 d-flex justify-content-end align-items-center flex-wrap" style="gap: 8px;">
-        <a href="{{ route('assets.create') }}" class="btn btn-sm btn-outline-info" title="Pindai Dokumen Nota/Faktur 1-Klik">
+        @can('action_manage_assets')
+<a href="{{ route('assets.create') }}" class="btn btn-sm btn-outline-info" title="Pindai Dokumen Nota/Faktur 1-Klik">
             <i class="fas fa-magic mr-1"></i> {{ __('messages.ocr_scan') }}
         </a>
-        <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#importModal" style="border: none;">
-            <i class="fas fa-file-import mr-1"></i> {{ __('messages.import_excel') }}
+@endcan
+        @can('action_manage_assets')
+<button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#importModal" style="border: none;">
+            {{ __('messages.import_excel') }}
         </button>
-        <a href="{{ route('assets.export') }}" class="btn btn-sm btn-success" style="border: none;">
-            <i class="fas fa-file-export mr-1"></i> {{ __('messages.export') }}
+@endcan
+        <a href="{{ route('assets.export', request()->query()) }}" class="btn btn-sm btn-success" style="border: none;">
+            {{ __('messages.export') }}
         </a>
         <a href="{{ route('assets.create', request()->query()) }}" class="btn btn-sm btn-primary">
-            <i class="fas fa-laptop-medical mr-1"></i> {{ __('messages.add_new') }} {{ __('messages.asset') }}
+            {{ __('messages.add_new') }} {{ __('messages.asset') }}
         </a>
     </div>
 </div>
@@ -79,6 +89,7 @@
                         <th>{{ __('messages.asset_tag') }}</th>
                         <th>{{ __('messages.name') }}</th>
                         <th>{{ __('messages.category') }}</th>
+                        <th>{{ __('messages.date_received') ?? 'DATE RECEIVED' }}</th>
                         <th>{{ __('messages.location') }}</th>
                         <th>{{ __('messages.user') }}</th>
                         <th>{{ __('messages.status') }}</th>
@@ -93,6 +104,7 @@
                         <td class="font-weight-bold"><a href="{{ route('assets.show', $asset) }}" class="text-info font-weight-bold">{{ $asset->asset_tag }}</a></td>
                         <td class="theme-text"><a href="{{ route('assets.show', $asset) }}" class="theme-text">{{ $asset->name }}</a></td>
                         <td class="theme-text">{{ $asset->category->name ?? '-' }}</td>
+                        <td class="theme-text">{{ $asset->date_received ? \Carbon\Carbon::parse($asset->date_received)->format('d M Y') : '-' }}</td>
                         <td class="theme-text">{{ $asset->location->name ?? '-' }}</td>
                         <td class="theme-text">
                             @if($asset->currentAssignment && $asset->currentAssignment->employee)
@@ -103,7 +115,8 @@
                         </td>
                         <td class="theme-text">
                             <div class="dropdown">
-                                <button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $asset->id }}" style="box-shadow: none;">
+                                @can('action_manage_assets')
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $asset->id }}" style="box-shadow: none;">
                                     @switch($asset->status)
                                         @case('Available')
                                             <span class="badge badge-success status-badge" style="box-shadow: 0 0 8px rgba(40,167,69,0.5);">{{ __('messages.available') }}</span>
@@ -129,6 +142,34 @@
                                     <a class="dropdown-item status-change-btn text-secondary" href="#" data-status="Retired">{{ __('messages.retired') }}</a>
                                     <a class="dropdown-item status-change-btn text-danger" href="#" data-status="Missing">{{ __('messages.missing') }}</a>
                                 </div>
+@else
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $asset->id }}" style="box-shadow: none;">
+                                    @switch($asset->status)
+                                        @case('Available')
+                                            <span class="badge badge-success status-badge" style="box-shadow: 0 0 8px rgba(40,167,69,0.5);">{{ __('messages.available') }}</span>
+                                            @break
+                                        @case('Assigned')
+                                            <span class="badge badge-primary status-badge" style="box-shadow: 0 0 8px rgba(0,123,255,0.5);">{{ __('messages.assigned') }}</span>
+                                            @break
+                                        @case('Maintenance')
+                                            <span class="badge badge-warning status-badge" style="box-shadow: 0 0 8px rgba(255,193,7,0.5);">{{ __('messages.maintenance') }}</span>
+                                            @break
+                                        @case('Retired')
+                                            <span class="badge badge-secondary status-badge">{{ __('messages.retired') }}</span>
+                                            @break
+                                        @case('Missing')
+                                            <span class="badge badge-danger status-badge" style="box-shadow: 0 0 8px rgba(220,53,69,0.5);">{{ __('messages.missing') }}</span>
+                                            @break
+                                    @endswitch
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" >
+                                    <a class="dropdown-item status-change-btn text-success" href="#" data-status="Available">{{ __('messages.available') }}</a>
+                                    <a class="dropdown-item status-change-btn text-primary" href="#" data-status="Assigned">{{ __('messages.assigned') }}</a>
+                                    <a class="dropdown-item status-change-btn text-warning" href="#" data-status="Maintenance">{{ __('messages.maintenance') }}</a>
+                                    <a class="dropdown-item status-change-btn text-secondary" href="#" data-status="Retired">{{ __('messages.retired') }}</a>
+                                    <a class="dropdown-item status-change-btn text-danger" href="#" data-status="Missing">{{ __('messages.missing') }}</a>
+                                </div>
+@endcan
                             </div>
                         </td>
                         <td class="theme-text">
@@ -143,11 +184,15 @@
                         <td class="theme-text">
                             <div class="d-flex justify-content-center" style="gap: 8px;">
                                 <a href="{{ route('assets.show', $asset) }}" class="btn action-btn btn-outline-info" title="{{ __('messages.more_info') }}" style="border: 1px solid rgba(23, 162, 184, 0.3); background: rgba(23, 162, 184, 0.15); color: #17a2b8;"><i class="fas fa-eye"></i></a>
-                                <a href="{{ route('assets.edit', array_merge(['asset' => $asset->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;" title="{{ __('messages.edit') }}" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('assets.destroy', array_merge(['asset' => $asset->id], request()->query())) }}" method="POST" class="d-inline">
+                                @can('action_manage_assets')
+<a href="{{ route('assets.edit', array_merge(['asset' => $asset->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;" title="{{ __('messages.edit') }}" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;"><i class="fas fa-edit"></i></a>
+@endcan
+                                @can('action_manage_assets')
+<form action="{{ route('assets.destroy', array_merge(['asset' => $asset->id], request()->query())) }}" method="POST" class="d-inline">
                                     @csrf @method('DELETE')
                                     <button class="btn btn-delete action-btn btn-outline-danger" style="border: 1px solid rgba(220, 53, 69, 0.3); background: rgba(220, 53, 69, 0.15); color: #dc3545;" title="{{ __('messages.delete') }}" data-confirm-message="{{ __('messages.confirm_delete') }}" style="border: 1px solid rgba(220, 53, 69, 0.3); background: rgba(220, 53, 69, 0.15); color: #dc3545;"><i class="fas fa-trash"></i></button>
                                 </form>
+@endcan
                             </div>
                         </td>
                     </tr>
@@ -251,7 +296,7 @@ $(document).ready(function() {
                 }
             },
             error: function(xhr) {
-                alert('Error updating status.');
+                Swal.fire({ icon: 'error', text: 'Error updating status.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
                 badge.html(originalHtml);
             }
         });

@@ -63,7 +63,7 @@ class PingDaemon extends Command
 
                     // Update DB if state changed or unchecked
                     if ($oldOnline !== $isOnline || $ip->is_online === null) {
-                        $ip->update([
+                        $ip->updateQuietly([
                             'is_online' => $isOnline,
                             'last_ping_at' => now(),
                         ]);
@@ -101,7 +101,7 @@ class PingDaemon extends Command
 
                     if ($oldOnline !== $isOnline || $ip->is_online === null) {
                         $ip->processStateNotification($isOnline, 'Terdeteksi Offline oleh Ping Daemon real-time.');
-                        $ip->update([
+                        $ip->updateQuietly([
                             'is_online' => $isOnline,
                             'last_ping_at' => now(),
                         ]);

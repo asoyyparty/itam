@@ -11,8 +11,15 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
-class IpAddressController extends Controller
+class IpAddressController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_network', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+        ];
+    }
+
     public function index(Request $request)
     {
         $query = IpAddress::with(['asset', 'employee', 'vlan']);
@@ -47,7 +54,17 @@ class IpAddressController extends Controller
             $query->where('vlan_id', $request->vlan_id);
         }
 
-        $ips = $query->orderByRaw('INET_ATON(ip_address)')->get();
+        if ($request->has('ping_status') && $request->ping_status !== '') {
+            if ($request->ping_status === 'online') {
+                $query->where('is_online', true);
+            } elseif ($request->ping_status === 'offline') {
+                $query->where('is_online', false);
+            } elseif ($request->ping_status === 'unchecked') {
+                $query->whereNull('is_online');
+            }
+        }
+
+        $ips = $query->orderByRaw('INET_ATON(ip_address)')->paginate(25)->withQueryString();
         $vlans = Vlan::orderBy('vlan_number')->get();
 
         return view('ips.index', compact('ips', 'vlans'));
@@ -153,9 +170,9 @@ class IpAddressController extends Controller
         return response()->json(['success' => true, 'message' => 'Status updated successfully.', 'status' => $ip->status]);
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        return Excel::download(new IpAddressExport, 'ips.xlsx');
+        return Excel::download(new IpAddressExport($request), 'ips_' . date('Ymd_His') . '.xlsx');
     }
 
     public function ping(Request $request, IpAddress $ip)
@@ -168,7 +185,7 @@ class IpAddressController extends Controller
             $result = $this->pingSingleIp($ip->ip_address, $ip);
             $online = $result['online'];
             $ip->processStateNotification($online, 'Terdeteksi Offline saat Ping tunggal dari Portal ITAM.');
-            $ip->update([
+            $ip->updateQuietly([
                 'is_online' => $online,
                 'last_ping_at' => now(),
             ]);
@@ -198,7 +215,15 @@ class IpAddressController extends Controller
         }
 
         try {
-            $ipIds = array_slice($request->input('ip_ids', []), 0, 15);
+            if ($request->boolean('get_used_ids')) {
+                $usedIds = IpAddress::where('status', 'Used')->pluck('id')->toArray();
+                return response()->json([
+                    'success' => true,
+                    'ip_ids' => $usedIds,
+                ]);
+            }
+
+            $ipIds = array_slice($request->input('ip_ids', []), 0, 20);
             if (empty($ipIds)) {
                 return response()->json(['success' => false, 'results' => []]);
             }
@@ -210,7 +235,7 @@ class IpAddressController extends Controller
                 $result = $this->pingSingleIp($ip->ip_address, $ip);
                 $online = $result['online'];
                 $ip->processStateNotification($online, 'Terdeteksi Offline saat Batch Ping dari Portal ITAM.');
-                $ip->update([
+                $ip->updateQuietly([
                     'is_online' => $online,
                     'last_ping_at' => now(),
                 ]);
@@ -389,7 +414,7 @@ class IpAddressController extends Controller
 
             if ($targetIp) {
                 $targetIp->processStateNotification($isOnline, 'Terdeteksi Offline oleh Local Office Agent Sync.');
-                $targetIp->update([
+                $targetIp->updateQuietly([
                     'is_online' => $isOnline,
                     'last_ping_at' => now(),
                 ]);

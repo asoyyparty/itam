@@ -8,8 +8,15 @@ use App\Models\Maintenance;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
-class MaintenanceController extends Controller
+class MaintenanceController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_maintenance', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+        ];
+    }
+
     public function index(Request $request)
     {
         $query = Maintenance::with('asset');
@@ -129,9 +136,9 @@ class MaintenanceController extends Controller
         return response()->json(['success' => true, 'message' => 'Status updated successfully.', 'status' => $maintenance->status]);
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        return Excel::download(new MaintenanceExport, 'maintenances.xlsx');
+        return Excel::download(new MaintenanceExport($request), 'maintenances_' . date('Ymd_His') . '.xlsx');
     }
 
     public function complete(Request $request, Maintenance $maintenance)

@@ -7,8 +7,15 @@ use App\Models\AssetAssignment;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 
-class AssetAssignmentController extends Controller
+class AssetAssignmentController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_assignments', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+        ];
+    }
+
     public function index(Request $request)
     {
         $query = AssetAssignment::with(['asset', 'employee']);

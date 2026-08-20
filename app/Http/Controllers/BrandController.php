@@ -8,8 +8,15 @@ use App\Models\Brand;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
-class BrandController extends Controller
+class BrandController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_master_data', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+        ];
+    }
+
     public function index(Request $request)
     {
         $query = Brand::query();
@@ -69,9 +76,9 @@ class BrandController extends Controller
         return redirect()->route('brands.index', request()->query())->with('success', __('messages.deleted_success'));
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        return Excel::download(new BrandExport, 'brands.xlsx');
+        return Excel::download(new BrandExport($request), 'brands_' . date('Ymd_His') . '.xlsx');
     }
 
     public function importExcel(Request $request)

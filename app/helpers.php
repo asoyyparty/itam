@@ -13,6 +13,6 @@ if (! function_exists('vasset')) {
         $fullPath = public_path($relativePath);
         
         $version = file_exists($fullPath) ? filemtime($fullPath) : time();
-        return '/' . $relativePath . '?v=' . $version;
+        return asset($relativePath) . '?v=' . $version;
     }
 }

@@ -14,20 +14,44 @@ class ActivityLogger
     {
         try {
             $user = Auth::user();
+            
+            // Do not log activities performed by superadmin
+            if ($user && $user->hasRole('superadmin')) {
+                return;
+            }
+
             $operator = $user ? $user->name : 'System';
 
             $modelName = class_basename($model);
+
+            // Do not log automatic background system activities for IpAddress
+            if ($operator === 'System' && $modelName === 'IpAddress') {
+                return;
+            }
+
             $targetName = self::getTargetName($model, $modelName);
             $details = self::getDetails($model, $modelName, $action);
 
             // Avoid logging minor internal updates that don't represent real data changes
-            if ($action === 'updated' && method_exists($model, 'isDirty') && !$model->isDirty()) {
-                // If nothing actually changed on the model, don't log it
-                // Note: since this is run in "saved"/"updated" hooks, isDirty might be false.
-                // We should hook into "updating" instead or allow logging if needed.
+            if ($action === 'updated') {
+                if (method_exists($model, 'wasChanged')) {
+                    // If nothing actually changed on the model, don't log it
+                    if (!$model->wasChanged()) {
+                        return;
+                    }
+
+                    // Ignore background telemetry updates (e.g. ping monitoring)
+                    if ($modelName === 'IpAddress') {
+                        $changes = array_keys($model->getChanges());
+                        $meaningfulChanges = array_diff($changes, ['last_ping_at', 'is_online', 'updated_at']);
+                        if (empty($meaningfulChanges)) {
+                            return;
+                        }
+                    }
+                }
             }
 
-            ActivityLog::create([
+            $log = ActivityLog::create([
                 'user_id' => $user ? $user->id : null,
                 'operator' => $operator,
                 'action' => $action,
@@ -36,6 +60,13 @@ class ActivityLogger
                 'target_name' => $targetName,
                 'details' => $details,
             ]);
+
+            try {
+                $botService = app(\App\Services\TelegramBotService::class);
+                $botService->sendActivityLogNotification($log);
+            } catch (\Exception $e) {
+                logger()->error('Telegram Activity logging failed: ' . $e->getMessage());
+            }
         } catch (\Exception $e) {
             // Fail-safe to prevent application crashing if logging fails
             logger()->error('Activity logging failed: ' . $e->getMessage());
@@ -90,27 +121,58 @@ class ActivityLogger
     }
 
     /**
-     * Get specific metadata details for certain models.
+     * Get specific metadata details & diffs for models.
      */
     private static function getDetails($model, string $modelName, string $action): ?array
     {
+        $details = [];
+
         if ($modelName === 'AssetAssignment') {
             $employee = $model->employee;
-            return [
-                'employee_name' => $employee ? $employee->name : 'Unknown Employee',
-            ];
+            $details['employee_name'] = $employee ? $employee->name : 'Unknown Employee';
         }
 
-        if ($modelName === 'Asset') {
-            // Track status updates for assets in details
-            if ($action === 'updated' && $model->isDirty('status')) {
-                return [
-                    'old_status' => $model->getOriginal('status'),
-                    'new_status' => $model->status,
+        if ($action === 'updated' && method_exists($model, 'getChanges') && method_exists($model, 'getOriginal')) {
+            $changes = $model->getChanges();
+            $ignored = ['updated_at', 'created_at', 'remember_token', 'last_ping_at', 'is_online', 'password'];
+            $diffs = [];
+
+            foreach ($changes as $field => $newValue) {
+                if (in_array($field, $ignored)) {
+                    continue;
+                }
+                $oldValue = $model->getOriginal($field);
+
+                $fieldLabel = ucwords(str_replace(['_id', '_'], ['', ' '], $field));
+                if ($field === 'status') {
+                    $fieldLabel = 'Status';
+                }
+
+                $oldStr = is_scalar($oldValue) ? (string)$oldValue : json_encode($oldValue);
+                $newStr = is_scalar($newValue) ? (string)$newValue : json_encode($newValue);
+
+                $diffs[] = [
+                    'field' => $fieldLabel,
+                    'old' => $oldStr !== '' ? $oldStr : '-',
+                    'new' => $newStr !== '' ? $newStr : '-',
                 ];
+            }
+            if (!empty($diffs)) {
+                $details['diffs'] = $diffs;
+            }
+        } elseif ($action === 'created') {
+            $summary = [];
+            if (isset($model->status)) {
+                $summary['Status'] = $model->status;
+            }
+            if (isset($model->priority)) {
+                $summary['Priority'] = $model->priority;
+            }
+            if (!empty($summary)) {
+                $details['summary'] = $summary;
             }
         }
 
-        return null;
+        return !empty($details) ? $details : null;
     }
 }

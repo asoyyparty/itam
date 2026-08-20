@@ -2,75 +2,61 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\TelegramBotController;
-use App\Services\TelegramBotService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use App\Http\Controllers\TelegramBotController;
+use App\Models\Setting;
 
 class TelegramPollCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'telegram:poll {--timeout=30}';
+    protected $signature = 'telegram:poll';
+    protected $description = 'Long poll Telegram updates (for local development)';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Run long polling worker for Telegram Bot to reply to commands on localhost 24/7';
-
-    /**
-     * Execute the console command.
-     */
-    public function handle(TelegramBotController $botController, TelegramBotService $botService): int
+    public function handle()
     {
-        $token = env('TELEGRAM_BOT_TOKEN');
+        $token = Setting::where('key', 'telegram_bot_token')->value('value') ?: env('TELEGRAM_BOT_TOKEN');
+        
         if (empty($token)) {
-            $this->error('TELEGRAM_BOT_TOKEN is not set in .env!');
-            return 1;
+            $this->error('Telegram Bot Token is not set in Settings or .env');
+            return;
         }
 
-        $this->info("🤖 ITAM Telegram Bot Polling Worker Started...");
-        $this->info("Bot Token: {$token}");
-        $this->info("Press Ctrl+C to stop.\n");
+        $this->info("Starting Telegram long polling...");
+        
+        // First delete any existing webhook to ensure getUpdates works
+        Http::post("https://api.telegram.org/bot{$token}/deleteWebhook");
 
         $offset = 0;
+        $controller = app(TelegramBotController::class);
 
         while (true) {
             try {
-                $response = Http::timeout(35)->get("https://api.telegram.org/bot{$token}/getUpdates", [
+                $response = Http::timeout(60)->get("https://api.telegram.org/bot{$token}/getUpdates", [
                     'offset' => $offset,
-                    'timeout' => 25,
+                    'timeout' => 50,
                 ]);
 
-                if ($response->successful()) {
-                    $updates = $response->json('result') ?? [];
-
+                if ($response->successful() && isset($response['result'])) {
+                    $updates = $response['result'];
+                    
                     foreach ($updates as $update) {
-                        $offset = $update['update_id'] + 1;
-
-                        // Create fake Request to reuse TelegramBotController logic
-                        $request = new \Illuminate\Http\Request();
+                        $this->info("Received update: " . $update['update_id']);
+                        
+                        // Simulate a Request object
+                        $request = new Request();
                         $request->replace($update);
-
-                        $botController->handleWebhook($request);
-
-                        $this->info("Processed update ID: {$update['update_id']}");
+                        
+                        // Pass to the webhook handler
+                        $controller->handleWebhook($request);
+                        
+                        $offset = $update['update_id'] + 1;
                     }
                 }
             } catch (\Exception $e) {
-                $this->error("Polling error: " . $e->getMessage());
+                $this->error("Connection error: " . $e->getMessage());
                 sleep(2);
             }
-
-            usleep(200000); // 0.2s sleep between polling iterations
         }
-
-        return 0;
     }
 }

@@ -8,8 +8,15 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
-class CategoryController extends Controller
+class CategoryController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_master_data', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+        ];
+    }
+
     public function index(Request $request)
     {
         $query = Category::query();
@@ -81,9 +88,9 @@ class CategoryController extends Controller
         return redirect()->route('categories.index', request()->query())->with('success', __('messages.deleted_success'));
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        return Excel::download(new CategoryExport, 'categories.xlsx');
+        return Excel::download(new CategoryExport($request), 'categories_' . date('Ymd_His') . '.xlsx');
     }
 
     public function importExcel(Request $request)

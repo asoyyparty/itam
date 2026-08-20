@@ -24,6 +24,8 @@ class User extends Authenticatable
         'username',
         'email',
         'password',
+        'anydesk_password',
+        'pc_password',
     ];
 
     /**
