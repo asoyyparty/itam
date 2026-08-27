@@ -1,0 +1,217 @@
+@extends('layouts.admin')
+
+@section('title', __('messages.maintenance'))
+
+@section('content')
+<div class="division-actions maintenance-actions d-flex flex-nowrap justify-content-end align-items-center mb-3" style="gap: 8px; overflow-x: auto; padding-bottom: 2px;">
+    <a href="{{ route('maintenances.export', request()->query()) }}" class="btn btn-sm btn-success text-nowrap flex-shrink-0" title="{{ __('messages.export') }}"><i class="fas fa-file-export mr-1"></i> {{ __('messages.export') }}</a>
+    @can('action_manage_maintenance')
+    <a href="{{ route('maintenances.create') }}" class="btn btn-sm btn-primary text-nowrap flex-shrink-0" title="{{ __('messages.log_maintenance') }}"><i class="fas fa-clipboard-list mr-1"></i> {{ __('messages.log_maintenance') }}</a>
+    @endcan
+</div>
+
+<div class="card theme-card">
+    <div class="division-table-header maintenance-table-header card-header border-0 d-flex align-items-center flex-wrap">
+        <form action="{{ route('maintenances.index') }}" method="GET" class="maintenance-search-form" style="width: 100%;">
+            <div class="maintenance-search-controls d-flex align-items-center justify-content-start">
+                <select name="status" class="form-control select2 theme-input maintenance-filter" style="width: 180px; min-width: 180px; flex-shrink: 0;">
+                    <option value="">{{ __('messages.all_status') }}</option>
+                    <option value="Ongoing" {{ request('status') == 'Ongoing' ? 'selected' : '' }}>{{ __('messages.ongoing') }}</option>
+                    <option value="Completed" {{ request('status') == 'Completed' ? 'selected' : '' }}>{{ __('messages.completed') }}</option>
+                    <option value="Cancelled" {{ request('status') == 'Cancelled' ? 'selected' : '' }}>{{ __('messages.cancelled') }}</option>
+                </select>
+                <div class="input-group maintenance-search-input" style="display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; flex: 1; min-width: 0;">
+                    <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search') }}..." value="{{ request('search') }}" aria-label="{{ __('messages.search') }}" style="min-width: 180px; flex: 1;">
+                    @if(request()->anyFilled(['search', 'status']))
+                        <a href="{{ route('maintenances.index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" title="Clear" aria-label="Clear"  style="min-width: 40px; height: 38px; padding: 0; display: flex !important; align-items: center !important; justify-content: center !important; border-color: rgba(148, 163, 184, 0.22);"><i class="fas fa-times"></i></a>
+                    @endif
+                    <button class="btn btn-info d-flex align-items-center justify-content-center" type="submit" title="{{ __('messages.search') }}" aria-label="{{ __('messages.search') }}"   style="margin-left: 2px; min-width: 40px; height: 38px; padding: 0; display: flex !important; align-items: center !important; justify-content: center !important;"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="card-body p-0">
+        <div class="theme-scroll-container table-responsive">
+            <table class="table table-striped table-hover m-0 theme-table division-table">
+                <thead>
+                    <tr>
+                        <th width="50">{{ __('messages.no') }}</th>
+                        <th>{{ __('messages.asset') }}</th>
+                        <th>{{ __('messages.type') }}</th>
+                        <th>{{ __('messages.description') }}</th>
+                        <th>{{ __('messages.dates') }}</th>
+                        <th>{{ __('messages.status') }}</th>
+                        <th width="150" class="text-center">{{ __('messages.actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($maintenances as $maintenance)
+                    <tr>
+                        <td class="theme-text">{{ $loop->iteration }}</td>
+                        <td class="font-weight-bold" >
+                            {{ $maintenance->asset->name ?? '-' }}<br>
+                            <small class="text-muted">{{ $maintenance->asset->asset_tag ?? '-' }}</small>
+                        </td>
+                        <td class="theme-text">{{ $maintenance->type }}</td>
+                        <td class="theme-text">{{ Str::limit($maintenance->description, 30) }}</td>
+                        <td class="theme-text">
+                            <small><i class="far fa-calendar-alt text-muted"></i> {{ $maintenance->start_date }}</small><br>
+                            <small><i class="far fa-calendar-check text-muted"></i> {{ $maintenance->end_date ?? '...' }}</small>
+                        </td>
+                        <td class="theme-text">
+                            <div class="dropdown">
+                                @can('action_manage_maintenance')
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $maintenance->id }}" style="box-shadow: none;">
+                                    @if($maintenance->status == 'Ongoing')
+                                        <span class="badge badge-warning status-badge" style="box-shadow: 0 0 8px rgba(255,193,7,0.5);">{{ __('messages.ongoing') }}</span>
+                                    @elseif($maintenance->status == 'Completed')
+                                        <span class="badge badge-success status-badge" style="box-shadow: 0 0 8px rgba(40,167,69,0.5);">{{ __('messages.completed') }}</span>
+                                    @else
+                                        <span class="badge badge-secondary status-badge">{{ __('messages.cancelled') }}</span>
+                                    @endif
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" >
+                                    <a class="dropdown-item status-change-btn text-warning" href="#" data-status="Ongoing">{{ __('messages.ongoing') }}</a>
+                                    <a class="dropdown-item status-change-btn text-success" href="#" data-status="Completed">{{ __('messages.completed') }}</a>
+                                    <a class="dropdown-item status-change-btn text-secondary" href="#" data-status="Cancelled">{{ __('messages.cancelled') }}</a>
+                                </div>
+@else
+<button class="btn btn-sm dropdown-toggle status-btn p-0 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false" data-id="{{ $maintenance->id }}" style="box-shadow: none;">
+                                    @if($maintenance->status == 'Ongoing')
+                                        <span class="badge badge-warning status-badge" style="box-shadow: 0 0 8px rgba(255,193,7,0.5);">{{ __('messages.ongoing') }}</span>
+                                    @elseif($maintenance->status == 'Completed')
+                                        <span class="badge badge-success status-badge" style="box-shadow: 0 0 8px rgba(40,167,69,0.5);">{{ __('messages.completed') }}</span>
+                                    @else
+                                        <span class="badge badge-secondary status-badge">{{ __('messages.cancelled') }}</span>
+                                    @endif
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" >
+                                    <a class="dropdown-item status-change-btn text-warning" href="#" data-status="Ongoing">{{ __('messages.ongoing') }}</a>
+                                    <a class="dropdown-item status-change-btn text-success" href="#" data-status="Completed">{{ __('messages.completed') }}</a>
+                                    <a class="dropdown-item status-change-btn text-secondary" href="#" data-status="Cancelled">{{ __('messages.cancelled') }}</a>
+                                </div>
+@endcan
+                            </div>
+                        </td>
+                        <td class="theme-text">
+                            <div class="d-flex justify-content-center" style="gap: 8px;">
+                                @if($maintenance->status == 'Ongoing')
+                                    <button type="button" class="btn btn-sm d-flex align-items-center justify-content-center" style="background: rgba(40, 167, 69, 0.15); color: #28a745; border: 1px solid rgba(40, 167, 69, 0.3); border-radius: 8px; width: 32px; height: 32px;" title="{{ __('messages.complete_maintenance') }}" data-toggle="modal" data-target="#completeModal{{ $maintenance->id }}"><i class="fas fa-check"></i></button>
+                                @endif
+                                @can('action_manage_maintenance')
+<a href="{{ route('maintenances.edit', array_merge([$maintenance->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;"  title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
+@endcan
+                                @can('action_manage_maintenance')
+<form action="{{ route('maintenances.destroy', array_merge([$maintenance->id], request()->query())) }}" method="POST" class="d-inline">
+                                    @csrf @method('DELETE')
+                                    <button class="btn btn-delete action-btn btn-outline-danger" style="border: 1px solid rgba(220, 53, 69, 0.3); background: rgba(220, 53, 69, 0.15); color: #dc3545;"  title="{{ __('messages.delete') }}" data-confirm-message="{{ __('messages.confirm_delete') }}"><i class="fas fa-trash"></i></button>
+                                </form>
+@endcan
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">{{ __('messages.no_data') }}</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Complete Modals placed outside of table-responsive to prevent clipping -->
+@foreach($maintenances as $maintenance)
+    @if($maintenance->status == 'Ongoing')
+    <div class="modal fade" id="completeModal{{ $maintenance->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content theme-card">
+                <form action="{{ route('maintenances.complete', $maintenance) }}" method="POST">
+                    @csrf
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title theme-text">{{ __('messages.complete_maintenance') }}</h5>
+                        <button type="button" class="close theme-text" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="theme-text">{{ __('messages.completing_maintenance_for') ?? 'Completing maintenance for' }} <strong class="text-info">{{ $maintenance->asset->asset_tag ?? '' }}</strong></p>
+                        <div class="form-group">
+                            <label class="theme-text">{{ __('messages.end_date') }} *</label>
+                            <input type="date" name="end_date" class="form-control theme-input" value="{{ date('Y-m-d') }}" required >
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('messages.cancel') }}</button>
+                        <button type="submit" class="btn btn-success">{{ __('messages.mark_completed') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
+@endforeach
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    $(document).on('click', '.status-change-btn', function(e) {
+        e.preventDefault();
+        var btn = $(this);
+        var newStatus = btn.data('status');
+        var container = btn.closest('.dropdown');
+        var id = container.find('.status-btn').data('id');
+        var badge = container.find('.status-badge');
+        
+        var originalHtml = badge.html();
+        badge.html('<i class="fas fa-spinner fa-spin"></i>');
+        
+        $.ajax({
+            url: '{{ url("maintenances") }}/' + id + '/status',
+            type: 'PATCH',
+            data: {
+                _token: '{{ csrf_token() }}',
+                status: newStatus
+            },
+            success: function(response) {
+                if(response.success) {
+                    badge.removeClass('badge-primary badge-warning badge-success badge-danger badge-secondary badge-info badge-dark');
+                    badge.css('box-shadow', 'none');
+                    
+                    switch(newStatus) {
+                        case 'Ongoing':
+                            badge.addClass('badge-warning');
+                            badge.css('box-shadow', '0 0 8px rgba(255,193,7,0.5)');
+                            badge.text('{{ __("messages.ongoing") }}');
+                            break;
+                        case 'Completed':
+                            badge.addClass('badge-success');
+                            badge.css('box-shadow', '0 0 8px rgba(40,167,69,0.5)');
+                            badge.text('{{ __("messages.completed") }}');
+                            break;
+                        case 'Cancelled':
+                            badge.addClass('badge-secondary');
+                            badge.text('{{ __("messages.cancelled") }}');
+                            break;
+                    }
+                    setTimeout(function() { location.reload(); }, 1000); // Reload to update action buttons and date correctly
+                } else {
+                    Swal.fire({ icon: 'error', text: response.message || 'Error updating status.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
+                    badge.html(originalHtml);
+                }
+            },
+            error: function(xhr) {
+                Swal.fire({ icon: 'error', text: 'Error updating status.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc', customClass: { popup: 'border border-danger' } });
+                badge.html(originalHtml);
+            }
+        });
+    });
+});
+</script>
+<style>
+.status-btn::after { display: none !important; }
+.status-change-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
+</style>
+@endpush
+@endsection
