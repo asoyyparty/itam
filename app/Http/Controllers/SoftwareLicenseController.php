@@ -19,6 +19,10 @@ class SoftwareLicenseController extends Controller implements \Illuminate\Routin
     {
         $query = SoftwareLicense::with('pic');
 
+        if ($request->has('pic_id') && $request->pic_id != '') {
+            $query->where('pic_id', $request->pic_id);
+        }
+
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -28,8 +32,9 @@ class SoftwareLicenseController extends Controller implements \Illuminate\Routin
         }
 
         $software_licenses = $query->orderBy('name')->get();
+        $employees = Employee::orderBy('name')->get();
 
-        return view('software_licenses.index', compact('software_licenses'));
+        return view('software_licenses.index', compact('software_licenses', 'employees'));
     }
 
     public function create()

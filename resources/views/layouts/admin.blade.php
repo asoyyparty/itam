@@ -227,7 +227,7 @@
       gap: 6px;
       padding: 6px 14px;
       height: 36px;
-      border-radius: var(--radius-pill);
+      border-radius: 14px;
       font-size: 0.8125rem;
       font-weight: 500;
       background: var(--color-paper-1);
@@ -421,6 +421,109 @@
       border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
 
+    /* ── Modal Change Password Dual-Mode Theme (Light & Dark) ── */
+    #changePasswordModal .modal-content {
+      border-radius: 20px !important;
+      overflow: hidden !important;
+      backdrop-filter: blur(20px) !important;
+      transition: all 0.25s ease !important;
+    }
+
+    /* Dark Mode Default / Explicit */
+    body.dark-mode #changePasswordModal .modal-content {
+      background: rgba(15, 23, 42, 0.96) !important;
+      border: 1px solid rgba(129, 140, 248, 0.3) !important;
+      color: #f8fafc !important;
+      box-shadow: 0 25px 65px rgba(0, 0, 0, 0.8), 0 0 30px rgba(99, 102, 241, 0.25) !important;
+    }
+    body.dark-mode #changePasswordModal .modal-header {
+      background: rgba(30, 41, 59, 0.8) !important;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14) !important;
+    }
+    body.dark-mode #changePasswordModal .modal-title {
+      color: #ffffff !important;
+    }
+    body.dark-mode #changePasswordModal .modal-subtitle {
+      color: #94a3b8 !important;
+    }
+    body.dark-mode #changePasswordModal .close {
+      color: #cbd5e1 !important;
+    }
+    body.dark-mode #changePasswordModal .modal-body {
+      background: transparent !important;
+    }
+    body.dark-mode #changePasswordModal label {
+      color: #cbd5e1 !important;
+    }
+    body.dark-mode #changePasswordModal .pw-input {
+      background: rgba(15, 23, 42, 0.6) !important;
+      border: 1px solid rgba(148, 163, 184, 0.22) !important;
+      color: #ffffff !important;
+    }
+    body.dark-mode #changePasswordModal .pw-input::placeholder {
+      color: #94a3b8 !important;
+    }
+    body.dark-mode #changePasswordModal .btn-toggle-pw {
+      color: #94a3b8 !important;
+    }
+    body.dark-mode #changePasswordModal .modal-footer {
+      background: rgba(30, 41, 59, 0.5) !important;
+      border-top: 1px solid rgba(148, 163, 184, 0.14) !important;
+    }
+    body.dark-mode #changePasswordModal .pw-cancel-btn {
+      background: rgba(148, 163, 184, 0.12) !important;
+      border: 1px solid rgba(148, 163, 184, 0.28) !important;
+      color: #cbd5e1 !important;
+    }
+
+    /* Light Mode Specifics */
+    body.light-mode #changePasswordModal .modal-content {
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15) !important;
+    }
+    body.light-mode #changePasswordModal .modal-header {
+      background: #f8fafc !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+    }
+    body.light-mode #changePasswordModal .modal-title {
+      color: #0f172a !important;
+    }
+    body.light-mode #changePasswordModal .modal-subtitle {
+      color: #64748b !important;
+    }
+    body.light-mode #changePasswordModal .close {
+      color: #64748b !important;
+      opacity: 0.8;
+    }
+    body.light-mode #changePasswordModal .modal-body {
+      background: #ffffff !important;
+    }
+    body.light-mode #changePasswordModal label {
+      color: #334155 !important;
+    }
+    body.light-mode #changePasswordModal .pw-input {
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    body.light-mode #changePasswordModal .pw-input::placeholder {
+      color: #94a3b8 !important;
+    }
+    body.light-mode #changePasswordModal .btn-toggle-pw {
+      color: #64748b !important;
+    }
+    body.light-mode #changePasswordModal .modal-footer {
+      background: #f8fafc !important;
+      border-top: 1px solid #e2e8f0 !important;
+    }
+    body.light-mode #changePasswordModal .pw-cancel-btn {
+      background: #f1f5f9 !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #475569 !important;
+    }
+
     /* Mobile Responsive Optimizations for Modern Feature Components */
     @media (max-width: 768px) {
       .content-header {
@@ -479,10 +582,6 @@
       .timeline-card {
         padding: 10px 12px !important;
         margin-bottom: 8px !important;
-      }
-      .main-footer {
-        padding: 8px 10px !important;
-        text-align: center !important;
       }
       .main-footer .float-right {
         float: none !important;
@@ -2796,7 +2895,7 @@
       <li class="nav-item d-flex d-md-none align-items-center ml-1">
         <a href="{{ route('dashboard') }}" class="d-flex align-items-center text-decoration-none" style="gap: 8px;">
           <img src="{{ vasset('logo.png') }}" alt="Logo" loading="lazy" decoding="async"
-               style="max-height: 28px; max-width: 44px; object-fit: contain;">
+               style="max-height: 38px; max-width: 54px; object-fit: contain;">
           <span style="font-weight: 700; font-size: 0.95rem; color: var(--color-ink-0);">{{ $app_name ?? 'ITAM' }}</span>
         </a>
       </li>
@@ -2807,7 +2906,7 @@
 
       <!-- Real-Time Jakarta (WIB) Clock Pill -->
       <li class="nav-item d-none d-sm-block">
-        <div class="nav-pill-btn" style="border: 1px solid rgba(59, 130, 246, 0.25); background: rgba(59, 130, 246, 0.08); color: var(--color-ink-0) !important; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600; cursor: default;" title="Waktu Nyata Jakarta (WIB)">
+        <div class="nav-pill-btn" style="border: 1px solid rgba(59, 130, 246, 0.25); background: rgba(59, 130, 246, 0.08); color: var(--color-ink-0) !important; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600; cursor: default;" title="{{ App::getLocale() == 'en' ? 'Jakarta Real-Time Clock (WIB)' : 'Waktu Nyata Jakarta (WIB)' }}">
           <i class="far fa-clock text-info" style="font-size: 0.8rem;"></i>
           <span id="header-jakarta-clock">--:--:-- WIB</span>
         </div>
@@ -2836,7 +2935,7 @@
       @auth
       <!-- User Profile Dropdown Menu -->
       <li class="nav-item dropdown user-menu">
-        <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-toggle="dropdown" aria-expanded="false" style="gap: 8px; padding: 4px 10px; border-radius: 20px; background: color-mix(in oklch, var(--color-ink-0) 5%, transparent); border: 1px solid color-mix(in oklch, var(--color-ink-0) 8%, transparent);">
+        <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-toggle="dropdown" aria-expanded="false" style="gap: 8px; padding: 4px 10px; border-radius: 14px; background: color-mix(in oklch, var(--color-ink-0) 5%, transparent); border: 1px solid color-mix(in oklch, var(--color-ink-0) 8%, transparent);">
           <div class="user-avatar-badge" style="width: 28px; height: 28px; border-radius: 50%; background: #4f46e5; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 700; font-size: 0.8rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">
             {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
           </div>
@@ -2908,7 +3007,7 @@
     <!-- Brand -->
     <a href="{{ route('dashboard') }}" class="brand-link" style="text-decoration: none;">
       <img src="{{ vasset('logo.png') }}" alt="Logo" loading="lazy" decoding="async"
-           style="max-height: 30px; max-width: 52px; object-fit: contain; margin-right: 12px;">
+           style="max-height: 42px; max-width: 64px; object-fit: contain; margin-right: 12px;">
       <span class="brand-text">{{ $app_name ?? 'ITAM Enterprise' }}</span>
     </a>
 
@@ -3505,9 +3604,9 @@
   }
 
   body.dark-mode .ai-chatbot-drawer {
-    background: rgba(15, 23, 42, 0.94);
-    border-color: rgba(255, 255, 255, 0.14);
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65), 0 0 25px rgba(99, 102, 241, 0.25);
+    background: rgba(15, 23, 42, 0.96);
+    border-color: rgba(129, 140, 248, 0.35);
+    box-shadow: 0 25px 65px rgba(0, 0, 0, 0.8), 0 0 30px rgba(99, 102, 241, 0.3);
   }
 
   .ai-chatbot-drawer.active {
@@ -3528,8 +3627,8 @@
   }
 
   body.dark-mode .ai-chat-header {
-    background: rgba(30, 41, 59, 0.8);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(255, 255, 255, 0.12);
   }
 
   .ai-chat-header-info {
@@ -3548,7 +3647,7 @@
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
   }
 
   .ai-chat-title {
@@ -3559,10 +3658,14 @@
     line-height: 1.2;
   }
 
+  body.dark-mode .ai-chat-title {
+    color: #ffffff;
+  }
+
   .ai-chat-status {
     font-size: 0.72rem;
     color: #10b981;
-    font-weight: 500;
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -3600,14 +3703,18 @@
     outline: none !important;
   }
 
+  body.dark-mode .ai-header-btn {
+    color: #cbd5e1;
+  }
+
   .ai-header-btn:hover {
-    background: rgba(239, 68, 68, 0.12);
+    background: rgba(239, 68, 68, 0.15);
     color: #ef4444;
   }
 
   .ai-header-btn#btn-close-chat-drawer:hover {
-    background: var(--color-paper-2, rgba(0,0,0,0.06));
-    color: var(--color-ink-0, #0f172a);
+    background: var(--color-paper-2, rgba(255,255,255,0.1));
+    color: var(--color-ink-0, #ffffff);
   }
 
   /* Body */
@@ -3622,14 +3729,14 @@
   }
 
   body.dark-mode .ai-chat-body {
-    background: rgba(15, 23, 42, 0.95);
+    background: rgba(15, 23, 42, 0.96);
   }
 
   .ai-chat-body::-webkit-scrollbar {
     width: 5px;
   }
   .ai-chat-body::-webkit-scrollbar-thumb {
-    background: rgba(100, 116, 139, 0.3);
+    background: rgba(100, 116, 139, 0.35);
     border-radius: 4px;
   }
 
@@ -3637,7 +3744,7 @@
   .chat-msg {
     display: flex;
     flex-direction: column;
-    max-width: 88%;
+    max-width: 90%;
     animation: fadeInMsg 0.25s ease forwards;
   }
 
@@ -3651,13 +3758,13 @@
   }
 
   .chat-msg-user .chat-bubble {
-    background: #4f46e5;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
     color: #ffffff;
     border-radius: 16px 16px 2px 16px;
     padding: 10px 14px;
     font-size: 0.88rem;
     line-height: 1.45;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
   }
 
   .chat-msg-bot {
@@ -3670,14 +3777,15 @@
     border-radius: 16px 16px 16px 2px;
     padding: 12px 15px;
     font-size: 0.88rem;
-    line-height: 1.45;
+    line-height: 1.48;
     border: 1px solid var(--rule-soft, rgba(0,0,0,0.06));
   }
 
   body.dark-mode .chat-msg-bot .chat-bubble {
-    background: rgba(30, 41, 59, 0.9);
+    background: rgba(30, 41, 59, 0.95);
     color: #f8fafc;
-    border-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(129, 140, 248, 0.25);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   }
 
   /* Typing Indicator */
@@ -3711,7 +3819,7 @@
     align-items: center;
     padding: 10px 12px;
     margin-top: 8px;
-    border-radius: 10px;
+    border-radius: 12px;
     background: var(--color-paper-0, #ffffff);
     border: 1px solid var(--rule-soft, rgba(0,0,0,0.08));
     text-decoration: none !important;
@@ -3719,14 +3827,14 @@
   }
 
   body.dark-mode .chat-item-card {
-    background: rgba(15, 23, 42, 0.8);
-    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(30, 41, 59, 0.85);
+    border-color: rgba(255, 255, 255, 0.14);
   }
 
   .chat-item-card:hover {
     transform: translateX(3px);
     border-color: #6366f1;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
   }
 
   .chat-item-title {
@@ -3746,6 +3854,10 @@
     margin: 0;
   }
 
+  body.dark-mode .chat-item-sub {
+    color: #94a3b8;
+  }
+
   /* Footer */
   .ai-chat-footer {
     padding: 12px 14px;
@@ -3754,8 +3866,8 @@
   }
 
   body.dark-mode .ai-chat-footer {
-    background: rgba(30, 41, 59, 0.8);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(255, 255, 255, 0.12);
   }
 
   .ai-chat-input-wrap {
@@ -3763,19 +3875,20 @@
     align-items: center;
     gap: 8px;
     background: var(--color-paper-0, #ffffff);
-    border: 1px solid var(--rule-soft, rgba(0,0,0,0.12));
-    border-radius: 999px;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 14px;
     padding: 4px 6px 4px 16px;
-    transition: border-color 0.2s ease;
+    transition: all 0.2s ease;
   }
 
   body.dark-mode .ai-chat-input-wrap {
-    background: rgba(15, 23, 42, 0.9);
-    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(15, 23, 42, 0.95);
+    border-color: rgba(129, 140, 248, 0.35);
   }
 
   .ai-chat-input-wrap:focus-within {
-    border-color: #6366f1;
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
   }
 
   #ai-chat-input {
@@ -3788,6 +3901,11 @@
     padding: 6px 0;
   }
 
+  #ai-chat-input::placeholder {
+    color: #94a3b8 !important;
+    opacity: 0.85;
+  }
+
   body.dark-mode #ai-chat-input {
     color: #f8fafc;
   }
@@ -3796,7 +3914,7 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: #4f46e5;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
     color: #ffffff;
     border: none;
     display: flex;
@@ -3805,19 +3923,49 @@
     font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
   }
 
   #btn-send-chat:hover {
-    background: #4338ca;
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
     transform: scale(1.08);
   }
 
   .ai-chip-btn {
-    border: 1px solid var(--rule-soft) !important;
-    background: var(--color-paper-1) !important;
-    color: var(--color-ink-1) !important;
-    font-weight: 500;
-    border-radius: 999px !important;
+    border: 1px solid rgba(99, 102, 241, 0.25) !important;
+    background: rgba(99, 102, 241, 0.08) !important;
+    color: var(--color-ink-0, #0f172a) !important;
+    font-weight: 600 !important;
+    border-radius: 14px !important;
+    padding: 6px 13px !important;
+    font-size: 0.78rem !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    cursor: pointer;
+    outline: none !important;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  body.dark-mode .ai-chip-btn {
+    background: rgba(30, 41, 59, 0.9) !important;
+    border-color: rgba(129, 140, 248, 0.35) !important;
+    color: #e2e8f0 !important;
+  }
+
+  .ai-chip-btn:hover {
+    background: rgba(99, 102, 241, 0.18) !important;
+    border-color: #6366f1 !important;
+    color: #4f46e5 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+  }
+
+  body.dark-mode .ai-chip-btn:hover {
+    background: rgba(99, 102, 241, 0.25) !important;
+    border-color: #818cf8 !important;
+    color: #ffffff !important;
+  }
     padding: 5px 12px !important;
     font-size: 0.76rem !important;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
@@ -3932,12 +4080,12 @@
               {!! __('messages.ai_welcome_text') !!}
             </div>
           </div>
-          <div class="my-2 d-flex flex-wrap" style="gap: 6px;">
-            <small class="text-muted w-100 mb-1" style="font-size: 0.72rem;">{{ __('messages.ai_recommendation_text') }}</small>
-            <button type="button" class="ai-chip-btn" data-prompt="{{ __('messages.prompt_expired_laptops') }}">{{ __('messages.chip_expired_laptops') }}</button>
-            <button type="button" class="ai-chip-btn" data-prompt="{{ __('messages.prompt_available_ips') }}">{{ __('messages.chip_available_ips') }}</button>
-            <button type="button" class="ai-chip-btn" data-prompt="{{ __('messages.prompt_open_tickets') }}">{{ __('messages.chip_open_tickets') }}</button>
-            <button type="button" class="ai-chip-btn" data-prompt="{{ __('messages.prompt_printer_devices') }}">{{ __('messages.chip_printer_devices') }}</button>
+          <div class="my-2 d-flex flex-wrap" style="gap: 8px;">
+            <small class="w-100 mb-1 font-weight-bold" style="font-size: 0.78rem; color: #94a3b8;">{{ __('messages.ai_recommendation_text') }}</small>
+            <button type="button" class="ai-chip-btn" data-prompt="{{ __('messages.prompt_expired_laptops') }}"><i class="fas fa-laptop-code mr-1" style="opacity: 0.85;"></i> {{ __('messages.chip_expired_laptops') }}</button>
+            <button type="button" class="ai-chip-btn" data-prompt="{{ __('messages.prompt_available_ips') }}"><i class="fas fa-network-wired mr-1" style="opacity: 0.85;"></i> {{ __('messages.chip_available_ips') }}</button>
+            <button type="button" class="ai-chip-btn" data-prompt="{{ __('messages.prompt_open_tickets') }}"><i class="fas fa-ticket-alt mr-1" style="opacity: 0.85;"></i> {{ __('messages.chip_open_tickets') }}</button>
+            <button type="button" class="ai-chip-btn" data-prompt="{{ __('messages.prompt_printer_devices') }}"><i class="fas fa-print mr-1" style="opacity: 0.85;"></i> {{ __('messages.chip_printer_devices') }}</button>
           </div>
         `);
       } else {
@@ -4229,45 +4377,78 @@
 
 <!-- Modal Change Password -->
 <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content" style="background: rgba(15, 23, 42, 0.96); border: 1px solid rgba(148, 163, 184, 0.2); color: #f8fafc; border-radius: 18px; box-shadow: 0 30px 60px -20px rgba(15, 23, 42, 0.9);">
-      <div class="modal-header" style="border-bottom: 1px solid rgba(148, 163, 184, 0.12); padding: 18px 22px 14px; background: rgba(15, 23, 42, 0.75); border-top-left-radius: 18px; border-top-right-radius: 18px;">
-        <h5 class="modal-title font-weight-bold" id="changePasswordModalLabel" style="font-size: 1.15rem; color: #f8fafc; margin: 0;">
-          {{ __('messages.change_password') }}
-        </h5>
-        <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close" style="opacity: 0.8;">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 440px;">
+    <div class="modal-content">
+      
+      <!-- Modal Header -->
+      <div class="modal-header align-items-center py-3 px-4">
+        <div class="d-flex align-items-center" style="gap: 12px;">
+          <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(129, 140, 248, 0.3); color: #818cf8; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; flex-shrink: 0;">
+            <i class="fas fa-key"></i>
+          </div>
+          <div>
+            <h5 class="modal-title font-weight-bold" id="changePasswordModalLabel" style="font-size: 1.05rem; margin: 0; line-height: 1.2;">
+              {{ __('messages.change_password') }}
+            </h5>
+            <small class="d-block modal-subtitle" style="font-size: 0.74rem;">{{ __('messages.change_password_desc') }}</small>
+          </div>
+        </div>
+        <button type="button" class="close ml-auto" data-dismiss="modal" aria-label="Close" style="outline: none !important;">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+
       <form method="POST" action="{{ route('password.update') }}">
         @csrf
         @method('put')
-        <div class="modal-body" style="padding: 22px 22px 12px;">
+        <div class="modal-body py-4 px-4">
+          <!-- Password Saat Ini -->
           <div class="form-group mb-3">
-            <label for="current_password" style="font-size: 0.82rem; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; display: block;">{{ __('messages.current_password') ?? 'Current Password' }}</label>
-            <input type="password" name="current_password" id="current_password" class="form-control @error('current_password', 'updatePassword') is-invalid @enderror" placeholder="{{ __('messages.current_password_placeholder') ?? 'Enter your current password' }}" required style="background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(148, 163, 184, 0.18); color: #fff; border-radius: 12px; padding: 12px 14px; box-shadow: none;">
+            <label for="current_password" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; display: block;">{{ __('messages.current_password') }}</label>
+            <div class="position-relative">
+              <input type="password" name="current_password" id="current_password" class="form-control pw-input @error('current_password', 'updatePassword') is-invalid @enderror" placeholder="{{ __('messages.current_password_placeholder') }}" required style="border-radius: 14px; padding: 11px 40px 11px 16px; font-size: 0.88rem; box-shadow: none; transition: all 0.2s;">
+              <button type="button" class="btn btn-link position-absolute btn-toggle-pw" data-target="#current_password" style="right: 6px; top: 50%; transform: translateY(-50%); padding: 4px 8px; font-size: 0.85rem; text-decoration: none; border: none; background: transparent;">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
             @error('current_password', 'updatePassword')
-              <small class="text-danger mt-1 d-block"><i class="fas fa-exclamation-circle"></i> {{ $message }}</small>
+              <small class="text-danger mt-1 d-block" style="font-size: 0.78rem;"><i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}</small>
             @enderror
           </div>
 
+          <!-- Password Baru -->
           <div class="form-group mb-3">
-            <label for="password" style="font-size: 0.82rem; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; display: block;">{{ __('messages.new_password') ?? 'New Password' }}</label>
-            <input type="password" name="password" id="password" class="form-control @error('password', 'updatePassword') is-invalid @enderror" placeholder="{{ __('messages.new_password_placeholder') ?? 'Enter a new password (min 8 characters)' }}" required style="background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(148, 163, 184, 0.18); color: #fff; border-radius: 12px; padding: 12px 14px; box-shadow: none;">
+            <label for="password" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; display: block;">{{ __('messages.new_password') }}</label>
+            <div class="position-relative">
+              <input type="password" name="password" id="password" class="form-control pw-input @error('password', 'updatePassword') is-invalid @enderror" placeholder="{{ __('messages.new_password_placeholder') }}" required style="border-radius: 14px; padding: 11px 40px 11px 16px; font-size: 0.88rem; box-shadow: none; transition: all 0.2s;">
+              <button type="button" class="btn btn-link position-absolute btn-toggle-pw" data-target="#password" style="right: 6px; top: 50%; transform: translateY(-50%); padding: 4px 8px; font-size: 0.85rem; text-decoration: none; border: none; background: transparent;">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
             @error('password', 'updatePassword')
-              <small class="text-danger mt-1 d-block"><i class="fas fa-exclamation-circle"></i> {{ $message }}</small>
+              <small class="text-danger mt-1 d-block" style="font-size: 0.78rem;"><i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}</small>
             @enderror
           </div>
 
+          <!-- Konfirmasi Password Baru -->
           <div class="form-group mb-0">
-            <label for="password_confirmation" style="font-size: 0.82rem; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; display: block;">{{ __('messages.confirm_new_password') ?? 'Confirm New Password' }}</label>
-            <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" placeholder="{{ __('messages.confirm_new_password_placeholder') ?? 'Repeat your new password' }}" required style="background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(148, 163, 184, 0.18); color: #fff; border-radius: 12px; padding: 12px 14px; box-shadow: none;">
+            <label for="password_confirmation" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; display: block;">{{ __('messages.confirm_new_password') }}</label>
+            <div class="position-relative">
+              <input type="password" name="password_confirmation" id="password_confirmation" class="form-control pw-input" placeholder="{{ __('messages.confirm_new_password_placeholder') }}" required style="border-radius: 14px; padding: 11px 40px 11px 16px; font-size: 0.88rem; box-shadow: none; transition: all 0.2s;">
+              <button type="button" class="btn btn-link position-absolute btn-toggle-pw" data-target="#password_confirmation" style="right: 6px; top: 50%; transform: translateY(-50%); padding: 4px 8px; font-size: 0.85rem; text-decoration: none; border: none; background: transparent;">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
           </div>
         </div>
-        <div class="modal-footer" style="border-top: 1px solid rgba(148, 163, 184, 0.12); padding: 14px 22px 20px; display: flex; justify-content: flex-end; gap: 10px;">
-          <button type="button" class="btn btn-light px-4" data-dismiss="modal" style="border-radius: 10px; font-weight: 600; background: rgba(148, 163, 184, 0.12); border: 1px solid rgba(148, 163, 184, 0.18); color: #f8fafc;">{{ __('messages.cancel') }}</button>
-          <button type="submit" class="btn btn-primary px-4" style="border-radius: 10px; font-weight: 600; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; box-shadow: 0 10px 20px -12px rgba(37, 99, 235, 0.8);">
-            {{ __('messages.save_password') ?? 'Save Password' }}
+
+        <!-- Footer Buttons -->
+        <div class="modal-footer py-3 px-4" style="display: flex; justify-content: flex-end; gap: 6px;">
+          <button type="button" class="btn px-3.5 pw-cancel-btn" data-dismiss="modal" style="height: 38px; border-radius: 14px !important; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; padding-left: 16px !important; padding-right: 16px !important;">
+            {{ __('messages.cancel') }}
+          </button>
+          <button type="submit" class="btn px-3.5" style="height: 38px; border-radius: 14px !important; font-weight: 600; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none; color: #ffffff; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35); display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; padding-left: 16px !important; padding-right: 16px !important;">
+            {{ __('messages.save_password') }}
           </button>
         </div>
       </form>
@@ -4276,6 +4457,20 @@
 </div>
 
 <script>
+  $(document).on('click', '.btn-toggle-pw', function(e) {
+    e.preventDefault();
+    const targetSelector = $(this).data('target');
+    const input = $(targetSelector);
+    const icon = $(this).find('i');
+    if (input.attr('type') === 'password') {
+      input.attr('type', 'text');
+      icon.removeClass('fa-eye').addClass('fa-eye-slash');
+    } else {
+      input.attr('type', 'password');
+      icon.removeClass('fa-eye-slash').addClass('fa-eye');
+    }
+  });
+
   @if($errors->updatePassword->any())
     $(document).ready(function() {
       $('#changePasswordModal').modal('show');
@@ -4298,8 +4493,10 @@
     const clockEl = document.getElementById('header-jakarta-clock');
     if (!clockEl) return;
     const now = new Date();
+    const isEn = '{{ App::getLocale() }}' === 'en';
+    const localeStr = isEn ? 'en-US' : 'id-ID';
     try {
-      const formatter = new Intl.DateTimeFormat('id-ID', {
+      const formatter = new Intl.DateTimeFormat(localeStr, {
         timeZone: 'Asia/Jakarta',
         weekday: 'short',
         day: 'numeric',
@@ -4312,7 +4509,7 @@
       });
       clockEl.textContent = formatter.format(now).replace(/\./g, ':') + ' WIB';
     } catch (e) {
-      clockEl.textContent = now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID') + ' WIB';
+      clockEl.textContent = now.toLocaleDateString(localeStr) + ' ' + now.toLocaleTimeString(localeStr) + ' WIB';
     }
   }
   setInterval(updateJakartaClock, 1000);

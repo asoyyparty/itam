@@ -3,29 +3,27 @@
 @section('title', __('messages.software_licenses'))
 
 @section('content')
-<div class="row mb-3 legacy-list-toolbar">
-    <div class="col-sm-6">
-        <form action="{{ route('software_licenses.index') }}" method="GET">
-            <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
-            <div class="position-relative" style="width: 250px; max-width: 100%; flex: 1; min-width: 200px;">
-                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search_license') }}" value="{{ request('search') }}">
-                <div class="position-absolute d-flex align-items-center" style="top: 50%; right: 5px; transform: translateY(-50%); gap: 4px;">
+<div class="division-actions license-actions d-flex justify-content-end align-items-center mb-3">
+    @can('action_manage_settings')
+    <a href="{{ route('software_licenses.create') }}" class="btn btn-sm btn-primary" title="{{ __('messages.add_license') }}">
+        <i class="fas fa-plus mr-1"></i>{{ __('messages.add_license') }}
+    </a>
+    @endcan
+</div>
+
+<div class="card theme-card license-filter-card">
+    <div class="division-table-header license-table-header card-header border-0 d-flex align-items-center flex-wrap">
+        <form action="{{ route('software_licenses.index') }}" method="GET" class="license-search-form" style="width: 100%;">
+            <div class="license-search-controls d-flex align-items-center justify-content-start">
+                <div class="license-search-input input-group">
+                    <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search_license') }}" value="{{ request('search') }}" aria-label="{{ __('messages.search_license') }}">
                     @if(request('search'))
-                        <a href="{{ route('software_licenses.index') }}" class="btn  btn-outline-secondary    d-flex align-items-center justify-content-center"  title="Clear"  style="min-width: 40px; height: 38px; padding: 0; display: flex !important; align-items: center !important; justify-content: center !important; border-color: rgba(148, 163, 184, 0.22);"><i class="fas fa-times"></i></a>
+                        <a href="{{ route('software_licenses.index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" title="Clear" style="min-width: 40px; height: 38px; padding: 0; display: flex !important; align-items: center !important; justify-content: center !important; border-color: rgba(148, 163, 184, 0.22);"><i class="fas fa-times"></i></a>
                     @endif
-                    <button class="btn  btn-info    d-flex align-items-center justify-content-center" type="submit"   style="min-width: 40px; height: 38px; padding: 0; display: flex !important; align-items: center !important; justify-content: center !important;"><i class="fas fa-search"></i></button>
+                    <button class="btn btn-info d-flex align-items-center justify-content-center" type="submit" style="min-width: 40px; height: 38px; padding: 0; display: flex !important; align-items: center !important; justify-content: center !important;"><i class="fas fa-search"></i></button>
                 </div>
             </div>
-            
-        </div>
-    </form>
-    </div>
-    <div class="col-sm-6 text-right">
-        @can('action_manage_settings')
-<a href="{{ route('software_licenses.create') }}" class="btn btn-sm btn-primary">
-            <i class="fas fa-plus mr-1"></i>{{ __('messages.add_license') }}
-        </a>
-@endcan
+        </form>
     </div>
 </div>
 
@@ -90,15 +88,15 @@
                         <td class="theme-text">
                             <div class="d-flex justify-content-center" style="gap: 8px;">
                                 @can('action_manage_settings')
-<a href="{{ route('software_licenses.edit', array_merge([$lic->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;" title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
-@endcan
+                                <a href="{{ route('software_licenses.edit', array_merge([$lic->id], request()->query())) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;" title="{{ __('messages.edit') }}"><i class="fas fa-edit"></i></a>
+                                @endcan
                                 @can('action_manage_settings')
-<form action="{{ route('software_licenses.destroy', array_merge([$lic->id], request()->query())) }}" method="POST" class="d-inline">
+                                <form action="{{ route('software_licenses.destroy', array_merge([$lic->id], request()->query())) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-delete action-btn btn-outline-danger" style="border: 1px solid rgba(220, 53, 69, 0.3); background: rgba(220, 53, 69, 0.15); color: #dc3545;" title="{{ __('messages.delete') }}" data-confirm-message="{{ __('messages.confirm_delete') }}"><i class="fas fa-trash"></i></button>
                                 </form>
-@endcan
+                                @endcan
                             </div>
                         </td>
                     </tr>
@@ -161,4 +159,35 @@ $(document).ready(function() {
     });
 });
 </script>
+<style>
+.license-actions { gap: 10px !important; }
+.license-actions .btn {
+    min-height: 42px;
+    padding: 0.7rem 1.1rem;
+    border-radius: 12px !important;
+    font-weight: 600;
+}
+.license-search-form, .license-search-controls { width: 100%; }
+.license-search-controls { gap: 10px; flex-wrap: nowrap; }
+.license-search-input { min-width: 220px; flex: 1 1 auto; max-width: 380px; gap: 8px; }
+.license-search-input .form-control, .license-filter {
+    height: 42px !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    background: rgba(15, 23, 42, 0.22);
+    box-shadow: none !important;
+}
+.license-search-input .form-control { min-width: 0; flex: 1 1 auto; }
+.license-search-input .btn { height: 42px; min-width: 42px; border-radius: 10px !important; }
+.license-filter { width: 180px; min-width: 150px; flex: 0 1 180px; }
+
+@media (max-width: 767.98px) {
+    .license-search-controls { flex-wrap: wrap; }
+    .license-search-input, .license-filter {
+        width: 100% !important; min-width: 0 !important; flex-basis: 100%; max-width: 100%;
+    }
+    .license-search-input { display: flex !important; flex-wrap: nowrap; }
+    .license-search-input .form-control { width: auto !important; }
+}
+</style>
 @endpush

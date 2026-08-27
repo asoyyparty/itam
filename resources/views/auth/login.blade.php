@@ -487,7 +487,7 @@
       </div>
 
       <button type="submit" class="btn-submit">
-        Sign In <i class="fas fa-arrow-right"></i>
+        Sign In
       </button>
 
     </form>

@@ -206,8 +206,8 @@
                             <small class="text-muted">{{ __('messages.age') }}: {{ $h['age_years'] }} {{ __('messages.years_short') }}</small>
                         </td>
                         <td class="text-right pr-4">
-                            <button type="button" class="btn btn-sm btn-outline-info btn-audit-asset" data-asset-id="{{ $asset->id }}">
-                                <i class="fas fa-magic mr-1"></i> {{ __('messages.ai_audit') }}
+                            <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3 btn-audit-asset" data-asset-id="{{ $asset->id }}" style="font-weight: 600; font-size: 0.8rem;">
+                                {{ __('messages.ai_audit') }}
                             </button>
                         </td>
                     </tr>
@@ -263,8 +263,8 @@
                     </div>
                 </div>
                 
-                <button type="button" class="btn btn-sm btn-outline-info btn-block btn-audit-asset" data-asset-id="{{ $asset->id }}" style="border-radius: 8px;">
-                    <i class="fas fa-magic mr-1"></i> {{ __('messages.ai_audit') }}
+                <button type="button" class="btn btn-sm btn-outline-info rounded-pill btn-block btn-audit-asset mt-2" data-asset-id="{{ $asset->id }}" style="font-weight: 600; font-size: 0.82rem; height: 38px; display: flex; align-items: center; justify-content: center;">
+                    {{ __('messages.ai_audit') }}
                 </button>
             </div>
         @empty

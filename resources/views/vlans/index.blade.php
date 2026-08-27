@@ -14,10 +14,15 @@
 <div class="card theme-card vlan-filter-card">
     <div class="division-table-header vlan-table-header card-header border-0 d-flex align-items-center flex-wrap">
         <form action="{{ route('vlans.index') }}" method="GET" class="vlan-search-form" style="width: 100%;">
-            <div class="vlan-search-controls d-flex align-items-center justify-content-end">
+            <div class="vlan-search-controls d-flex align-items-center justify-content-start">
+                <select name="status" class="form-control select2 theme-input vlan-filter" onchange="this.form.submit()">
+                    <option value="">{{ __('messages.all_status') }}</option>
+                    <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>{{ __('messages.active') }}</option>
+                    <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>{{ __('messages.inactive') }}</option>
+                </select>
                 <div class="vlan-search-input input-group">
                     <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search_vlan') }}" value="{{ request('search') }}" aria-label="{{ __('messages.search_vlan') }}">
-                    @if(request('search'))
+                    @if(request()->anyFilled(['search', 'status']))
                         <a href="{{ route('vlans.index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" title="Clear" style="min-width: 40px; height: 38px; padding: 0; display: flex !important; align-items: center !important; justify-content: center !important; border-color: rgba(148, 163, 184, 0.22);"><i class="fas fa-times"></i></a>
                     @endif
                     <button class="btn btn-info d-flex align-items-center justify-content-center" type="submit" style="min-width: 40px; height: 38px; padding: 0; display: flex !important; align-items: center !important; justify-content: center !important;"><i class="fas fa-search"></i></button>
@@ -185,7 +190,7 @@ $(document).ready(function() {
 }
 .vlan-search-form, .vlan-search-controls { width: 100%; }
 .vlan-search-controls { gap: 10px; flex-wrap: nowrap; }
-.vlan-search-input { min-width: 220px; flex: 0 0 250px; gap: 8px; }
+.vlan-search-input { min-width: 220px; flex: 1 1 auto; max-width: 380px; gap: 8px; }
 .vlan-search-input .form-control, .vlan-filter {
     height: 42px !important;
     border-radius: 10px !important;
@@ -200,7 +205,7 @@ $(document).ready(function() {
 @media (max-width: 767.98px) {
     .vlan-search-controls { flex-wrap: wrap; }
     .vlan-search-input, .vlan-filter {
-        width: 100% !important; min-width: 0 !important; flex-basis: 100%;
+        width: 100% !important; min-width: 0 !important; flex-basis: 100%; max-width: 100%;
     }
     .vlan-search-input { display: flex !important; flex-wrap: nowrap; }
     .vlan-search-input .form-control { width: auto !important; }

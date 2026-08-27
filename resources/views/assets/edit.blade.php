@@ -318,10 +318,10 @@
         {{-- ===== FOOTER ===== --}}
         <div class="form-footer">
             <button type="submit" class="btn-save">
-                <i class="fas fa-save"></i> {{ __('messages.update') }}
+                {{ __('messages.update') }}
             </button>
             <a href="{{ route('assets.index', request()->query()) }}" class="btn-cancel">
-                <i class="fas fa-times"></i> {{ __('messages.cancel') }}
+                {{ __('messages.cancel') }}
             </a>
         </div>
     </form>

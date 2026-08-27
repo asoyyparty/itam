@@ -88,6 +88,36 @@
             background: var(--color-paper-1, #1e293b) !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
+        .small-box {
+            border-radius: 16px !important;
+            overflow: hidden !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+            transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+            border: var(--rule-soft) !important;
+        }
+        .small-box:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25) !important;
+        }
+        .small-box .inner {
+            padding: 18px 20px !important;
+        }
+        .small-box h3 {
+            font-size: 2.1rem !important;
+            font-weight: 800 !important;
+            line-height: 1.1 !important;
+        }
+        .small-box p {
+            font-size: 0.88rem !important;
+            font-weight: 600 !important;
+            opacity: 0.9;
+        }
+        .small-box-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+            font-size: 0.82rem !important;
+            font-weight: 600 !important;
+            padding: 8px 16px !important;
+        }
         @media (max-width: 575.98px) {
             .activity-scroll-container {
                 max-height: 320px !important;
@@ -95,6 +125,12 @@
             .activity-scroll-container table th,
             .activity-scroll-container table td {
                 padding: 8px 10px !important;
+                font-size: 0.78rem !important;
+            }
+            .small-box h3 {
+                font-size: 1.6rem !important;
+            }
+            .small-box p {
                 font-size: 0.78rem !important;
             }
         }

@@ -319,7 +319,7 @@
       </div>
 
       <button type="submit" class="btn-submit">
-        <i class="fas fa-paper-plane mr-2"></i> {{ __('Email Password Reset Link') }}
+        {{ __('Email Password Reset Link') }}
       </button>
 
       <a href="{{ route('login') }}" class="back-link"><i class="fas fa-arrow-left mr-1"></i> Back to Login</a>

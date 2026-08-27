@@ -367,8 +367,8 @@
 
                                 @if($group == 'whatsapp')
                                     <div class="mt-4 pt-3 border-top" style="border-color: rgba(255,255,255,0.08) !important;">
-                                        <button type="button" id="btn-test-whatsapp" class="btn btn-outline-success px-4 py-2" style="border-radius: 10px; font-weight: 600;">
-                                            <i class="fab fa-whatsapp mr-2 fa-lg"></i> {{ __('messages.test_whatsapp') ?? 'Kirim Pesan Pengujian WhatsApp' }}
+                                        <button type="button" id="btn-test-whatsapp" class="btn btn-outline-success rounded-pill px-4" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;">
+                                            {{ __('messages.test_whatsapp') ?? 'Kirim Pesan Pengujian WhatsApp' }}
                                         </button>
                                         <span id="test-wa-spinner" class="spinner-border spinner-border-sm text-success ml-2 d-none" role="status"></span>
                                         <div id="test-wa-result" class="mt-3"></div>
@@ -376,8 +376,8 @@
                                 @endif
                                 @if($group == 'telegram')
                                     <div class="mt-4 pt-3 border-top" style="border-color: rgba(255,255,255,0.08) !important;">
-                                        <button type="button" id="btn-test-telegram" class="btn btn-outline-primary px-4 py-2" style="border-radius: 10px; font-weight: 600; color: #3b82f6; border-color: #3b82f6;">
-                                            <i class="fab fa-telegram-plane mr-2 fa-lg"></i> {{ __('messages.test_telegram') ?? 'Kirim Pesan Pengujian Telegram' }}
+                                        <button type="button" id="btn-test-telegram" class="btn btn-outline-primary rounded-pill px-4" style="height: 42px; font-weight: 600; color: #3b82f6; border-color: #3b82f6; display: inline-flex; align-items: center; justify-content: center;">
+                                            {{ __('messages.test_telegram') ?? 'Kirim Pesan Pengujian Telegram' }}
                                         </button>
                                         <span id="test-tg-spinner" class="spinner-border spinner-border-sm text-primary ml-2 d-none" role="status"></span>
                                         <div id="test-tg-result" class="mt-3"></div>
@@ -389,8 +389,8 @@
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-0 text-right pb-4 pr-4">
-                    <button type="submit" class="btn btn-primary px-4 py-2" style="border-radius: 10px; font-weight: 600; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);">
-                        <i class="fas fa-save mr-2"></i> {{ __('messages.save') }}
+                    <button type="submit" class="btn btn-primary rounded-pill px-4" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);">
+                        {{ __('messages.save') }}
                     </button>
                 </div>
             </form>

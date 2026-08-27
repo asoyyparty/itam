@@ -3,102 +3,314 @@
 @section('title', __('messages.create_ticket'))
 
 @section('content')
-<div class="card theme-card">
+<style>
+    .ticket-form-card {
+        border-radius: 16px !important;
+        overflow: visible !important;
+        border: var(--rule-soft);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    .ticket-form-card .card-header {
+        border-top-left-radius: 16px !important;
+        border-top-right-radius: 16px !important;
+    }
+    .ticket-card-header {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        width: 100% !important;
+    }
+    .ticket-header-title-box {
+        display: flex !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
+        gap: 12px !important;
+    }
+    .ticket-header-actions {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
+        gap: 8px !important;
+    }
+    .ticket-header-actions .btn {
+        white-space: nowrap !important;
+    }
+    .position-relative-title-wrapper {
+        position: relative !important;
+        width: 100% !important;
+    }
+    .title-template-dropdown {
+        position: absolute !important;
+        top: calc(100% + 4px) !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        transform: none !important;
+        z-index: 1070 !important;
+        background: var(--color-paper-1, #1e293b) !important;
+        border: 1px solid rgba(148, 163, 184, 0.25) !important;
+        border-radius: 14px !important;
+        box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6) !important;
+        padding: 8px !important;
+        margin: 0 !important;
+        max-height: 280px !important;
+        overflow-y: auto !important;
+    }
+    .title-template-dropdown .dropdown-header {
+        text-align: left !important;
+        font-size: 0.72rem !important;
+        letter-spacing: 0.05em !important;
+        color: #94a3b8 !important;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12) !important;
+        padding: 8px 12px 10px 12px !important;
+        margin-bottom: 6px !important;
+    }
+    .title-template-dropdown .dropdown-item {
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+        padding: 10px 14px !important;
+        border-radius: 10px !important;
+        font-size: 0.88rem !important;
+        line-height: 1.45 !important;
+        color: var(--color-ink-0, #f8f9fa) !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        transition: all 0.18s ease !important;
+    }
+    .title-template-dropdown .dropdown-item:hover,
+    .title-template-dropdown .dropdown-item:focus {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #60a5fa !important;
+        transform: translateX(2px);
+    }
+    .title-template-dropdown::-webkit-scrollbar {
+        width: 6px;
+    }
+    .title-template-dropdown::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.3);
+        border-radius: 4px;
+    }
+    .custom-ticket-input,
+    .ticket-form-card .select2-container--default .select2-selection--single {
+        height: 44px !important;
+        border-radius: 10px !important;
+        border: 1px solid rgba(148, 163, 184, 0.22) !important;
+        background: rgba(15, 23, 42, 0.22) !important;
+        box-shadow: none !important;
+        font-size: 0.9rem !important;
+        color: var(--color-ink-0) !important;
+    }
+    .ticket-form-card .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 42px !important;
+        padding-left: 12px !important;
+        color: var(--color-ink-0) !important;
+    }
+    .ticket-form-card .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 42px !important;
+    }
+    .ticket-form-card .input-group-text {
+        height: 44px !important;
+        border-radius: 10px 0 0 10px !important;
+        border: 1px solid rgba(148, 163, 184, 0.22) !important;
+        background: rgba(15, 23, 42, 0.25) !important;
+        color: #94a3b8 !important;
+    }
+    .ticket-form-card input.flatpickr-datetime {
+        border-radius: 0 10px 10px 0 !important;
+    }
+    .btn-ai-sparkle {
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .btn-ai-sparkle:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(168, 85, 247, 0.35) !important;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(168, 85, 247, 0.35)) !important;
+        color: #ffffff !important;
+    }
+    .ai-analysis-panel {
+        border-radius: 14px;
+        border-left: 4px solid #8b5cf6 !important;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(59, 130, 246, 0.05)) !important;
+        border-top: 1px solid rgba(139, 92, 246, 0.2);
+        border-right: 1px solid rgba(139, 92, 246, 0.2);
+        border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+    }
+    .form-label-title {
+        font-size: 0.88rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        margin-bottom: 8px !important;
+    }
+
+    @media (max-width: 767.98px) {
+        .ticket-card-header {
+            overflow-x: auto !important;
+            padding: 12px 14px !important;
+        }
+        .ticket-header-title-box h5 {
+            font-size: 0.98rem !important;
+        }
+        .ticket-header-title-box small {
+            font-size: 0.72rem !important;
+        }
+        .ticket-header-actions .btn {
+            font-size: 0.78rem !important;
+            padding: 6px 10px !important;
+            height: 36px !important;
+        }
+        .ticket-form-group {
+            margin-bottom: 20px !important;
+        }
+        .card-footer-actions {
+            flex-direction: column-reverse;
+            width: 100%;
+            gap: 10px !important;
+        }
+        .card-footer-actions .btn,
+        .card-footer-actions a {
+            width: 100% !important;
+            justify-content: center !important;
+            height: 44px !important;
+        }
+    }
+</style>
+
+<div class="card theme-card ticket-form-card">
     <form action="{{ route('tickets.store') }}" method="POST">
         @csrf
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="text-info m-0"><i class="fas fa-ticket-alt"></i> {{ __('messages.ticket_details') }}</h5>
-                <button type="button" id="btn-ai-analyze" class="btn btn-sm" style="background: var(--color-accent-tint); color: var(--color-accent); border: 1px solid var(--color-accent-soft); font-weight: 600;">
-                    <i class="fas fa-magic mr-1"></i> Analisis AI Assistant
+        <!-- Header Toolbar -->
+        <div class="card-header bg-transparent border-bottom ticket-card-header py-3 px-3 px-md-4" style="border-color: rgba(148, 163, 184, 0.12) !important;">
+            <div class="ticket-header-title-box">
+                <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 1.1rem; flex-shrink: 0;">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.create_ticket') }}</h5>
+                    <small class="text-muted d-block" style="font-size: 0.78rem;">{{ __('messages.ticket_details') }}</small>
+                </div>
+            </div>
+            
+            <div class="ticket-header-actions">
+                <button type="button" id="btn-ai-analyze" class="btn btn-sm btn-ai-sparkle rounded-pill px-3" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2)); color: #a78bfa; border: 1px solid rgba(168, 85, 247, 0.4); font-weight: 600; height: 38px; display: inline-flex; align-items: center; justify-content: center;">
+                    Analisis AI Assistant
                 </button>
             </div>
+        </div>
 
+        <div class="card-body p-3 p-md-4">
             <!-- AI Analysis Result Box -->
-            <div id="ai-analysis-result" class="card theme-card mb-3" style="display: none; border-left: 4px solid var(--color-accent) !important; background: color-mix(in oklch, var(--color-accent-tint) 30%, var(--color-paper-0)) !important;">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="m-0 font-weight-bold" style="color: var(--color-accent);"><i class="fas fa-robot mr-2"></i> Diagnosa & Rekomendasi AI Assistant</h6>
-                        <button type="button" id="btn-apply-ai-suggestions" class="btn btn-xs btn-success px-3">
-                            <i class="fas fa-check-circle mr-1"></i> Terapkan Kategori & Prioritas AI
+            <div id="ai-analysis-result" class="card ai-analysis-panel mb-4" style="display: none;">
+                <div class="card-body p-3 p-md-4">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3" style="gap: 10px;">
+                        <h6 class="m-0 font-weight-bold d-flex align-items-center" style="color: #a78bfa; font-size: 1rem; gap: 8px;">
+                            Diagnosa & Rekomendasi AI Assistant
+                        </h6>
+                        <button type="button" id="btn-apply-ai-suggestions" class="btn btn-xs btn-success rounded-pill px-3 py-1" style="font-weight: 600;">
+                            Terapkan Kategori & Prioritas AI
                         </button>
                     </div>
-                    <div class="row mb-2">
-                        <div class="col-md-6">
-                            <small class="text-muted d-block">Rekomendasi Kategori:</small>
-                            <strong id="ai-cat-res" class="text-info"></strong>
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-2 mb-md-0">
+                            <small class="text-muted d-block uppercase text-xs font-weight-bold">Rekomendasi Kategori:</small>
+                            <strong id="ai-cat-res" class="text-info" style="font-size: 0.95rem;"></strong>
                         </div>
                         <div class="col-md-6">
-                            <small class="text-muted d-block">Rekomendasi Prioritas:</small>
-                            <span id="ai-priority-badge" class="badge"></span>
+                            <small class="text-muted d-block uppercase text-xs font-weight-bold">Rekomendasi Prioritas:</small>
+                            <span id="ai-priority-badge" class="badge px-3 py-1" style="font-size: 0.8rem; border-radius: 10px;"></span>
                         </div>
                     </div>
-                    <div class="mb-2">
-                        <small class="text-muted d-block">Akar Penyebab Masalah (Diagnosis):</small>
-                        <p id="ai-diagnosis-res" class="theme-text mb-1" style="font-size: 0.875rem; font-style: italic;"></p>
+                    <div class="mb-3">
+                        <small class="text-muted d-block uppercase text-xs font-weight-bold mb-1">Akar Penyebab Masalah (Diagnosis):</small>
+                        <p id="ai-diagnosis-res" class="theme-text mb-0 p-2 rounded" style="font-size: 0.88rem; font-style: italic; background: rgba(15, 23, 42, 0.3); border-left: 3px solid #a78bfa;"></p>
                     </div>
-                    <div class="mb-2">
-                        <small class="text-muted d-block">Langkah-langkah Penanganan IT Support:</small>
-                        <ul id="ai-steps-res" class="pl-3 mb-1 theme-text" style="font-size: 0.8125rem;"></ul>
+                    <div class="mb-3">
+                        <small class="text-muted d-block uppercase text-xs font-weight-bold mb-1">Langkah-langkah Penanganan IT Support:</small>
+                        <ul id="ai-steps-res" class="pl-3 mb-0 theme-text" style="font-size: 0.85rem; line-height: 1.6;"></ul>
                     </div>
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <small class="text-muted">Draft Balasan User:</small>
-                            <button type="button" id="btn-copy-ai-reply" class="btn btn-xs btn-outline-secondary" style="padding: 1px 6px; font-size: 0.7rem;"><i class="fas fa-copy"></i> Salin Balasan</button>
+                            <small class="text-muted uppercase text-xs font-weight-bold">Draft Balasan User:</small>
+                            <button type="button" id="btn-copy-ai-reply" class="btn btn-xs btn-outline-secondary rounded-pill px-2" style="font-size: 0.72rem;">Salin Balasan</button>
                         </div>
-                        <pre id="ai-reply-res" class="p-2 theme-input rounded" style="font-family: var(--font-body); font-size: 0.8rem; white-space: pre-wrap; margin-bottom: 0;"></pre>
+                        <pre id="ai-reply-res" class="p-3 theme-input rounded" style="font-family: var(--font-body); font-size: 0.82rem; white-space: pre-wrap; margin-bottom: 0; background: rgba(15, 23, 42, 0.3); border: 1px solid rgba(148, 163, 184, 0.15);"></pre>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12 form-group">
-                    <label class="theme-text d-flex justify-content-between align-items-center w-100" style="margin-bottom: 0.5rem;">
-                        <span>{{ __('messages.title_subject') }} *</span>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-info dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false" style="padding: 2px 8px; font-size: 0.8rem;">
-                                <i class="fas fa-list"></i> Template
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-right shadow" style="max-height: 250px; overflow-y: auto;">
-                                @foreach($templates as $template)
-                                    <a class="dropdown-item template-title-item" href="#" data-title="{{ $template }}"><small>{{ $template }}</small></a>
-                                @endforeach
-                            </div>
+
+            <!-- Title / Subject with Absolute Locked Dropdown -->
+            <div class="form-group ticket-form-group mb-4">
+                <label class="form-label form-label-title theme-text">
+                    {{ __('messages.title_subject') }} <span class="text-danger">*</span>
+                </label>
+                <div class="position-relative-title-wrapper">
+                    <input type="text" id="ticket_title" name="title" class="form-control theme-input custom-ticket-input @error('title') is-invalid @enderror" value="{{ old('title') }}" placeholder="Ketik judul masalah atau pilih dari dropdown..." required style="padding-right: 44px !important;" autocomplete="off">
+                    
+                    <button id="btn-toggle-title-templates" class="btn btn-sm text-info p-0 d-flex align-items-center justify-content-center position-absolute" type="button" style="top: 50%; right: 12px; transform: translateY(-50%); width: 28px; height: 28px; background: transparent; border: none; z-index: 6;" title="Pilih Template Judul">
+                        <i class="fas fa-chevron-down" style="font-size: 0.85rem;"></i>
+                    </button>
+
+                    <div id="title-template-menu" class="dropdown-menu title-template-dropdown shadow-lg border-0">
+                        <div class="dropdown-header text-uppercase font-weight-bold">
+                            TEMPLATE JUDUL:
                         </div>
-                    </label>
-                    <input type="text" id="ticket_title" name="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title') }}" required >
-                    @error('title') <span class="text-danger">{{ $message }}</span> @enderror
+                        @foreach($templates as $template)
+                            <a class="dropdown-item template-title-item" href="#" data-title="{{ $template }}">
+                                <span>{{ $template }}</span>
+                            </a>
+                        @endforeach
+                    </div>
                 </div>
+                @error('title') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
             </div>
+
+            <!-- Row 1: Reporter & Related Asset -->
             <div class="row">
-                <div class="col-md-6 form-group">
-                    <label  class="theme-text">{{ __('messages.reporter_employee') }} *</label>
-                    <select name="employee_id" class="form-control select2 @error('employee_id') is-invalid @enderror" required >
-                        <option value="" >{{ __('messages.select_employee') }}</option>
+                <div class="col-lg-6 form-group ticket-form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        {{ __('messages.reporter_employee') }} <span class="text-danger">*</span>
+                    </label>
+                    <select name="employee_id" class="form-control select2 @error('employee_id') is-invalid @enderror" required>
+                        <option value="">{{ __('messages.select_employee') }}</option>
                         @foreach($employees as $employee)
-                            <option value="{{ $employee->id }}"  {{ old('employee_id') == $employee->id ? 'selected' : '' }}>
+                            <option value="{{ $employee->id }}" {{ old('employee_id') == $employee->id ? 'selected' : '' }}>
                                 {{ $employee->employee_id }} - {{ $employee->name }}
                             </option>
                         @endforeach
                     </select>
-                    @error('employee_id') <span class="text-danger">{{ $message }}</span> @enderror
+                    @error('employee_id') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
-                <div class="col-md-6 form-group">
-                    <label  class="theme-text">{{ __('messages.related_asset_optional') }}</label>
-                    <select name="asset_id" class="form-control select2 @error('asset_id') is-invalid @enderror" >
-                        <option value="" >{{ __('messages.none') }}</option>
+
+                <div class="col-lg-6 form-group ticket-form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        {{ __('messages.related_asset_optional') }}
+                    </label>
+                    <select name="asset_id" class="form-control select2 @error('asset_id') is-invalid @enderror">
+                        <option value="">{{ __('messages.none') }}</option>
                         @foreach($assets as $asset)
-                            <option value="{{ $asset->id }}"  {{ old('asset_id') == $asset->id ? 'selected' : '' }}>
+                            <option value="{{ $asset->id }}" {{ old('asset_id') == $asset->id ? 'selected' : '' }}>
                                 {{ $asset->asset_tag }} - {{ $asset->name }}
                             </option>
                         @endforeach
                     </select>
-                    @error('asset_id') <span class="text-danger">{{ $message }}</span> @enderror
+                    @error('asset_id') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
             </div>
+
+            <!-- Row 2: Category & Priority -->
             <div class="row">
-                <div class="col-md-6 form-group">
-                    <label  class="theme-text">Kategori Pelaporan *</label>
-                    <select name="category" id="category_select" class="form-control select2 @error('category') is-invalid @enderror" required >
+                <div class="col-lg-6 form-group ticket-form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        Kategori Pelaporan <span class="text-danger">*</span>
+                    </label>
+                    <select name="category" id="category_select" class="form-control select2 @error('category') is-invalid @enderror" required>
                         <option value="">Pilih Kategori...</option>
                         @foreach($categories as $category)
                             <option value="{{ $category['name'] }}" {{ old('category') == $category['name'] ? 'selected' : '' }}>
@@ -107,23 +319,30 @@
                         @endforeach
                     </select>
                     <small id="category_description" class="form-text text-info mt-2"></small>
-                    @error('category') <span class="text-danger">{{ $message }}</span> @enderror
+                    @error('category') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
-                <div class="col-md-6 form-group">
-                    <label  class="theme-text">{{ __('messages.priority') }} *</label>
-                    <select name="priority" class="form-control @error('priority') is-invalid @enderror" required >
-                        <option value="Low"  {{ old('priority') == 'Low' ? 'selected' : '' }}>{{ __('messages.low') }}</option>
-                        <option value="Medium"  {{ old('priority') == 'Medium' ? 'selected' : '' }}>{{ __('messages.medium') }}</option>
-                        <option value="High"  {{ old('priority') == 'High' ? 'selected' : '' }}>{{ __('messages.high') }}</option>
-                        <option value="Critical"  {{ old('priority') == 'Critical' ? 'selected' : '' }}>{{ __('messages.critical') }}</option>
+
+                <div class="col-lg-6 form-group ticket-form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        {{ __('messages.priority') }} <span class="text-danger">*</span>
+                    </label>
+                    <select name="priority" class="form-control select2 @error('priority') is-invalid @enderror" required>
+                        <option value="Low" {{ old('priority', 'Low') == 'Low' ? 'selected' : '' }}>{{ __('messages.low') }}</option>
+                        <option value="Medium" {{ old('priority') == 'Medium' ? 'selected' : '' }}>{{ __('messages.medium') }}</option>
+                        <option value="High" {{ old('priority') == 'High' ? 'selected' : '' }}>{{ __('messages.high') }}</option>
+                        <option value="Critical" {{ old('priority') == 'Critical' ? 'selected' : '' }}>{{ __('messages.critical') }}</option>
                     </select>
-                    @error('priority') <span class="text-danger">{{ $message }}</span> @enderror
+                    @error('priority') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
             </div>
+
+            <!-- Row 3: PIC & Created At -->
             <div class="row">
-                <div class="col-md-6 form-group">
-                    <label  class="theme-text">PIC (Penanggung Jawab)</label>
-                    <select name="pic_id" id="pic_id" class="form-control select2 w-100 theme-input">
+                <div class="col-lg-6 form-group ticket-form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        PIC (Penanggung Jawab)
+                    </label>
+                    <select name="pic_id" id="pic_id" class="form-control select2 @error('pic_id') is-invalid @enderror">
                         <option value="">Belum di-assign</option>
                         @foreach($pics as $pic)
                             <option value="{{ $pic->id }}" {{ old('pic_id') == $pic->id ? 'selected' : '' }}>
@@ -131,42 +350,58 @@
                             </option>
                         @endforeach
                     </select>
-                    @error('pic_id') <span class="text-danger">{{ $message }}</span> @enderror
+                    @error('pic_id') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
-                <div class="col-md-6 form-group">
-                    <label class="theme-text">Waktu Laporan Dibuat</label>
+
+                <div class="col-lg-6 form-group ticket-form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        Waktu Laporan Dibuat
+                    </label>
                     <div class="input-group">
                         <div class="input-group-prepend">
-                            <span class="input-group-text bg-transparent border-right-0"><i class="far fa-calendar-alt"></i></span>
+                            <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
                         </div>
-                        <input type="text" name="created_at" class="form-control theme-input border-left-0 flatpickr-datetime" style="background: transparent;" value="{{ old('created_at', now()->format('Y-m-d\TH:i')) }}">
+                        <input type="text" name="created_at" class="form-control theme-input custom-ticket-input border-left-0 flatpickr-datetime" style="background: transparent;" value="{{ old('created_at', now()->format('Y-m-d\TH:i')) }}">
                     </div>
-                    <small class="text-muted">Biarkan jika ingin menggunakan waktu saat ini.</small>
-                    @error('created_at') <span class="text-danger">{{ $message }}</span> @enderror
+                    <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">Biarkan jika ingin menggunakan waktu saat ini.</small>
+                    @error('created_at') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12 form-group">
-                    <label  class="theme-text">{{ __('messages.description_details') }} *</label>
-                    <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="5" required >{{ old('description') }}</textarea>
-                    @error('description') <span class="text-danger">{{ $message }}</span> @enderror
-                </div>
+
+            <!-- Description -->
+            <div class="form-group ticket-form-group mb-2">
+                <label class="form-label form-label-title theme-text">
+                    {{ __('messages.description_details') }} <span class="text-danger">*</span>
+                </label>
+                <textarea name="description" class="form-control theme-input @error('description') is-invalid @enderror" rows="5" placeholder="Tuliskan deskripsi lengkap mengenai masalah atau permintaan yang dialami..." style="border-radius: 12px !important; border: 1px solid rgba(148, 163, 184, 0.22); background: rgba(15, 23, 42, 0.22);" required>{{ old('description') }}</textarea>
+                @error('description') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
             </div>
         </div>
-        <div class="card-footer bg-transparent border-0">
-            <button type="submit" class="btn btn-primary" ><i class="fas fa-save"></i> {{ __('messages.save') }}</button>
-            <a href="{{ route('tickets.index') }}" class="btn btn-outline-secondary ml-2" >{{ __('messages.cancel') }}</a>
+
+        <!-- Footer Actions -->
+        <div class="card-footer bg-transparent py-3 px-3 px-md-4 border-top d-flex align-items-center justify-content-end card-footer-actions" style="gap: 10px; border-color: rgba(148, 163, 184, 0.12) !important;">
+            <a href="{{ route('tickets.index') }}" class="btn btn-outline-secondary rounded-pill px-4" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;">
+                {{ __('messages.cancel') }}
+            </a>
+            <button type="submit" class="btn btn-primary rounded-pill px-4" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;">
+                {{ __('messages.save') }}
+            </button>
         </div>
     </form>
 </div>
 
 @push('scripts')
 <script>
+$(document).ready(function() {
+    // Select2 Initialization with 100% width
+    $('.select2').select2({ width: '100%' });
+
     const categoriesData = @json($categories);
     const categorySelect = document.getElementById('category_select');
     const categoryDesc = document.getElementById('category_description');
 
     function updateCategoryDescription() {
+        if (!categorySelect) return;
         const selectedValue = categorySelect.value;
         const category = categoriesData.find(c => c.name === selectedValue);
         if (category) {
@@ -176,21 +411,29 @@
         }
     }
 
-    // Trigger on change
     if(categorySelect) {
-        // If select2 is used, we need to listen to its event
-        $(categorySelect).on('select2:select', updateCategoryDescription);
-        $(categorySelect).on('change', updateCategoryDescription);
-        // Initial load
+        $(categorySelect).on('select2:select change', updateCategoryDescription);
         updateCategoryDescription();
     }
 
+    // Toggle Title Template Menu manually to bypass Popper.js displacement
+    $('#ticket_title, #btn-toggle-title-templates').on('click', function(e) {
+        e.stopPropagation();
+        $('#title-template-menu').toggleClass('show');
+    });
+
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.position-relative-title-wrapper').length) {
+            $('#title-template-menu').removeClass('show');
+        }
+    });
+
     // Template Title Selection
-    document.querySelectorAll('.template-title-item').forEach(item => {
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('ticket_title').value = this.getAttribute('data-title');
-        });
+    $(document).on('click', '.template-title-item', function(e) {
+        e.preventDefault();
+        const title = $(this).attr('data-title');
+        $('#ticket_title').val(title).focus();
+        $('#title-template-menu').removeClass('show');
     });
 
     // AI Analysis Handler
@@ -213,7 +456,7 @@
         }
 
         const btn = $(this);
-        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Menganalisis AI...');
+        btn.prop('disabled', true).text('Menganalisis AI...');
 
         $.ajax({
             url: "{{ route('ai.analyze-ticket') }}",
@@ -226,7 +469,7 @@
                 asset_id: assetId
             },
             success: function(response) {
-                btn.prop('disabled', false).html('<i class="fas fa-magic mr-1"></i> Analisis AI Assistant');
+                btn.prop('disabled', false).text('Analisis AI Assistant');
                 if (response.success && response.data) {
                     latestAiResult = response.data;
                     const res = response.data;
@@ -243,7 +486,7 @@
                     let stepsHtml = '';
                     if (res.resolution_steps && Array.isArray(res.resolution_steps)) {
                         res.resolution_steps.forEach(step => {
-                            stepsHtml += '<li>' + step + '</li>';
+                            stepsHtml += '<li class="mb-1">' + step + '</li>';
                         });
                     }
                     $('#ai-steps-res').html(stepsHtml);
@@ -264,7 +507,7 @@
                 }
             },
             error: function(err) {
-                btn.prop('disabled', false).html('<i class="fas fa-magic mr-1"></i> Analisis AI Assistant');
+                btn.prop('disabled', false).text('Analisis AI Assistant');
                 console.error(err);
             }
         });
@@ -314,6 +557,7 @@
             console.error('Could not copy reply draft: ', err);
         });
     });
+});
 </script>
 @endpush
 @endsection

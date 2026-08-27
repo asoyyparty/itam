@@ -18,6 +18,10 @@ class VlanController extends Controller implements \Illuminate\Routing\Controlle
     {
         $query = Vlan::query();
 
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function ($q) use ($search) {

@@ -181,7 +181,7 @@
                         <div>
                             @if($isActive)
                                 <span class="btn btn-xs font-weight-bold w-100" style="background: #ffffff; color: #1e3a8a; border-radius: 20px; padding: 5px 12px; font-weight: 700; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
-                                    <i class="fas fa-check-circle mr-1 text-primary"></i> {{ __('messages.complete') }}
+                                    {{ __('messages.complete') }}
                                 </span>
                             @else
                                 <a href="{{ route('budget-planner.index', ['year' => $yr]) }}" class="btn btn-xs btn-outline-info font-weight-bold w-100" style="border-radius: 20px; padding: 5px 12px;">

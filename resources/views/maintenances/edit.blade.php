@@ -3,235 +3,212 @@
 @section('title', __('messages.edit_maintenance'))
 
 @section('content')
-<div class="card theme-card maintenance-form-card">
+<style>
+    .maint-form-card {
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        border: var(--rule-soft);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    .maint-form-card .card-header {
+        border-top-left-radius: 16px !important;
+        border-top-right-radius: 16px !important;
+    }
+    .maint-card-header {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        width: 100% !important;
+    }
+    .maint-header-title-box {
+        display: flex !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
+        gap: 12px !important;
+    }
+    .custom-maint-input,
+    .maint-form-card .select2-container--default .select2-selection--single {
+        height: 44px !important;
+        border-radius: 10px !important;
+        border: 1px solid rgba(148, 163, 184, 0.22) !important;
+        background: rgba(15, 23, 42, 0.22) !important;
+        box-shadow: none !important;
+        font-size: 0.9rem !important;
+        color: var(--color-ink-0) !important;
+        transition: all 0.2s ease !important;
+    }
+    .maint-form-card .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 42px !important;
+        padding-left: 12px !important;
+        color: var(--color-ink-0) !important;
+    }
+    .maint-form-card .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 42px !important;
+    }
+    .custom-maint-input:focus {
+        border-color: #60a5fa !important;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) !important;
+        background: rgba(15, 23, 42, 0.35) !important;
+    }
+    .custom-maint-textarea {
+        border-radius: 12px !important;
+        border: 1px solid rgba(148, 163, 184, 0.22) !important;
+        background: rgba(15, 23, 42, 0.22) !important;
+        font-size: 0.9rem !important;
+        color: var(--color-ink-0) !important;
+        transition: all 0.2s ease !important;
+    }
+    .form-label-title {
+        font-size: 0.88rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        margin-bottom: 8px !important;
+    }
+
+    @media (max-width: 767.98px) {
+        .maint-card-header {
+            padding: 12px 14px !important;
+        }
+        .maint-header-title-box h5 {
+            font-size: 0.98rem !important;
+        }
+        .maint-header-title-box small {
+            font-size: 0.72rem !important;
+        }
+        .card-footer-actions {
+            flex-direction: column-reverse;
+            width: 100%;
+            gap: 10px !important;
+        }
+        .card-footer-actions .btn,
+        .card-footer-actions a {
+            width: 100% !important;
+            justify-content: center !important;
+            height: 44px !important;
+        }
+    }
+</style>
+
+<div class="card theme-card maint-form-card">
     <form action="{{ route('maintenances.update', array_merge([$maintenance->id], request()->query())) }}" method="POST">
         @csrf @method('PUT')
-        <div class="card-body maintenance-form-body">
-            <div class="maintenance-form-header">
-                <h5 class="maintenance-form-title">
-                    <i class="fas fa-edit text-info mr-2"></i>{{ __('messages.edit_maintenance') }}
-                </h5>
+        <!-- Header Toolbar -->
+        <div class="card-header bg-transparent border-bottom maint-card-header py-3 px-3 px-md-4" style="border-color: rgba(148, 163, 184, 0.12) !important;">
+            <div class="maint-header-title-box">
+                <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 1.1rem; flex-shrink: 0;">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.edit_maintenance') }}</h5>
+                    <small class="text-muted d-block" style="font-size: 0.78rem;">Perbarui catatan maintenance perangkat {{ $maintenance->asset->asset_tag ?? '' }}</small>
+                </div>
             </div>
+        </div>
 
+        <div class="card-body p-3 p-md-4">
+            <!-- Row 1: Asset & Status -->
             <div class="row">
-                <!-- Asset (Col 6 Readonly) -->
-                <div class="col-md-6 form-group mb-3">
-                    <label class="theme-text form-label">{{ __('messages.asset') }}</label>
-                    <div class="position-relative">
-                        <i class="fas fa-lock position-absolute text-muted readonly-asset-icon"></i>
-                        <input type="text" class="form-control theme-input readonly-asset-input" value="{{ $maintenance->asset->asset_tag ?? '' }} - {{ $maintenance->asset->name ?? '' }}" readonly>
-                    </div>
+                <div class="col-md-6 form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        {{ __('messages.asset') }}
+                    </label>
+                    <input type="text" class="form-control theme-input custom-maint-input text-muted" value="{{ $maintenance->asset->asset_tag ?? '' }} - {{ $maintenance->asset->name ?? '' }}" readonly style="cursor: not-allowed; background: rgba(15, 23, 42, 0.4) !important;">
                 </div>
 
-                <!-- Status (Col 6) -->
-                <div class="col-md-6 form-group mb-3">
-                    <label class="theme-text form-label">{{ __('messages.status') }} <span class="text-danger">*</span></label>
-                    <select name="status" class="form-control theme-select @error('status') is-invalid @enderror" required>
+                <div class="col-md-6 form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        {{ __('messages.status') }} <span class="text-danger">*</span>
+                    </label>
+                    <select name="status" class="form-control select2 @error('status') is-invalid @enderror" required>
                         <option value="Ongoing" {{ old('status', $maintenance->status) == 'Ongoing' ? 'selected' : '' }}>{{ __('messages.ongoing') }}</option>
                         <option value="Completed" {{ old('status', $maintenance->status) == 'Completed' ? 'selected' : '' }}>{{ __('messages.completed') }}</option>
                         <option value="Cancelled" {{ old('status', $maintenance->status) == 'Cancelled' ? 'selected' : '' }}>{{ __('messages.cancelled') }}</option>
                     </select>
-                    @error('status') <span class="text-danger small d-block mt-1">{{ $message }}</span> @enderror
+                    @error('status') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
             </div>
 
+            <!-- Row 2: Type & Start Date -->
             <div class="row">
-                <!-- Maintenance Type (Col 6) -->
-                <div class="col-md-6 form-group mb-3">
-                    <label class="theme-text form-label">{{ __('messages.maintenance_type') }} <span class="text-danger">*</span></label>
-                    <select name="type" class="form-control theme-select @error('type') is-invalid @enderror" required>
+                <div class="col-md-6 form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        {{ __('messages.maintenance_type') }} <span class="text-danger">*</span>
+                    </label>
+                    <select name="type" class="form-control select2 @error('type') is-invalid @enderror" required>
                         <option value="Routine" {{ old('type', $maintenance->type) == 'Routine' ? 'selected' : '' }}>{{ __('messages.routine_maintenance') }}</option>
                         <option value="Repair" {{ old('type', $maintenance->type) == 'Repair' ? 'selected' : '' }}>{{ __('messages.repair_broken') }}</option>
                         <option value="Upgrade" {{ old('type', $maintenance->type) == 'Upgrade' ? 'selected' : '' }}>{{ __('messages.hardware_upgrade') }}</option>
                     </select>
-                    @error('type') <span class="text-danger small d-block mt-1">{{ $message }}</span> @enderror
+                    @error('type') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
 
-                <!-- Start Date (Col 6) -->
-                <div class="col-md-6 form-group mb-3">
-                    <label class="theme-text form-label">{{ __('messages.start_date') }} <span class="text-danger">*</span></label>
-                    <input type="text" name="start_date" class="form-control maintenance-form-date @error('start_date') is-invalid @enderror" value="{{ old('start_date', $maintenance->start_date) }}" placeholder="dd/mm/yyyy" autocomplete="off" required>
-                    @error('start_date') <span class="text-danger small d-block mt-1">{{ $message }}</span> @enderror
-                </div>
-            </div>
-
-            <div class="row">
-                <!-- Estimated Cost (Col 6) -->
-                <div class="col-md-6 form-group mb-3">
-                    <label class="theme-text form-label">{{ __('messages.estimated_cost') }}</label>
-                    <input type="number" name="cost" class="form-control theme-input @error('cost') is-invalid @enderror" value="{{ old('cost', $maintenance->cost) }}" step="0.01" placeholder="0.00">
-                    @error('cost') <span class="text-danger small d-block mt-1">{{ $message }}</span> @enderror
-                </div>
-
-                <!-- End Date (Col 6) -->
-                <div class="col-md-6 form-group mb-3">
-                    <label class="theme-text form-label">{{ __('messages.end_date') }}</label>
-                    <input type="text" name="end_date" class="form-control maintenance-form-date @error('end_date') is-invalid @enderror" value="{{ old('end_date', $maintenance->end_date) }}" placeholder="dd/mm/yyyy" autocomplete="off">
-                    @error('end_date') <span class="text-danger small d-block mt-1">{{ $message }}</span> @enderror
+                <div class="col-md-6 form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        {{ __('messages.start_date') }} <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" name="start_date" class="form-control theme-input custom-maint-input maintenance-form-date @error('start_date') is-invalid @enderror" value="{{ old('start_date', $maintenance->start_date) }}" placeholder="dd/mm/yyyy" autocomplete="off" required>
+                    @error('start_date') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
             </div>
 
+            <!-- Row 3: Estimated Cost & End Date -->
             <div class="row">
-                <!-- Description / Issue (Col 12) -->
+                <div class="col-md-6 form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        {{ __('messages.estimated_cost') }}
+                    </label>
+                    <input type="number" name="cost" class="form-control theme-input custom-maint-input @error('cost') is-invalid @enderror" value="{{ old('cost', $maintenance->cost) }}" step="0.01" placeholder="0.00" autocomplete="off">
+                    @error('cost') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="col-md-6 form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        {{ __('messages.end_date') }}
+                    </label>
+                    <input type="text" name="end_date" class="form-control theme-input custom-maint-input maintenance-form-date @error('end_date') is-invalid @enderror" value="{{ old('end_date', $maintenance->end_date) }}" placeholder="dd/mm/yyyy" autocomplete="off">
+                    @error('end_date') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <!-- Row 4: Description / Issue -->
+            <div class="row">
                 <div class="col-md-12 form-group mb-2">
-                    <label class="theme-text form-label">{{ __('messages.description_issue') }} <span class="text-danger">*</span></label>
-                    <textarea name="description" class="form-control theme-input @error('description') is-invalid @enderror" rows="3" placeholder="..." required>{{ old('description', $maintenance->description) }}</textarea>
-                    @error('description') <span class="text-danger small d-block mt-1">{{ $message }}</span> @enderror
+                    <label class="form-label form-label-title theme-text">
+                        {{ __('messages.description_issue') }} <span class="text-danger">*</span>
+                    </label>
+                    <textarea name="description" class="form-control theme-input custom-maint-textarea @error('description') is-invalid @enderror" rows="4" placeholder="Tuliskan rincian kendala atau solusi..." required>{{ old('description', $maintenance->description) }}</textarea>
+                    @error('description') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
             </div>
         </div>
 
         <!-- Footer Actions -->
-        <div class="card-footer maintenance-form-actions bg-transparent border-0">
-            <button type="submit" class="btn btn-primary btn-sm">
-                <i class="fas fa-save mr-1"></i> {{ __('messages.update') }}
-            </button>
-            <a href="{{ route('maintenances.index', request()->query()) }}" class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-times mr-1"></i> {{ __('messages.cancel') }}
+        <div class="card-footer bg-transparent py-3 px-3 px-md-4 border-top d-flex align-items-center justify-content-end card-footer-actions" style="gap: 10px; border-color: rgba(148, 163, 184, 0.12) !important;">
+            <a href="{{ route('maintenances.index', request()->query()) }}" class="btn btn-outline-secondary rounded-pill px-4" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;">
+                {{ __('messages.cancel') }}
             </a>
+            <button type="submit" class="btn btn-primary rounded-pill px-4" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;">
+                {{ __('messages.update') }}
+            </button>
         </div>
     </form>
 </div>
 
-@push('styles')
-<style>
-.maintenance-form-card {
-    width: 100%;
-    overflow: hidden;
-    border-radius: 8px;
-}
-
-.maintenance-form-body {
-    padding: 16px 20px 8px;
-}
-
-.maintenance-form-header {
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--rule-soft, rgba(255, 255, 255, 0.1));
-}
-
-.maintenance-form-title {
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--color-accent-soft, #60a5fa);
-    display: flex;
-    align-items: center;
-}
-
-.maintenance-form-card .form-label {
-    margin-bottom: 4px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    display: block;
-}
-
-.maintenance-form-card .readonly-asset-input {
-    background-color: rgba(0, 0, 0, 0.25) !important;
-    color: #cbd5e1 !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    padding-left: 30px !important;
-    cursor: not-allowed;
-}
-
-.maintenance-form-card .readonly-asset-icon {
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    opacity: 0.6;
-    font-size: 0.78rem;
-    pointer-events: none;
-    z-index: 5;
-}
-
-.maintenance-form-card .form-control,
-.maintenance-form-card .select2-container .select2-selection--single {
-    min-height: 34px;
-    height: 34px;
-    padding: 4px 10px;
-    font-size: 0.84rem;
-}
-
-.maintenance-form-card textarea.form-control {
-    min-height: 70px;
-    height: auto;
-    resize: vertical;
-}
-
-/* Select2 Specific Alignments */
-.maintenance-form-card .select2-container {
-    width: 100% !important;
-}
-
-.maintenance-form-card .select2-container .select2-selection--single {
-    display: flex;
-    align-items: center;
-}
-
-.maintenance-form-card .select2-container--default .select2-selection--single .select2-selection__rendered {
-    line-height: normal;
-    padding-left: 0;
-}
-
-.maintenance-form-card .select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 32px;
-}
-
-.maintenance-form-date {
-    cursor: pointer;
-}
-
-.maintenance-form-date:focus {
-    border-color: var(--color-accent, #3b82f6) !important;
-    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-accent, #3b82f6) 15%, transparent) !important;
-}
-
-.maintenance-form-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 20px 16px;
-}
-
-.maintenance-form-actions .btn {
-    min-height: 34px;
-    padding: 4px 14px;
-    border-radius: var(--radius-md, 6px);
-    font-weight: 600;
-    font-size: 0.83rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-@media (max-width: 767.98px) {
-    .maintenance-form-body {
-        padding: 14px 14px 6px;
-    }
-
-    .maintenance-form-actions {
-        padding: 8px 14px 14px;
-        flex-direction: column;
-    }
-
-    .maintenance-form-actions .btn {
-        width: 100%;
-    }
-}
-</style>
-@endpush
-
 @push('scripts')
 <script>
-$(document).ready(function() {
-    flatpickr('.maintenance-form-date', {
-        dateFormat: 'Y-m-d',
-        altInput: true,
-        altFormat: 'd/m/Y',
-        allowInput: true,
+    $(document).ready(function() {
+        $('.select2').select2({ width: '100%' });
+
+        flatpickr('.maintenance-form-date', {
+            dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: 'd/m/Y',
+            allowInput: true,
+        });
     });
-});
 </script>
 @endpush
 @endsection
