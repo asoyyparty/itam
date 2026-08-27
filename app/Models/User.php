@@ -24,9 +24,23 @@ class User extends Authenticatable
         'username',
         'email',
         'password',
+        'api_token',
         'anydesk_password',
         'pc_password',
     ];
+
+    /**
+     * Generate a new unique API token for mobile authentication.
+     */
+    public function generateApiToken(): string
+    {
+        $token = \Illuminate\Support\Str::random(60);
+        $this->forceFill([
+            'api_token' => hash('sha256', $token),
+        ])->save();
+
+        return $token;
+    }
 
     /**
      * The attributes that should be hidden for serialization.
