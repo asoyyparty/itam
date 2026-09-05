@@ -24,4 +24,8 @@ try {
     // Ignore if table doesn't exist yet
 }
 
-
+// Daily Database Backup (Option 2: rolling dated backups + itam.sql snapshot at 00:00)
+Schedule::command('db:backup')
+    ->dailyAt('00:00')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/backup.log'));
