@@ -25,6 +25,7 @@ class StoreAssetRequest extends FormRequest
         return [
             'asset_tag' => 'required|string|max:255|unique:assets',
             'name' => 'required|string|max:255',
+            'uom' => 'nullable|string|max:50',
             'serial_number' => 'nullable|string|max:255',
             'category_id' => 'nullable|exists:categories,id',
             'brand_id' => 'nullable|exists:brands,id',
@@ -34,6 +35,7 @@ class StoreAssetRequest extends FormRequest
             'warranty_months' => 'nullable|integer|min:0',
             'status' => 'required|in:Available,Assigned,Maintenance,Retired,Missing',
             'notes' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
             'quantity' => 'nullable|integer|min:1',
         ];
     }

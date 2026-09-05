@@ -262,15 +262,24 @@
 <body>
 
 <div class="login-container">
+  <!-- Top Language Switcher Bar -->
+  <div class="d-flex justify-content-end mb-2" style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+    <div style="display: inline-flex; align-items: center; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 999px; padding: 3px; gap: 4px; backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);">
+      <a href="{{ route('lang.switch', 'id') }}" style="padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-decoration: none; color: {{ App::getLocale() == 'id' ? '#ffffff' : '#94a3b8' }}; background: {{ App::getLocale() == 'id' ? '#6366f1' : 'transparent' }}; transition: all 0.2s;">ID</a>
+      <a href="{{ route('lang.switch', 'en') }}" style="padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-decoration: none; color: {{ App::getLocale() == 'en' ? '#ffffff' : '#94a3b8' }}; background: {{ App::getLocale() == 'en' ? '#6366f1' : 'transparent' }}; transition: all 0.2s;">EN</a>
+    </div>
+  </div>
+
   <div class="glass-card">
     
     <div class="brand-header">
-      <img src="{{ vasset('logo.png') }}" alt="ITAM Logo">
+      <img src="{{ vasset('logo.png') }}" alt="ITAM Logo" loading="lazy" decoding="async">
       <h1>ITAM <span>Enterprise</span></h1>
+      <p style="font-size: 0.95rem; font-weight: 600; color: #818cf8; margin-top: 4px;">{{ __('messages.reset_password') }}</p>
     </div>
 
     <div class="instruction-text">
-      {{ __('Create your new password') }}
+      {{ __('messages.create_new_password') }}
     </div>
 
     <form method="POST" action="{{ route('password.store') }}">
@@ -281,7 +290,7 @@
 
       <!-- Email Address -->
       <div class="form-group">
-        <label for="email">{{ __('Email') }}</label>
+        <label for="email">{{ __('messages.email') }}</label>
         <div class="input-wrapper">
           <input
             id="email"
@@ -302,18 +311,18 @@
 
       <!-- Password -->
       <div class="form-group">
-        <label for="password">{{ __('New Password') }}</label>
+        <label for="password">{{ __('messages.new_password') }}</label>
         <div class="input-wrapper">
           <input
             id="password"
             type="password"
             class="form-control @error('password') is-invalid @enderror"
             name="password"
-            placeholder="Enter new password"
+            placeholder="{{ __('messages.enter_new_password_placeholder') }}"
             required
             autocomplete="new-password">
           <i class="fas fa-lock input-icon"></i>
-          <i class="fas fa-eye toggle-password" onclick="togglePass('password', this)" title="Show/Hide Password"></i>
+          <i class="fas fa-eye toggle-password" onclick="togglePass('password', this)" title="{{ __('messages.show_hide_password') ?? 'Show/Hide Password' }}"></i>
         </div>
         @error('password')
           <span class="invalid-feedback"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
@@ -322,18 +331,18 @@
 
       <!-- Confirm Password -->
       <div class="form-group">
-        <label for="password_confirmation">{{ __('Confirm Password') }}</label>
+        <label for="password_confirmation">{{ __('messages.confirm_password') }}</label>
         <div class="input-wrapper">
           <input
             id="password_confirmation"
             type="password"
             class="form-control @error('password_confirmation') is-invalid @enderror"
             name="password_confirmation"
-            placeholder="Confirm new password"
+            placeholder="{{ __('messages.confirm_password_placeholder') }}"
             required
             autocomplete="new-password">
           <i class="fas fa-lock input-icon"></i>
-          <i class="fas fa-eye toggle-password" onclick="togglePass('password_confirmation', this)" title="Show/Hide Password"></i>
+          <i class="fas fa-eye toggle-password" onclick="togglePass('password_confirmation', this)" title="{{ __('messages.show_hide_password') ?? 'Show/Hide Password' }}"></i>
         </div>
         @error('password_confirmation')
           <span class="invalid-feedback"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
@@ -341,9 +350,10 @@
       </div>
 
       <button type="submit" class="btn-submit">
-        <i class="fas fa-save mr-2"></i> {{ __('Reset Password') }}
+        <i class="fas fa-save mr-2"></i> {{ __('messages.reset_password') }}
       </button>
 
+      <a href="{{ route('login') }}" class="back-link mt-3"><i class="fas fa-arrow-left mr-1"></i> {{ __('messages.back_to_login') }}</a>
     </form>
 
   </div>

@@ -88,20 +88,29 @@
     }
 @endphp
 
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap" style="gap: 12px;">
-    <div>
-        <p class="text-muted small mb-0">{{ __('messages.budget_planner_desc') }}</p>
-    </div>
-    <div class="d-flex align-items-center" style="gap: 8px;">
-        <span class="text-muted small font-weight-bold mr-1"><i class="fas fa-calendar-alt mr-1"></i> {{ __('messages.fiscal_year') }}:</span>
-        @foreach([2026, 2027, 2028, 2029, 2030] as $yr)
-            <a href="{{ route('budget-planner.index', ['year' => $yr]) }}" class="btn btn-sm year-pill-btn {{ $selectedYear == $yr ? 'btn-primary' : 'btn-outline-secondary' }}">
-                {{ $yr }}
+<!-- Header Toolbar -->
+<div class="row mb-3 budget-toolbar-box" style="margin-top: 0 !important;">
+    <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center" style="gap: 10px;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); display: flex; align-items: center; justify-content: center; color: #818cf8; font-size: 1.1rem; flex-shrink: 0;">
+                <i class="fas fa-calculator"></i>
+            </div>
+            <div>
+                <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.budget_planner_title') }}</h5>
+                <small class="text-muted d-block" style="font-size: 0.78rem;">Proyeksi dan alokasi anggaran belanja perangkat IT 5 tahun</small>
+            </div>
+        </div>
+        <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+            <span class="text-muted small font-weight-bold mr-1"><i class="fas fa-calendar-alt mr-1"></i> {{ __('messages.fiscal_year') }}:</span>
+            @foreach([2026, 2027, 2028, 2029, 2030] as $yr)
+                <a href="{{ route('budget-planner.index', ['year' => $yr]) }}" class="btn btn-sm year-pill-btn {{ $selectedYear == $yr ? 'btn-primary' : 'btn-outline-secondary' }}" style="height: 38px; display: inline-flex; align-items: center;">
+                    {{ $yr }}
+                </a>
+            @endforeach
+            <a href="{{ route('budget-planner.export', ['year' => $selectedYear]) }}" class="btn btn-sm btn-success year-pill-btn ml-2" style="height: 38px; border-radius: 14px !important; display: inline-flex; align-items: center;" title="{{ __('messages.export_budget') }} CSV">
+                {{ __('messages.export_budget') }} {{ $selectedYear }}
             </a>
-        @endforeach
-        <a href="{{ route('budget-planner.export', ['year' => $selectedYear]) }}" class="btn btn-sm btn-success year-pill-btn ml-2" title="{{ __('messages.export_budget') }} CSV">
-            {{ __('messages.export_budget') }} {{ $selectedYear }}
-        </a>
+        </div>
     </div>
 </div>
 

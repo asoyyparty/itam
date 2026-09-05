@@ -20,3 +20,7 @@ yarn-error.log
 fix_clear.*
 seed_permissions.php
 test_notification.php
+models.json
+extract_css.php
+test_ai.php
+/scratch

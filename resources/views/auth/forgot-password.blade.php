@@ -277,16 +277,25 @@
 <body>
 
 <div class="login-container">
+  <!-- Top Language Switcher Bar -->
+  <div class="d-flex justify-content-end mb-2" style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+    <div style="display: inline-flex; align-items: center; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 999px; padding: 3px; gap: 4px; backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);">
+      <a href="{{ route('lang.switch', 'id') }}" style="padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-decoration: none; color: {{ App::getLocale() == 'id' ? '#ffffff' : '#94a3b8' }}; background: {{ App::getLocale() == 'id' ? '#6366f1' : 'transparent' }}; transition: all 0.2s;">ID</a>
+      <a href="{{ route('lang.switch', 'en') }}" style="padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-decoration: none; color: {{ App::getLocale() == 'en' ? '#ffffff' : '#94a3b8' }}; background: {{ App::getLocale() == 'en' ? '#6366f1' : 'transparent' }}; transition: all 0.2s;">EN</a>
+    </div>
+  </div>
+
   <div class="glass-card">
     
     <!-- Brand Info Inside Card -->
     <div class="brand-header">
-      <img src="{{ vasset('logo.png') }}" alt="ITAM Logo">
+      <img src="{{ vasset('logo.png') }}" alt="ITAM Logo" loading="lazy" decoding="async">
       <h1>ITAM <span>Enterprise</span></h1>
+      <p style="font-size: 0.95rem; font-weight: 600; color: #818cf8; margin-top: 4px;">{{ __('messages.forgot_password') }}</p>
     </div>
 
     <div class="instruction-text">
-      {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+      {{ __('messages.forgot_password_desc') }}
     </div>
 
     @if (session('status'))
@@ -300,7 +309,7 @@
 
       <!-- Email Address -->
       <div class="form-group">
-        <label for="email">{{ __('Email') }}</label>
+        <label for="email">{{ __('messages.email') }}</label>
         <div class="input-wrapper">
           <i class="fas fa-envelope input-icon"></i>
           <input
@@ -309,7 +318,7 @@
             class="form-control @error('email') is-invalid @enderror"
             name="email"
             value="{{ old('email') }}"
-            placeholder="Enter your email address"
+            placeholder="{{ __('messages.enter_email_placeholder') }}"
             required
             autofocus>
         </div>
@@ -319,10 +328,10 @@
       </div>
 
       <button type="submit" class="btn-submit">
-        {{ __('Email Password Reset Link') }}
+        {{ __('messages.send_reset_link') }}
       </button>
 
-      <a href="{{ route('login') }}" class="back-link"><i class="fas fa-arrow-left mr-1"></i> Back to Login</a>
+      <a href="{{ route('login') }}" class="back-link"><i class="fas fa-arrow-left mr-1"></i> {{ __('messages.back_to_login') }}</a>
     </form>
 
   </div>

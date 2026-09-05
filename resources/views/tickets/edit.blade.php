@@ -1,443 +1,1069 @@
 @extends('layouts.admin')
 
-@section('title', __('messages.edit_ticket'))
+@section('title', __('messages.edit_ticket') . ' #' . $ticket->ticket_number)
 
 @section('content')
 <style>
-    .ticket-form-card {
-        border-radius: 16px !important;
-        overflow: visible !important;
-        border: var(--rule-soft);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    }
-    .ticket-form-card .card-header {
-        border-top-left-radius: 16px !important;
-        border-top-right-radius: 16px !important;
-    }
-    .ticket-card-header {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        gap: 12px !important;
-        width: 100% !important;
-    }
-    .ticket-header-title-box {
-        display: flex !important;
-        align-items: center !important;
-        flex-shrink: 0 !important;
-        gap: 12px !important;
-    }
-    .ticket-header-actions {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        align-items: center !important;
-        flex-shrink: 0 !important;
-        gap: 8px !important;
-    }
-    .ticket-header-actions .btn {
-        white-space: nowrap !important;
-    }
-    .position-relative-title-wrapper {
-        position: relative !important;
-        width: 100% !important;
-    }
-    .title-template-dropdown {
-        position: absolute !important;
-        top: calc(100% + 4px) !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        min-width: 100% !important;
-        max-width: 100% !important;
-        transform: none !important;
-        z-index: 1070 !important;
-        background: var(--color-paper-1, #1e293b) !important;
-        border: 1px solid rgba(148, 163, 184, 0.25) !important;
-        border-radius: 14px !important;
-        box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6) !important;
-        padding: 8px !important;
-        margin: 0 !important;
-        max-height: 280px !important;
-        overflow-y: auto !important;
-    }
-    .title-template-dropdown .dropdown-header {
-        text-align: left !important;
-        font-size: 0.72rem !important;
-        letter-spacing: 0.05em !important;
-        color: #94a3b8 !important;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.12) !important;
-        padding: 8px 12px 10px 12px !important;
-        margin-bottom: 6px !important;
-    }
-    .title-template-dropdown .dropdown-item {
-        display: flex !important;
-        align-items: flex-start !important;
-        gap: 10px !important;
-        padding: 10px 14px !important;
-        border-radius: 10px !important;
-        font-size: 0.88rem !important;
-        line-height: 1.45 !important;
-        color: var(--color-ink-0, #f8f9fa) !important;
-        white-space: normal !important;
-        word-break: break-word !important;
-        transition: all 0.18s ease !important;
-    }
-    .title-template-dropdown .dropdown-item:hover,
-    .title-template-dropdown .dropdown-item:focus {
-        background: rgba(59, 130, 246, 0.15) !important;
-        color: #60a5fa !important;
-        transform: translateX(2px);
-    }
-    .title-template-dropdown::-webkit-scrollbar {
-        width: 6px;
-    }
-    .title-template-dropdown::-webkit-scrollbar-thumb {
-        background: rgba(148, 163, 184, 0.3);
-        border-radius: 4px;
-    }
-    .custom-ticket-input,
-    .ticket-form-card .select2-container--default .select2-selection--single {
-        height: 44px !important;
-        border-radius: 10px !important;
-        border: 1px solid rgba(148, 163, 184, 0.22) !important;
-        background: rgba(15, 23, 42, 0.22) !important;
-        box-shadow: none !important;
-        font-size: 0.9rem !important;
-        color: var(--color-ink-0) !important;
-    }
-    .ticket-form-card .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 42px !important;
-        padding-left: 12px !important;
-        color: var(--color-ink-0) !important;
-    }
-    .ticket-form-card .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 42px !important;
-    }
-    .ticket-form-card .input-group-text {
-        height: 44px !important;
-        border-radius: 10px 0 0 10px !important;
-        border: 1px solid rgba(148, 163, 184, 0.22) !important;
-        background: rgba(15, 23, 42, 0.25) !important;
-        color: #94a3b8 !important;
-    }
-    .ticket-form-card input.flatpickr-datetime {
-        border-radius: 0 10px 10px 0 !important;
-    }
-    .btn-ai-sparkle {
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    }
-    .btn-ai-sparkle:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(168, 85, 247, 0.35) !important;
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(168, 85, 247, 0.35)) !important;
-        color: #ffffff !important;
-    }
-    .ai-analysis-panel {
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 */
+:root {
+    --hl-bg-canvas: #090d16;
+    --hl-bg-surface: #0f172a;
+    --hl-bg-card: rgba(15, 23, 42, 0.82);
+    --hl-bg-card-sub: rgba(15, 23, 42, 0.55);
+    --hl-border-subtle: rgba(148, 163, 184, 0.14);
+    --hl-border-active: rgba(148, 163, 184, 0.28);
+    --hl-text-bright: #f8fafc;
+    --hl-text-muted: #94a3b8;
+    --hl-text-dim: #64748b;
+    --hl-accent-cyan: #06b6d4;
+    --hl-accent-cyan-glow: rgba(6, 182, 212, 0.2);
+    --hl-accent-indigo: #6366f1;
+    --hl-accent-purple: #a855f7;
+    --hl-status-open: #38bdf8;
+    --hl-status-progress: #f59e0b;
+    --hl-status-resolved: #10b981;
+    --hl-priority-critical: #f43f5e;
+    --hl-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.ticket-edit-container {
+    width: 100%;
+    margin-bottom: 2.5rem;
+    overflow-x: clip;
+}
+
+/* Header Banner */
+.ticket-edit-banner {
+    position: relative;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%);
+    border: 1px solid var(--hl-border-subtle);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 22px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.ticket-banner-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.ticket-banner-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fbbf24;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.2);
+}
+
+.ticket-id-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--hl-font-mono);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--hl-status-open);
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 4px 10px;
+    border-radius: 9999px;
+}
+
+.ticket-banner-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-ai-telemetry {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #f3e8ff !important;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%);
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    box-shadow: 0 0 14px rgba(168, 85, 247, 0.2);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+}
+
+.btn-ai-telemetry:hover {
+    transform: translateY(-1px);
+    border-color: rgba(168, 85, 247, 0.7);
+    box-shadow: 0 4px 18px rgba(168, 85, 247, 0.35);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.35) 0%, rgba(99, 102, 241, 0.35) 100%);
+    color: #ffffff !important;
+}
+
+.btn-tactile-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--hl-text-bright) !important;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--hl-border-active);
+    transition: all 0.2s;
+    text-decoration: none !important;
+}
+
+.btn-tactile-back:hover {
+    background: rgba(30, 41, 59, 0.9);
+    border-color: rgba(148, 163, 184, 0.45);
+    transform: translateY(-1px);
+}
+
+/* Status Lifecycle Stepper Ribbon */
+.lifecycle-stepper-box {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid var(--hl-border-subtle);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.stepper-stage {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 120px;
+    position: relative;
+}
+
+.stepper-stage-indicator {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: var(--hl-font-mono);
+    flex-shrink: 0;
+    border: 1px solid var(--hl-border-subtle);
+    background: rgba(15, 23, 42, 0.8);
+    color: var(--hl-text-dim);
+}
+
+.stepper-stage-text {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--hl-text-dim);
+    white-space: nowrap;
+}
+
+.stepper-stage.active .stepper-stage-indicator {
+    border-color: currentColor;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.stepper-stage.active .stepper-stage-text {
+    color: var(--hl-text-bright);
+    font-weight: 700;
+}
+
+.stepper-stage.stage-open.active { color: var(--hl-status-open); }
+.stepper-stage.stage-progress.active { color: var(--hl-status-progress); }
+.stepper-stage.stage-resolved.active { color: var(--hl-status-resolved); }
+.stepper-stage.stage-closed.active { color: var(--hl-text-muted); }
+
+.stepper-arrow {
+    color: var(--hl-text-dim);
+    font-size: 0.7rem;
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+/* AI Diagnostic HUD Drawer */
+.ai-diagnostic-hud {
+    border-radius: 14px;
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    background: linear-gradient(135deg, rgba(30, 27, 75, 0.6) 0%, rgba(15, 23, 42, 0.85) 100%);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    padding: 20px 22px;
+    margin-bottom: 22px;
+    backdrop-filter: blur(12px);
+}
+
+.ai-hud-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+    margin-bottom: 16px;
+}
+
+.ai-hud-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #d8b4fe;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    letter-spacing: 0.02em;
+}
+
+.btn-apply-ai {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: #059669;
+    border: 1px solid #10b981;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.25);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-apply-ai:hover {
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+}
+
+.ai-hud-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 14px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 10px;
+    padding: 12px 16px;
+}
+
+.ai-hud-field-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--hl-text-dim);
+    margin-bottom: 4px;
+}
+
+.ai-hud-field-val {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--hl-text-bright);
+}
+
+.ai-hud-box {
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+}
+
+.ai-hud-steps-list {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--hl-text-bright);
+    font-size: 0.84rem;
+    line-height: 1.6;
+}
+
+.ai-hud-steps-list li {
+    margin-bottom: 4px;
+}
+
+.ai-hud-reply-box {
+    font-family: var(--hl-font-mono);
+    font-size: 0.82rem;
+    color: #e2e8f0;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Bento Form Card */
+.ticket-form-bento {
+    background: var(--hl-bg-card);
+    border: 1px solid var(--hl-border-subtle);
+    border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px);
+    overflow: visible;
+}
+
+.form-bento-body {
+    padding: 24px 28px;
+}
+
+/* Bento Section Separation */
+.form-bento-section {
+    padding-bottom: 22px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--hl-border-subtle);
+}
+
+.form-bento-section:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.bento-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--hl-accent-cyan);
+    margin-bottom: 16px;
+}
+
+.bento-section-title i {
+    font-size: 0.85rem;
+}
+
+.form-field-group {
+    margin-bottom: 16px;
+}
+
+.form-label-tactile {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--hl-text-bright);
+    margin-bottom: 8px;
+}
+
+.form-label-tactile .req-star {
+    color: var(--hl-priority-critical);
+}
+
+/* Custom Tactical Inputs */
+.tactile-input {
+    width: 100%;
+    height: 44px !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--hl-border-subtle) !important;
+    background: rgba(15, 23, 42, 0.6) !important;
+    color: var(--hl-text-bright) !important;
+    font-size: 0.88rem !important;
+    padding: 0 14px !important;
+    outline: none !important;
+    transition: all 0.2s ease !important;
+}
+
+.tactile-input:focus {
+    border-color: var(--hl-accent-cyan) !important;
+    box-shadow: 0 0 0 2px var(--hl-accent-cyan-glow) !important;
+    background: rgba(15, 23, 42, 0.9) !important;
+}
+
+.tactile-textarea {
+    width: 100%;
+    border-radius: 12px !important;
+    border: 1px solid var(--hl-border-subtle) !important;
+    background: rgba(15, 23, 42, 0.6) !important;
+    color: var(--hl-text-bright) !important;
+    font-size: 0.88rem !important;
+    padding: 12px 14px !important;
+    outline: none !important;
+    transition: all 0.2s ease !important;
+    resize: vertical;
+    min-height: 120px;
+}
+
+.tactile-textarea:focus {
+    border-color: var(--hl-accent-cyan) !important;
+    box-shadow: 0 0 0 2px var(--hl-accent-cyan-glow) !important;
+    background: rgba(15, 23, 42, 0.9) !important;
+}
+
+/* Title Template Selector */
+.title-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.btn-toggle-templates {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 6px;
+    background: rgba(6, 182, 212, 0.12);
+    border: 1px solid rgba(6, 182, 212, 0.25);
+    color: #67e8f9;
+    font-size: 0.74rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    z-index: 5;
+}
+
+.btn-toggle-templates:hover {
+    background: rgba(6, 182, 212, 0.22);
+    color: #ffffff;
+}
+
+.template-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 1080;
+    background: #0f172a;
+    border: 1px solid var(--hl-border-active);
+    border-radius: 12px;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.6);
+    padding: 8px;
+    max-height: 260px;
+    overflow-y: auto;
+    display: none;
+}
+
+.template-dropdown-menu.show {
+    display: block;
+}
+
+.template-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    color: var(--hl-text-bright);
+    text-decoration: none !important;
+    transition: background 0.15s, color 0.15s;
+    cursor: pointer;
+}
+
+.template-item:hover {
+    background: rgba(99, 102, 241, 0.2);
+    color: #a5b4fc;
+}
+
+/* Select2 Theme Calibration */
+.ticket-form-bento .select2-container--default .select2-selection--single {
+    height: 44px !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--hl-border-subtle) !important;
+    background: rgba(15, 23, 42, 0.6) !important;
+    box-shadow: none !important;
+    font-size: 0.88rem !important;
+    color: var(--hl-text-bright) !important;
+    transition: border-color 0.2s;
+}
+
+.ticket-form-bento .select2-container--default.select2-container--open .select2-selection--single,
+.ticket-form-bento .select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: var(--hl-accent-cyan) !important;
+    box-shadow: 0 0 0 2px var(--hl-accent-cyan-glow) !important;
+}
+
+.ticket-form-bento .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 42px !important;
+    padding-left: 14px !important;
+    color: var(--hl-text-bright) !important;
+}
+
+.ticket-form-bento .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 42px !important;
+    right: 8px !important;
+}
+
+/* Flatpickr input group */
+.tactile-input-group {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.tactile-input-addon {
+    height: 44px;
+    padding: 0 14px;
+    border-radius: 10px 0 0 10px;
+    border: 1px solid var(--hl-border-subtle);
+    border-right: none;
+    background: rgba(15, 23, 42, 0.4);
+    color: var(--hl-text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tactile-input-grouped {
+    border-radius: 0 10px 10px 0 !important;
+}
+
+/* Category Description Box */
+.category-desc-box {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(6, 182, 212, 0.08);
+    border: 1px solid rgba(6, 182, 212, 0.2);
+    font-size: 0.78rem;
+    color: #67e8f9;
+    display: none;
+}
+
+/* Form Footer Actions */
+.form-bento-footer {
+    padding: 18px 28px;
+    border-top: 1px solid var(--hl-border-subtle);
+    background: rgba(15, 23, 42, 0.4);
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-tactile-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    border: 1px solid rgba(129, 140, 248, 0.4);
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    min-width: 140px;
+}
+
+.btn-tactile-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+    filter: brightness(1.08);
+}
+
+.btn-tactile-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--hl-text-muted) !important;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--hl-border-subtle);
+    transition: all 0.2s;
+    text-decoration: none !important;
+}
+
+.btn-tactile-cancel:hover {
+    background: rgba(30, 41, 59, 0.8);
+    color: var(--hl-text-bright) !important;
+    border-color: var(--hl-border-active);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 767.98px) {
+    .ticket-edit-banner {
+        padding: 14px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
         border-radius: 14px;
-        border-left: 4px solid #8b5cf6 !important;
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(59, 130, 246, 0.05)) !important;
-        border-top: 1px solid rgba(139, 92, 246, 0.2);
-        border-right: 1px solid rgba(139, 92, 246, 0.2);
-        border-bottom: 1px solid rgba(139, 92, 246, 0.2);
-    }
-    .form-label-title {
-        font-size: 0.88rem;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        margin-bottom: 8px !important;
+        margin-bottom: 14px;
     }
 
-    @media (max-width: 767.98px) {
-        .ticket-card-header {
-            overflow-x: auto !important;
-            padding: 12px 14px !important;
-        }
-        .ticket-header-title-box h5 {
-            font-size: 0.98rem !important;
-        }
-        .ticket-header-title-box small {
-            font-size: 0.72rem !important;
-        }
-        .ticket-header-actions .btn {
-            font-size: 0.78rem !important;
-            padding: 6px 10px !important;
-            height: 36px !important;
-        }
-        .ticket-form-group {
-            margin-bottom: 20px !important;
-        }
-        .card-footer-actions {
-            flex-direction: column-reverse;
-            width: 100%;
-            gap: 10px !important;
-        }
-        .card-footer-actions .btn,
-        .card-footer-actions a {
-            width: 100% !important;
-            justify-content: center !important;
-            height: 44px !important;
-        }
+    .ticket-banner-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 1.1rem;
     }
+
+    .ticket-banner-controls {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-ai-telemetry,
+    .btn-tactile-back {
+        flex: 1 1 50%;
+        justify-content: center;
+        padding: 8px 10px;
+        font-size: 0.78rem;
+    }
+
+    .form-bento-body {
+        padding: 16px 14px;
+    }
+
+    .ai-diagnostic-hud {
+        padding: 14px 14px;
+        margin-bottom: 16px;
+    }
+
+    .ai-hud-meta-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 10px 12px;
+    }
+
+    .form-bento-section {
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+    }
+
+    .form-bento-footer {
+        padding: 14px 14px;
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+
+    .btn-tactile-submit,
+    .btn-tactile-cancel {
+        width: 100%;
+        height: 44px;
+    }
+}
 </style>
 
-<div class="card theme-card ticket-form-card">
-    <form action="{{ route('tickets.update', array_merge(['ticket' => $ticket->id], request()->query())) }}" method="POST">
-        @csrf @method('PUT')
-        <!-- Header Toolbar -->
-        <div class="card-header bg-transparent border-bottom ticket-card-header py-3 px-3 px-md-4" style="border-color: rgba(148, 163, 184, 0.12) !important;">
-            <div class="ticket-header-title-box">
-                <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 1.1rem; flex-shrink: 0;">
-                    <i class="fas fa-edit"></i>
-                </div>
-                <div>
-                    <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.edit_ticket') }}</h5>
-                    <small class="text-muted d-block" style="font-size: 0.78rem;">{{ $ticket->ticket_number }}</small>
-                </div>
+<div class="ticket-edit-container">
+    <!-- Command Header Banner -->
+    <div class="ticket-edit-banner">
+        <div class="ticket-banner-info">
+            <div class="ticket-banner-icon">
+                <i class="fas fa-edit"></i>
             </div>
-            
-            <div class="ticket-header-actions">
-                <button type="button" id="btn-ai-analyze" class="btn btn-sm btn-ai-sparkle rounded-pill px-3" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2)); color: #a78bfa; border: 1px solid rgba(168, 85, 247, 0.4); font-weight: 600; height: 38px; display: inline-flex; align-items: center; justify-content: center;">
-                    Analisis AI Assistant
-                </button>
-            </div>
-        </div>
-
-        <div class="card-body p-3 p-md-4">
-            <!-- AI Analysis Result Box -->
-            <div id="ai-analysis-result" class="card ai-analysis-panel mb-4" style="display: none;">
-                <div class="card-body p-3 p-md-4">
-                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3" style="gap: 10px;">
-                        <h6 class="m-0 font-weight-bold d-flex align-items-center" style="color: #a78bfa; font-size: 1rem; gap: 8px;">
-                            Diagnosa & Rekomendasi AI Assistant
-                        </h6>
-                        <button type="button" id="btn-apply-ai-suggestions" class="btn btn-xs btn-success rounded-pill px-3 py-1" style="font-weight: 600;">
-                            Terapkan Kategori & Prioritas AI
-                        </button>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-2 mb-md-0">
-                            <small class="text-muted d-block uppercase text-xs font-weight-bold">Rekomendasi Kategori:</small>
-                            <strong id="ai-cat-res" class="text-info" style="font-size: 0.95rem;"></strong>
-                        </div>
-                        <div class="col-md-6">
-                            <small class="text-muted d-block uppercase text-xs font-weight-bold">Rekomendasi Prioritas:</small>
-                            <span id="ai-priority-badge" class="badge px-3 py-1" style="font-size: 0.8rem; border-radius: 10px;"></span>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <small class="text-muted d-block uppercase text-xs font-weight-bold mb-1">Akar Penyebab Masalah (Diagnosis):</small>
-                        <p id="ai-diagnosis-res" class="theme-text mb-0 p-2 rounded" style="font-size: 0.88rem; font-style: italic; background: rgba(15, 23, 42, 0.3); border-left: 3px solid #a78bfa;"></p>
-                    </div>
-                    <div class="mb-3">
-                        <small class="text-muted d-block uppercase text-xs font-weight-bold mb-1">Langkah-langkah Penanganan IT Support:</small>
-                        <ul id="ai-steps-res" class="pl-3 mb-0 theme-text" style="font-size: 0.85rem; line-height: 1.6;"></ul>
-                    </div>
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <small class="text-muted uppercase text-xs font-weight-bold">Draft Balasan User:</small>
-                            <button type="button" id="btn-copy-ai-reply" class="btn btn-xs btn-outline-secondary rounded-pill px-2" style="font-size: 0.72rem;">Salin Balasan</button>
-                        </div>
-                        <pre id="ai-reply-res" class="p-3 theme-input rounded" style="font-family: var(--font-body); font-size: 0.82rem; white-space: pre-wrap; margin-bottom: 0; background: rgba(15, 23, 42, 0.3); border: 1px solid rgba(148, 163, 184, 0.15);"></pre>
-                    </div>
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                    <h5 class="m-0 font-weight-bold" style="font-size: 1.15rem; color: var(--hl-text-bright); line-height: 1.2;">
+                        {{ __('messages.edit_ticket') }}
+                    </h5>
+                    <span class="ticket-id-pill">
+                        #{{ $ticket->ticket_number }}
+                    </span>
                 </div>
-            </div>
-
-            <!-- Title / Subject with Absolute Locked Dropdown -->
-            <div class="form-group ticket-form-group mb-4">
-                <label class="form-label form-label-title theme-text">
-                    {{ __('messages.title_subject') }} <span class="text-danger">*</span>
-                </label>
-                <div class="position-relative-title-wrapper">
-                    <input type="text" id="ticket_title" name="title" class="form-control theme-input custom-ticket-input @error('title') is-invalid @enderror" value="{{ old('title', $ticket->title) }}" placeholder="Ketik judul masalah atau pilih dari dropdown..." required style="padding-right: 44px !important;" autocomplete="off">
-                    
-                    <button id="btn-toggle-title-templates" class="btn btn-sm text-info p-0 d-flex align-items-center justify-content-center position-absolute" type="button" style="top: 50%; right: 12px; transform: translateY(-50%); width: 28px; height: 28px; background: transparent; border: none; z-index: 6;" title="Pilih Template Judul">
-                        <i class="fas fa-chevron-down" style="font-size: 0.85rem;"></i>
-                    </button>
-
-                    <div id="title-template-menu" class="dropdown-menu title-template-dropdown shadow-lg border-0">
-                        <div class="dropdown-header text-uppercase font-weight-bold">
-                            TEMPLATE JUDUL:
-                        </div>
-                        @foreach($templates as $template)
-                            <a class="dropdown-item template-title-item" href="#" data-title="{{ $template }}">
-                                <span>{{ $template }}</span>
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-                @error('title') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
-            </div>
-
-            <!-- Row 1: Reporter & Related Asset -->
-            <div class="row">
-                <div class="col-lg-6 form-group ticket-form-group mb-4">
-                    <label class="form-label form-label-title theme-text">
-                        {{ __('messages.reporter_employee') }} <span class="text-danger">*</span>
-                    </label>
-                    <select name="employee_id" class="form-control select2 @error('employee_id') is-invalid @enderror" required>
-                        @foreach($employees as $employee)
-                            <option value="{{ $employee->id }}" {{ old('employee_id', $ticket->employee_id) == $employee->id ? 'selected' : '' }}>
-                                {{ $employee->employee_id }} - {{ $employee->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('employee_id') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
-                </div>
-
-                <div class="col-lg-6 form-group ticket-form-group mb-4">
-                    <label class="form-label form-label-title theme-text">
-                        {{ __('messages.related_asset_optional') }}
-                    </label>
-                    <select name="asset_id" class="form-control select2 @error('asset_id') is-invalid @enderror">
-                        <option value="">{{ __('messages.none') }}</option>
-                        @foreach($assets as $asset)
-                            <option value="{{ $asset->id }}" {{ old('asset_id', $ticket->asset_id) == $asset->id ? 'selected' : '' }}>
-                                {{ $asset->asset_tag }} - {{ $asset->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('asset_id') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
-                </div>
-            </div>
-
-            <!-- Row 2: Category & Priority -->
-            <div class="row">
-                <div class="col-lg-6 form-group ticket-form-group mb-4">
-                    <label class="form-label form-label-title theme-text">
-                        Kategori Pelaporan <span class="text-danger">*</span>
-                    </label>
-                    <select name="category" id="category_select" class="form-control select2 @error('category') is-invalid @enderror" required>
-                        <option value="">Pilih Kategori...</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category['name'] }}" {{ old('category', $ticket->category) == $category['name'] ? 'selected' : '' }}>
-                                {{ $category['name'] }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <small id="category_description" class="form-text text-info mt-2"></small>
-                    @error('category') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
-                </div>
-
-                <div class="col-lg-6 form-group ticket-form-group mb-4">
-                    <label class="form-label form-label-title theme-text">
-                        {{ __('messages.priority') }} <span class="text-danger">*</span>
-                    </label>
-                    <select name="priority" class="form-control select2 @error('priority') is-invalid @enderror" required>
-                        <option value="Low" {{ old('priority', $ticket->priority) == 'Low' ? 'selected' : '' }}>{{ __('messages.low') }}</option>
-                        <option value="Medium" {{ old('priority', $ticket->priority) == 'Medium' ? 'selected' : '' }}>{{ __('messages.medium') }}</option>
-                        <option value="High" {{ old('priority', $ticket->priority) == 'High' ? 'selected' : '' }}>{{ __('messages.high') }}</option>
-                        <option value="Critical" {{ old('priority', $ticket->priority) == 'Critical' ? 'selected' : '' }}>{{ __('messages.critical') }}</option>
-                    </select>
-                    @error('priority') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
-                </div>
-            </div>
-
-            <!-- Row 3: PIC & Status -->
-            <div class="row">
-                <div class="col-lg-6 form-group ticket-form-group mb-4">
-                    <label class="form-label form-label-title theme-text">
-                        PIC (Penanggung Jawab)
-                    </label>
-                    <select name="pic_id" class="form-control select2 @error('pic_id') is-invalid @enderror">
-                        <option value="">Belum di-assign</option>
-                        @foreach($pics as $pic)
-                            <option value="{{ $pic->id }}" {{ old('pic_id', $ticket->pic_id) == $pic->id ? 'selected' : '' }}>
-                                {{ $pic->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('pic_id') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
-                </div>
-
-                <div class="col-lg-6 form-group ticket-form-group mb-4">
-                    <label class="form-label form-label-title theme-text">
-                        {{ __('messages.status') }} <span class="text-danger">*</span>
-                    </label>
-                    <select name="status" class="form-control select2 @error('status') is-invalid @enderror" required>
-                        <option value="Open" {{ old('status', $ticket->status) == 'Open' ? 'selected' : '' }}>{{ __('messages.open') }}</option>
-                        <option value="In Progress" {{ old('status', $ticket->status) == 'In Progress' ? 'selected' : '' }}>{{ __('messages.in_progress') }}</option>
-                        <option value="Resolved" {{ old('status', $ticket->status) == 'Resolved' ? 'selected' : '' }}>{{ __('messages.resolved') }}</option>
-                        <option value="Closed" {{ old('status', $ticket->status) == 'Closed' ? 'selected' : '' }}>{{ __('messages.closed') }}</option>
-                    </select>
-                    @error('status') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
-                </div>
-            </div>
-
-            <!-- Row 4: Created At -->
-            <div class="row">
-                <div class="col-lg-6 form-group ticket-form-group mb-4">
-                    <label class="form-label form-label-title theme-text">
-                        Waktu Laporan Dibuat
-                    </label>
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
-                        </div>
-                        <input type="text" name="created_at" class="form-control theme-input custom-ticket-input border-left-0 flatpickr-datetime" style="background: transparent;" value="{{ old('created_at', $ticket->created_at->format('Y-m-d\TH:i')) }}">
-                    </div>
-                    @error('created_at') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
-                </div>
-            </div>
-
-            <!-- Description -->
-            <div class="form-group ticket-form-group mb-2">
-                <label class="form-label form-label-title theme-text">
-                    {{ __('messages.description_details') }} <span class="text-danger">*</span>
-                </label>
-                <textarea name="description" class="form-control theme-input @error('description') is-invalid @enderror" rows="5" placeholder="Tuliskan deskripsi lengkap mengenai masalah atau permintaan yang dialami..." style="border-radius: 12px !important; border: 1px solid rgba(148, 163, 184, 0.22); background: rgba(15, 23, 42, 0.22);" required>{{ old('description', $ticket->description) }}</textarea>
-                @error('description') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                <small style="font-family: var(--hl-font-mono); font-size: 0.74rem; color: var(--hl-text-dim);">
+                    {{ __('messages.ticket_triage_sub') }}
+                </small>
             </div>
         </div>
 
-        <!-- Footer Actions -->
-        <div class="card-footer bg-transparent py-3 px-3 px-md-4 border-top d-flex align-items-center justify-content-end card-footer-actions" style="gap: 10px; border-color: rgba(148, 163, 184, 0.12) !important;">
-            <a href="{{ route('tickets.index', request()->query()) }}" class="btn btn-outline-secondary rounded-pill px-4" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;">
-                {{ __('messages.cancel') }}
+        <div class="ticket-banner-controls">
+            <button type="button" id="btn-ai-analyze" class="btn-ai-telemetry">
+                <i class="fas fa-magic"></i>
+                <span>{{ __('messages.ai_assistant_analysis') }}</span>
+            </button>
+            <a href="{{ route('tickets.index', request()->query()) }}" class="btn-tactile-back">
+                <i class="fas fa-arrow-left mr-1"></i>
+                <span>{{ __('messages.back') }}</span>
             </a>
-            <button type="submit" class="btn btn-primary rounded-pill px-4" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;">
-                {{ __('messages.update') }}
+        </div>
+    </div>
+
+    <!-- Status Lifecycle Stepper Ribbon -->
+    <div class="lifecycle-stepper-box">
+        <div class="stepper-stage stage-open {{ $ticket->status === 'Open' ? 'active' : '' }}">
+            <div class="stepper-stage-indicator">1</div>
+            <div class="stepper-stage-text">{{ __('messages.open') }}</div>
+        </div>
+        <i class="fas fa-chevron-right stepper-arrow"></i>
+        <div class="stepper-stage stage-progress {{ $ticket->status === 'In Progress' ? 'active' : '' }}">
+            <div class="stepper-stage-indicator">2</div>
+            <div class="stepper-stage-text">{{ __('messages.in_progress') }}</div>
+        </div>
+        <i class="fas fa-chevron-right stepper-arrow"></i>
+        <div class="stepper-stage stage-resolved {{ $ticket->status === 'Resolved' ? 'active' : '' }}">
+            <div class="stepper-stage-indicator">3</div>
+            <div class="stepper-stage-text">{{ __('messages.resolved') }}</div>
+        </div>
+        <i class="fas fa-chevron-right stepper-arrow"></i>
+        <div class="stepper-stage stage-closed {{ $ticket->status === 'Closed' ? 'active' : '' }}">
+            <div class="stepper-stage-indicator">4</div>
+            <div class="stepper-stage-text">{{ __('messages.closed') }}</div>
+        </div>
+    </div>
+
+    <!-- AI Diagnostic HUD Drawer (Hidden by default, triggered on demand) -->
+    <div id="ai-analysis-result" class="ai-diagnostic-hud" style="display: none;">
+        <div class="ai-hud-top">
+            <h6 class="ai-hud-title">
+                <i class="fas fa-robot text-purple-400"></i>
+                {{ __('messages.ai_diagnosis_recommendations') }}
+            </h6>
+            <button type="button" id="btn-apply-ai-suggestions" class="btn-apply-ai">
+                <i class="fas fa-check-double"></i>
+                <span>{{ __('messages.apply_ai_suggestions') }}</span>
             </button>
         </div>
-    </form>
+
+        <div class="ai-hud-meta-grid">
+            <div>
+                <div class="ai-hud-field-label">{{ __('messages.recommended_category') }}</div>
+                <div id="ai-cat-res" class="ai-hud-field-val text-cyan" style="color: #67e8f9;">-</div>
+            </div>
+            <div>
+                <div class="ai-hud-field-label">{{ __('messages.recommended_priority') }}</div>
+                <div id="ai-priority-container">
+                    <span id="ai-priority-badge" class="badge px-3 py-1" style="font-size: 0.76rem; border-radius: 6px;">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-hud-box">
+            <div class="ai-hud-field-label">{{ __('messages.root_cause_diagnosis') }}</div>
+            <p id="ai-diagnosis-res" class="mb-0" style="font-size: 0.86rem; color: var(--hl-text-bright); line-height: 1.5; font-style: normal;"></p>
+        </div>
+
+        <div class="ai-hud-box">
+            <div class="ai-hud-field-label mb-2">{{ __('messages.it_support_steps') }}</div>
+            <ul id="ai-steps-res" class="ai-hud-steps-list"></ul>
+        </div>
+
+        <div>
+            <div class="d-flex justify-content-between align-items-center mb-1.5">
+                <span class="ai-hud-field-label mb-0">{{ __('messages.draft_user_reply') }}</span>
+                <button type="button" id="btn-copy-ai-reply" class="btn-tactile-back py-1 px-2" style="font-size: 0.72rem; height: 28px;">
+                    <i class="far fa-copy mr-1"></i> {{ __('messages.copy_reply') }}
+                </button>
+            </div>
+            <pre id="ai-reply-res" class="ai-hud-reply-box"></pre>
+        </div>
+    </div>
+
+    <!-- Main Bento Form Card -->
+    <div class="ticket-form-bento">
+        <form action="{{ route('tickets.update', array_merge(['ticket' => $ticket->id], request()->query())) }}" method="POST">
+            @csrf
+            @method('PUT')
+
+            <div class="form-bento-body">
+                <!-- Section 1: Subject & Templates -->
+                <div class="form-bento-section">
+                    <div class="bento-section-title">
+                        <i class="fas fa-heading"></i>
+                        <span>{{ __('messages.incident_subject') }}</span>
+                    </div>
+
+                    <div class="form-field-group mb-0">
+                        <label class="form-label-tactile">
+                            <span>{{ __('messages.title_subject') }}</span>
+                            <span class="req-star">*</span>
+                        </label>
+                        <div class="title-input-wrapper">
+                            <input type="text" id="ticket_title" name="title" class="tactile-input @error('title') is-invalid @enderror" value="{{ old('title', $ticket->title) }}" placeholder="{{ __('messages.ticket_title_placeholder') }}" required style="padding-right: 140px !important;" autocomplete="off">
+                            
+                            <button id="btn-toggle-title-templates" class="btn-toggle-templates" type="button" title="{{ __('messages.select_title_template') }}">
+                                <i class="fas fa-layer-group"></i>
+                                <span>Templates</span>
+                                <i class="fas fa-chevron-down" style="font-size: 0.65rem;"></i>
+                            </button>
+
+                            <div id="title-template-menu" class="template-dropdown-menu">
+                                <div class="px-2 py-1 text-muted text-uppercase font-mono" style="font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; border-bottom: 1px solid var(--hl-border-subtle); margin-bottom: 4px;">
+                                    {{ __('messages.title_templates') }}
+                                </div>
+                                @foreach($templates as $template)
+                                    <div class="template-item template-title-item" data-title="{{ $template }}">
+                                        <i class="fas fa-tag text-cyan mr-1" style="font-size: 0.72rem; color: var(--hl-accent-cyan);"></i>
+                                        <span>{{ $template }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @error('title') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <!-- Section 2: Reporter & Linked Infrastructure -->
+                <div class="form-bento-section">
+                    <div class="bento-section-title">
+                        <i class="fas fa-users-cog"></i>
+                        <span>{{ __('messages.reporter') }} &amp; {{ __('messages.asset') }}</span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6 form-field-group">
+                            <label class="form-label-tactile">
+                                <span>{{ __('messages.reporter_employee') }}</span>
+                                <span class="req-star">*</span>
+                            </label>
+                            <select name="employee_id" class="form-control select2 @error('employee_id') is-invalid @enderror" required>
+                                @foreach($employees as $employee)
+                                    <option value="{{ $employee->id }}" {{ old('employee_id', $ticket->employee_id) == $employee->id ? 'selected' : '' }}>
+                                        {{ $employee->employee_id }} — {{ $employee->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('employee_id') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="col-lg-6 form-field-group">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label-tactile mb-0">
+                                    <span>{{ __('messages.related_asset_optional') }}</span>
+                                    <span class="text-muted small ml-1">({{ __('messages.optional') }})</span>
+                                </label>
+                                @if($ticket->asset)
+                                    <a href="{{ route('assets.show', $ticket->asset->id) }}" target="_blank" class="badge text-decoration-none" style="font-family: var(--hl-font-mono); font-size: 0.68rem; background: rgba(6, 182, 212, 0.12); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.3);">
+                                        <i class="fas fa-external-link-alt mr-1"></i> {{ __('messages.view_asset_details') }}
+                                    </a>
+                                @endif
+                            </div>
+                            <select name="asset_id" class="form-control select2 @error('asset_id') is-invalid @enderror">
+                                <option value="">-- {{ __('messages.none') }} --</option>
+                                @foreach($assets as $asset)
+                                    <option value="{{ $asset->id }}" {{ old('asset_id', $ticket->asset_id) == $asset->id ? 'selected' : '' }}>
+                                        [{{ $asset->asset_tag }}] {{ $asset->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('asset_id') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Triage Classification -->
+                <div class="form-bento-section">
+                    <div class="bento-section-title">
+                        <i class="fas fa-sitemap"></i>
+                        <span>{{ __('messages.report_category') }} &amp; {{ __('messages.priority') }}</span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6 form-field-group">
+                            <label class="form-label-tactile">
+                                <span>{{ __('messages.report_category') }}</span>
+                                <span class="req-star">*</span>
+                            </label>
+                            <select name="category" id="category_select" class="form-control select2 @error('category') is-invalid @enderror" required>
+                                <option value="">-- {{ __('messages.select_category') }} --</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category['name'] }}" {{ old('category', $ticket->category) == $category['name'] ? 'selected' : '' }}>
+                                        {{ $category['name'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div id="category_description_box" class="category-desc-box">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                <span id="category_description_text"></span>
+                            </div>
+                            @error('category') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="col-lg-6 form-field-group">
+                            <label class="form-label-tactile">
+                                <span>{{ __('messages.priority') }}</span>
+                                <span class="req-star">*</span>
+                            </label>
+                            <select name="priority" class="form-control select2 @error('priority') is-invalid @enderror" required>
+                                <option value="Low" {{ old('priority', $ticket->priority) == 'Low' ? 'selected' : '' }}>{{ __('messages.low') }}</option>
+                                <option value="Medium" {{ old('priority', $ticket->priority) == 'Medium' ? 'selected' : '' }}>{{ __('messages.medium') }}</option>
+                                <option value="High" {{ old('priority', $ticket->priority) == 'High' ? 'selected' : '' }}>{{ __('messages.high') }}</option>
+                                <option value="Critical" {{ old('priority', $ticket->priority) == 'Critical' ? 'selected' : '' }}>{{ __('messages.critical') }}</option>
+                            </select>
+                            @error('priority') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Operational Assignment & Status Lifecycle -->
+                <div class="form-bento-section">
+                    <div class="bento-section-title">
+                        <i class="fas fa-user-check"></i>
+                        <span>{{ __('messages.pic_assigned') }} &amp; {{ __('messages.status') }}</span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6 form-field-group">
+                            <label class="form-label-tactile">
+                                <span>{{ __('messages.pic_assigned') }}</span>
+                                <span class="text-muted small ml-1">({{ __('messages.optional') }})</span>
+                            </label>
+                            <select name="pic_id" id="pic_id" class="form-control select2 @error('pic_id') is-invalid @enderror">
+                                <option value="">-- {{ __('messages.unassigned') }} --</option>
+                                @foreach($pics as $pic)
+                                    <option value="{{ $pic->id }}" {{ old('pic_id', $ticket->pic_id) == $pic->id ? 'selected' : '' }}>
+                                        {{ $pic->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('pic_id') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="col-lg-6 form-field-group">
+                            <label class="form-label-tactile">
+                                <span>{{ __('messages.status') }}</span>
+                                <span class="req-star">*</span>
+                            </label>
+                            <select name="status" class="form-control select2 @error('status') is-invalid @enderror" required>
+                                <option value="Open" {{ old('status', $ticket->status) == 'Open' ? 'selected' : '' }}>{{ __('messages.open') }}</option>
+                                <option value="In Progress" {{ old('status', $ticket->status) == 'In Progress' ? 'selected' : '' }}>{{ __('messages.in_progress') }}</option>
+                                <option value="Resolved" {{ old('status', $ticket->status) == 'Resolved' ? 'selected' : '' }}>{{ __('messages.resolved') }}</option>
+                                <option value="Closed" {{ old('status', $ticket->status) == 'Closed' ? 'selected' : '' }}>{{ __('messages.closed') }}</option>
+                            </select>
+                            @error('status') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Timeline & Timestamps -->
+                <div class="form-bento-section">
+                    <div class="bento-section-title">
+                        <i class="fas fa-clock"></i>
+                        <span>{{ __('messages.timeline') }}</span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6 form-field-group">
+                            <label class="form-label-tactile">
+                                <span>{{ __('messages.report_time_created') }}</span>
+                            </label>
+                            <div class="tactile-input-group">
+                                <div class="tactile-input-addon">
+                                    <i class="far fa-clock" style="color: var(--hl-status-open);"></i>
+                                </div>
+                                <input type="text" name="created_at" class="tactile-input tactile-input-grouped flatpickr-datetime font-mono" value="{{ old('created_at', $ticket->created_at->format('Y-m-d\TH:i')) }}">
+                            </div>
+                            @error('created_at') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                        </div>
+
+                        @if($ticket->completed_at)
+                        <div class="col-lg-6 form-field-group">
+                            <label class="form-label-tactile">
+                                <span>{{ __('messages.completed') }}</span>
+                            </label>
+                            <div class="tactile-input-group">
+                                <div class="tactile-input-addon">
+                                    <i class="far fa-check-circle" style="color: var(--hl-status-resolved);"></i>
+                                </div>
+                                <input type="text" class="tactile-input tactile-input-grouped font-mono" value="{{ $ticket->completed_at->format('d/m/Y H:i') }}" readonly style="opacity: 0.85; background: rgba(0,0,0,0.2);">
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Section 6: Incident Description -->
+                <div class="form-bento-section">
+                    <div class="bento-section-title">
+                        <i class="fas fa-align-left"></i>
+                        <span>{{ __('messages.description_details') }}</span>
+                    </div>
+
+                    <div class="form-field-group mb-0">
+                        <label class="form-label-tactile">
+                            <span>{{ __('messages.description') }}</span>
+                            <span class="req-star">*</span>
+                        </label>
+                        <textarea name="description" class="tactile-textarea @error('description') is-invalid @enderror" rows="5" placeholder="{{ __('messages.description_placeholder') }}" required>{{ old('description', $ticket->description) }}</textarea>
+                        @error('description') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bento Footer -->
+            <div class="form-bento-footer">
+                <a href="{{ route('tickets.index', request()->query()) }}" class="btn-tactile-cancel">
+                    {{ __('messages.cancel') }}
+                </a>
+                <button type="submit" class="btn-tactile-submit">
+                    <i class="fas fa-save mr-1"></i>
+                    <span>{{ __('messages.update_ticket') }}</span>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 @push('scripts')
 <script>
 $(document).ready(function() {
-    // Select2 Initialization with 100% width
+    // Select2 Initialization
     $('.select2').select2({ width: '100%' });
 
     const categoriesData = @json($categories);
     const categorySelect = document.getElementById('category_select');
-    const categoryDesc = document.getElementById('category_description');
+    const categoryDescBox = document.getElementById('category_description_box');
+    const categoryDescText = document.getElementById('category_description_text');
 
     function updateCategoryDescription() {
         if (!categorySelect) return;
         const selectedValue = categorySelect.value;
         const category = categoriesData.find(c => c.name === selectedValue);
-        if (category) {
-            categoryDesc.innerHTML = '<strong>Deskripsi Tugas:</strong> ' + category.description;
+        if (category && category.description) {
+            categoryDescText.innerHTML = '<strong>' + @json(__('messages.task_description')) + '</strong> ' + category.description;
+            categoryDescBox.style.display = 'block';
         } else {
-            categoryDesc.innerHTML = '';
+            categoryDescBox.style.display = 'none';
         }
     }
 
-    if(categorySelect) {
+    if (categorySelect) {
         $(categorySelect).on('select2:select change', updateCategoryDescription);
         updateCategoryDescription();
     }
 
-    // Toggle Title Template Menu manually to bypass Popper.js displacement
-    $('#ticket_title, #btn-toggle-title-templates').on('click', function(e) {
+    // Toggle Title Template Menu
+    $('#btn-toggle-title-templates').on('click', function(e) {
         e.stopPropagation();
         $('#title-template-menu').toggleClass('show');
     });
 
     $(document).on('click', function(e) {
-        if (!$(e.target).closest('.position-relative-title-wrapper').length) {
+        if (!$(e.target).closest('.title-input-wrapper').length) {
             $('#title-template-menu').removeClass('show');
         }
     });
@@ -450,7 +1076,7 @@ $(document).ready(function() {
         $('#title-template-menu').removeClass('show');
     });
 
-    // AI Analysis Handler
+    // AI Telemetry Analysis Handler
     let latestAiResult = null;
     $('#btn-ai-analyze').click(function() {
         const title = $('#ticket_title').val();
@@ -461,16 +1087,17 @@ $(document).ready(function() {
         if (!title && !description) {
             Swal.fire({
                 icon: 'warning',
-                title: 'Judul atau Deskripsi Kosong',
-                text: 'Harap isi judul atau deskripsi tiket sebelum meminta analisis AI.',
-                background: 'rgba(30, 41, 59, 0.95)',
-                color: '#f8f9fa'
+                title: @json(__('messages.incident_subject')),
+                text: @json(__('messages.empty_title_desc_warning')),
+                background: 'rgba(15, 23, 42, 0.95)',
+                color: '#f8fafc'
             });
             return;
         }
 
         const btn = $(this);
-        btn.prop('disabled', true).text('Menganalisis AI...');
+        const originalHtml = btn.html();
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> ' + @json(__('messages.analyzing_ai')));
 
         $.ajax({
             url: "{{ route('ai.analyze-ticket') }}",
@@ -483,30 +1110,30 @@ $(document).ready(function() {
                 asset_id: assetId
             },
             success: function(response) {
-                btn.prop('disabled', false).text('Analisis AI Assistant');
+                btn.prop('disabled', false).html(originalHtml);
                 if (response.success && response.data) {
                     latestAiResult = response.data;
                     const res = response.data;
 
                     $('#ai-cat-res').text(res.suggested_category || 'Hardware & Software Support');
                     
-                    const badgeClass = res.suggested_priority === 'Critical' ? 'badge-danger' : 
-                                      (res.suggested_priority === 'High' ? 'badge-warning' : 
-                                      (res.suggested_priority === 'Medium' ? 'badge-info' : 'badge-secondary'));
-                    $('#ai-priority-badge').attr('class', 'badge ' + badgeClass).text(res.suggested_priority || 'Medium');
-
-                    $('#ai-diagnosis-res').text('"' + res.diagnosis + '"');
+                    const badgePriorityClass = res.suggested_priority === 'Critical' ? 'badge-priority-critical' : 
+                                              (res.suggested_priority === 'High' ? 'badge-priority-high' : 
+                                              (res.suggested_priority === 'Medium' ? 'badge-priority-medium' : 'badge-priority-low'));
+                    
+                    $('#ai-priority-badge').attr('class', 'badge ' + badgePriorityClass).text(res.suggested_priority || 'Medium');
+                    $('#ai-diagnosis-res').text(res.diagnosis || '');
 
                     let stepsHtml = '';
                     if (res.resolution_steps && Array.isArray(res.resolution_steps)) {
                         res.resolution_steps.forEach(step => {
-                            stepsHtml += '<li class="mb-1">' + step + '</li>';
+                            stepsHtml += '<li>' + step + '</li>';
                         });
                     }
                     $('#ai-steps-res').html(stepsHtml);
 
                     $('#ai-reply-res').text(res.reply_draft || '');
-                    $('#ai-analysis-result').slideDown();
+                    $('#ai-analysis-result').slideDown(250);
 
                     Swal.fire({
                         toast: true,
@@ -514,14 +1141,14 @@ $(document).ready(function() {
                         showConfirmButton: false,
                         timer: 2000,
                         icon: 'success',
-                        title: 'Analisis AI selesai!',
-                        background: 'rgba(30, 41, 59, 0.95)',
-                        color: '#f8f9fa'
+                        title: @json(__('messages.ai_analysis_complete')),
+                        background: 'rgba(15, 23, 42, 0.95)',
+                        color: '#f8fafc'
                     });
                 }
             },
             error: function(err) {
-                btn.prop('disabled', false).text('Analisis AI Assistant');
+                btn.prop('disabled', false).html(originalHtml);
                 console.error(err);
             }
         });
@@ -544,13 +1171,13 @@ $(document).ready(function() {
             showConfirmButton: false,
             timer: 1500,
             icon: 'success',
-            title: 'Kategori & Prioritas AI berhasil diterapkan!',
-            background: 'rgba(30, 41, 59, 0.95)',
-            color: '#f8f9fa'
+            title: @json(__('messages.ai_suggestions_applied')),
+            background: 'rgba(15, 23, 42, 0.95)',
+            color: '#f8fafc'
         });
     });
 
-    // Copy Reply Draft
+    // Copy Draft Reply
     $('#btn-copy-ai-reply').click(function() {
         const text = $('#ai-reply-res').text();
         if (!text) return;
@@ -562,9 +1189,9 @@ $(document).ready(function() {
                     showConfirmButton: false,
                     timer: 1500,
                     icon: 'success',
-                    title: 'Draft balasan disalin!',
-                    background: 'rgba(30, 41, 59, 0.95)',
-                    color: '#f8f9fa'
+                    title: @json(__('messages.reply_draft_copied')),
+                    background: 'rgba(15, 23, 42, 0.95)',
+                    color: '#f8fafc'
                 });
             }
         }).catch(function(err) {

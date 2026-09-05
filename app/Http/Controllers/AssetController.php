@@ -38,6 +38,7 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
             Excel::import(new AssetsImport, $request->file('file'));
 
             \Illuminate\Support\Facades\Cache::forget('master_asset_years');
+            \Illuminate\Support\Facades\Cache::forget('asset_status_counts');
 
             return back()->with('success', 'Assets successfully imported and replaced!');
         } catch (\Exception $e) {
@@ -52,6 +53,7 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
         ]);
 
         $asset->update(['status' => $request->status]);
+        \Illuminate\Support\Facades\Cache::forget('asset_status_counts');
 
         return response()->json(['success' => true, 'message' => 'Status updated successfully.', 'status' => $asset->status]);
     }
@@ -184,7 +186,15 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
             return $asset;
         });
 
-        return view('assets.index', compact('assets', 'categories', 'brands', 'locations', 'years'));
+        $statusCounts = \Illuminate\Support\Facades\Cache::remember('asset_status_counts', 300, function () {
+            return Asset::selectRaw('status, count(*) as total')
+                ->groupBy('status')
+                ->pluck('total', 'status')
+                ->toArray();
+        });
+        $totalAssetsCount = array_sum($statusCounts);
+
+        return view('assets.index', compact('assets', 'categories', 'brands', 'locations', 'years', 'statusCounts', 'totalAssetsCount'));
     }
 
     public function create(Request $request)
@@ -244,9 +254,15 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
                     $currentTag = $currentTag.'-'.uniqid();
                 }
 
+                $imageData = null;
+                if ($request->hasFile('image')) {
+                    $imageData = $request->file('image')->store('assets', 'public');
+                }
+
                 $asset = Asset::create([
                     'asset_tag' => $currentTag,
                     'name' => $request->name,
+                    'uom' => $request->uom,
                     'serial_number' => $currentSn,
                     'category_id' => $request->category_id,
                     'brand_id' => $request->brand_id,
@@ -256,6 +272,7 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
                     'warranty_months' => $request->warranty_months ?? 0,
                     'status' => $request->status,
                     'notes' => $request->notes,
+                    'image' => $imageData,
                     'spec_data' => $request->spec_data,
                 ]);
 
@@ -265,9 +282,23 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
             }
 
             \Illuminate\Support\Facades\Cache::forget('master_asset_years');
+            \Illuminate\Support\Facades\Cache::forget('asset_status_counts');
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $quantity > 1 ? $quantity.' Assets successfully created.' : __('messages.created_success')
+                ]);
+            }
 
             return redirect()->route('assets.index', $request->query())->with('success', $quantity > 1 ? $quantity.' Assets successfully created.' : __('messages.created_success'));
         } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create asset: '.$e->getMessage()
+                ], 500);
+            }
             return back()->withInput()->with('error', 'Failed to create asset: '.$e->getMessage());
         }
     }
@@ -292,12 +323,21 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
     public function update(UpdateAssetRequest $request, Asset $asset)
     {
         try {
-            $data = $request->all();
+            $data = $request->validated();
             $data['warranty_months'] = $request->warranty_months ?? 0;
+
+            if ($request->hasFile('image')) {
+                if ($asset->image && \Illuminate\Support\Facades\Storage::disk('public')->exists($asset->image)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($asset->image);
+                }
+                $data['image'] = $request->file('image')->store('assets', 'public');
+            }
+
             $asset->update($data);
             $this->saveSpecifications($asset, $request);
 
             \Illuminate\Support\Facades\Cache::forget('master_asset_years');
+            \Illuminate\Support\Facades\Cache::forget('asset_status_counts');
 
             return redirect()->route('assets.index', $request->query())->with('success', __('messages.updated_success'));
         } catch (\Exception $e) {
@@ -310,6 +350,7 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
         $asset->delete();
 
         \Illuminate\Support\Facades\Cache::forget('master_asset_years');
+        \Illuminate\Support\Facades\Cache::forget('asset_status_counts');
 
         return redirect()->route('assets.index', $request->query())->with('success', __('messages.deleted_success'));
     }

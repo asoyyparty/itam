@@ -10,7 +10,7 @@
         border: var(--rule-soft);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         max-width: 720px;
-        margin: 0 auto;
+        margin: 1rem auto 0;
     }
     .vault-form-card .card-header {
         border-top-left-radius: 16px !important;
@@ -55,12 +55,34 @@
         box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) !important;
         background: rgba(15, 23, 42, 0.35) !important;
     }
-    .vault-form-card .input-group-text {
+    .input-group > .custom-vault-input,
+    .input-group > input {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-right: none !important;
+    }
+    .input-group > .input-group-append > .input-group-text,
+    .input-group > .input-group-append > .btn {
         height: 44px !important;
-        border-radius: 0 10px 10px 0 !important;
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+        border-top-right-radius: 10px !important;
+        border-bottom-right-radius: 10px !important;
         border: 1px solid rgba(148, 163, 184, 0.22) !important;
+        border-left: none !important;
         background: rgba(15, 23, 42, 0.25) !important;
         color: #94a3b8 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 14px;
+        transition: all 0.2s ease !important;
+    }
+    body.light-mode .input-group > .input-group-append > .input-group-text,
+    body.light-mode .input-group > .input-group-append > .btn {
+        background: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+        color: #64748b !important;
     }
     .custom-vault-textarea {
         border-radius: 12px !important;
@@ -112,7 +134,7 @@
                 </div>
                 <div>
                     <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.add_vault') ?? 'Add Vault Password' }}</h5>
-                    <small class="text-muted d-block" style="font-size: 0.78rem;">Simpan kredensial atau kata sandi perangkat/sistem secara terenkripsi</small>
+                    <small class="text-muted d-block" style="font-size: 0.78rem;">{{ __('messages.add_vault_subtitle') }}</small>
                 </div>
             </div>
         </div>

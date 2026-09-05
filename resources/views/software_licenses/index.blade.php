@@ -3,44 +3,57 @@
 @section('title', __('messages.software_licenses'))
 
 @section('content')
-<div class="division-actions license-actions d-flex justify-content-end align-items-center mb-3">
-    @can('action_manage_settings')
-    <a href="{{ route('software_licenses.create') }}" class="btn btn-sm btn-primary" title="{{ __('messages.add_license') }}">
-        <i class="fas fa-plus mr-1"></i>{{ __('messages.add_license') }}
-    </a>
-    @endcan
-</div>
-
-<div class="card theme-card license-filter-card">
-    <div class="division-table-header license-table-header card-header border-0 d-flex align-items-center flex-wrap">
-        <form action="{{ route('software_licenses.index') }}" method="GET" class="license-search-form" style="width: 100%;">
-            <div class="license-search-controls d-flex align-items-center justify-content-start">
-                <div class="license-search-input input-group">
-                    <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search_license') }}" value="{{ request('search') }}" aria-label="{{ __('messages.search_license') }}">
-                    @if(request('search'))
-                        <a href="{{ route('software_licenses.index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" title="Clear" style="min-width: 40px; height: 38px; padding: 0; display: flex !important; align-items: center !important; justify-content: center !important; border-color: rgba(148, 163, 184, 0.22);"><i class="fas fa-times"></i></a>
-                    @endif
-                    <button class="btn btn-info d-flex align-items-center justify-content-center" type="submit" style="min-width: 40px; height: 38px; padding: 0; display: flex !important; align-items: center !important; justify-content: center !important;"><i class="fas fa-search"></i></button>
-                </div>
+<!-- Header Toolbar -->
+<div class="row mb-3 license-toolbar-box" style="margin-top: 0 !important;">
+    <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center" style="gap: 10px;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); display: flex; align-items: center; justify-content: center; color: #818cf8; font-size: 1.1rem; flex-shrink: 0;">
+                <i class="fas fa-certificate"></i>
             </div>
-        </form>
+            <div>
+                <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.software_licenses') }}</h5>
+                <small class="text-muted d-block" style="font-size: 0.78rem;">{{ __('messages.license_subtitle') }}</small>
+            </div>
+        </div>
+        @can('action_manage_settings')
+        <div class="d-flex align-items-center flex-wrap license-action-buttons header-action-buttons ml-auto" style="gap: 8px;">
+            <a href="{{ route('software_licenses.create') }}" class="btn btn-action-primary px-4 btn-add-main">
+                {{ __('messages.add_license') }}
+            </a>
+        </div>
+        @endcan
     </div>
 </div>
 
 @if(session('success'))
-    <div class="alert alert-success alert-dismissible" style="background: rgba(40,167,69,0.2); border: 1px solid rgba(40,167,69,0.5); color: #28a745;">
+    <div class="alert alert-success alert-dismissible mb-3" style="background: rgba(40,167,69,0.2); border: 1px solid rgba(40,167,69,0.5); color: #28a745; border-radius: 14px;">
         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
         <i class="icon fas fa-check"></i> {{ session('success') }}
     </div>
 @endif
 @if(session('error'))
-    <div class="alert alert-danger alert-dismissible" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.5); color: #dc3545;">
+    <div class="alert alert-danger alert-dismissible mb-3" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.5); color: #dc3545; border-radius: 14px;">
         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
         <i class="icon fas fa-ban"></i> {{ session('error') }}
     </div>
 @endif
 
-<div class="card theme-card">
+<div class="card theme-card license-card">
+    <div class="division-table-header license-table-header card-header border-0 d-flex align-items-center flex-wrap">
+        <form action="{{ route('software_licenses.index') }}" method="GET" class="license-search-form" style="width: 100%;">
+            <div class="license-search-controls d-flex align-items-center justify-content-start">
+                <div class="sleek-search-wrapper license-search-input">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" name="search" class="form-control theme-input sleek-search-input" placeholder="{{ __('messages.search_license') }}" value="{{ request('search') }}" aria-label="{{ __('messages.search_license') }}">
+                    @if(request('search'))
+                        <a href="{{ route('software_licenses.index') }}" class="clear-search-btn" title="Clear">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    @endif
+                </div>
+            </div>
+        </form>
+    </div>
     <div class="card-body p-0">
         <div class="theme-scroll-container table-responsive">
             <table class="table table-striped table-hover m-0 theme-table division-table">
@@ -59,7 +72,7 @@
                 <tbody>
                     @forelse($software_licenses as $lic)
                     <tr>
-                        <td class="theme-text">{{ $loop->iteration }}</td>
+                        <td class="theme-text">{{ (method_exists($software_licenses, 'firstItem') && $software_licenses->firstItem() ? $software_licenses->firstItem() + $loop->index : $loop->iteration) }}</td>
                         <td class="text-info font-weight-bold">{{ $lic->name }}</td>
                         <td class="theme-text">
                             @if($lic->license_key)

@@ -23,7 +23,7 @@ class EmployeeController extends Controller implements \Illuminate\Routing\Contr
 
     public function index(Request $request)
     {
-        $query = Employee::with(['department']);
+        $query = Employee::with(['department', 'location', 'supervisor']);
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
@@ -45,9 +45,14 @@ class EmployeeController extends Controller implements \Illuminate\Routing\Contr
             $query->where('status', $request->status);
         }
 
-        $departments = Department::orderBy('name')->get();
-        // Get only employees who are supervisors
-        $supervisors = Employee::whereIn('id', Employee::whereNotNull('supervisor_id')->pluck('supervisor_id')->unique())->orderBy('name')->get();
+        $departments = \Illuminate\Support\Facades\Cache::remember('all_departments_list', 1800, function () {
+            return Department::orderBy('name')->get();
+        });
+
+        // Get only employees who are supervisors with 30-min cache
+        $supervisors = \Illuminate\Support\Facades\Cache::remember('all_supervisors_list', 1800, function () {
+            return Employee::whereIn('id', Employee::whereNotNull('supervisor_id')->pluck('supervisor_id')->unique())->orderBy('name')->get();
+        });
 
         $employees = $query->orderBy('name')->paginate(25)->withQueryString();
 
@@ -56,9 +61,15 @@ class EmployeeController extends Controller implements \Illuminate\Routing\Contr
 
     public function create()
     {
-        $departments = Department::orderBy('name')->get();
-        $locations = Location::orderBy('name')->get();
-        $supervisors = Employee::orderBy('name')->get();
+        $departments = \Illuminate\Support\Facades\Cache::remember('all_departments_list', 1800, function () {
+            return Department::orderBy('name')->get();
+        });
+        $locations = \Illuminate\Support\Facades\Cache::remember('all_locations_list', 1800, function () {
+            return Location::orderBy('name')->get();
+        });
+        $supervisors = \Illuminate\Support\Facades\Cache::remember('all_potential_supervisors_list', 1800, function () {
+            return Employee::select('id', 'name', 'employee_id')->orderBy('name')->get();
+        });
 
         return view('employee.create', compact('departments', 'locations', 'supervisors'));
     }
@@ -66,7 +77,11 @@ class EmployeeController extends Controller implements \Illuminate\Routing\Contr
     public function store(StoreEmployeeRequest $request)
     {
         try {
-            Employee::create($request->all());
+            $data = $request->validated();
+            if ($request->hasFile('photo')) {
+                $data['photo'] = $request->file('photo')->store('employees', 'public');
+            }
+            Employee::create($data);
 
             return redirect()->route('employees.index', request()->query())->with('success', __('messages.created_success'));
         } catch (\Exception $e) {
@@ -102,7 +117,14 @@ class EmployeeController extends Controller implements \Illuminate\Routing\Contr
     public function update(UpdateEmployeeRequest $request, Employee $employee)
     {
         try {
-            $employee->update($request->all());
+            $data = $request->validated();
+            if ($request->hasFile('photo')) {
+                if ($employee->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($employee->photo)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($employee->photo);
+                }
+                $data['photo'] = $request->file('photo')->store('employees', 'public');
+            }
+            $employee->update($data);
 
             return redirect()->route('employees.index', request()->query())->with('success', __('messages.updated_success'));
         } catch (\Exception $e) {

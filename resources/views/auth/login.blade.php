@@ -405,13 +405,21 @@
 <body>
 
 <div class="login-container">
+  <!-- Top Language Switcher Bar -->
+  <div class="d-flex justify-content-end mb-2" style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+    <div style="display: inline-flex; align-items: center; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 999px; padding: 3px; gap: 4px; backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);">
+      <a href="{{ route('lang.switch', 'id') }}" style="padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-decoration: none; color: {{ App::getLocale() == 'id' ? '#ffffff' : '#94a3b8' }}; background: {{ App::getLocale() == 'id' ? '#6366f1' : 'transparent' }}; transition: all 0.2s;">ID</a>
+      <a href="{{ route('lang.switch', 'en') }}" style="padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-decoration: none; color: {{ App::getLocale() == 'en' ? '#ffffff' : '#94a3b8' }}; background: {{ App::getLocale() == 'en' ? '#6366f1' : 'transparent' }}; transition: all 0.2s;">EN</a>
+    </div>
+  </div>
+
   <div class="glass-card">
     
     <!-- Brand Info Inside Card -->
     <div class="brand-header">
       <img src="{{ vasset('logo.png') }}" alt="ITAM Logo" loading="lazy" decoding="async">
       <h1>ITAM <span>Enterprise</span></h1>
-      <p>Sign in to your account</p>
+      <p>{{ __('messages.sign_in_subtitle') }}</p>
     </div>
 
     @if (session('status'))
@@ -435,7 +443,7 @@
 
       <!-- Username -->
       <div class="form-group">
-        <label for="username">Username</label>
+        <label for="username">{{ __('messages.username') }}</label>
         <div class="input-wrapper">
           <i class="fas fa-user input-icon"></i>
           <input
@@ -444,7 +452,7 @@
             class="form-control @error('username') is-invalid @enderror"
             name="username"
             value="{{ old('username') }}"
-            placeholder="Enter your username"
+            placeholder="{{ __('messages.enter_username_placeholder') }}"
             required
             autofocus
             autocomplete="username">
@@ -456,7 +464,7 @@
 
       <!-- Password -->
       <div class="form-group">
-        <label for="password">Password</label>
+        <label for="password">{{ __('messages.password') }}</label>
         <div class="input-wrapper">
           <i class="fas fa-lock input-icon"></i>
           <input
@@ -464,10 +472,10 @@
             type="password"
             class="form-control @error('password') is-invalid @enderror"
             name="password"
-            placeholder="Enter your password"
+            placeholder="{{ __('messages.enter_password_placeholder') }}"
             required
             autocomplete="current-password">
-          <i class="fas fa-eye toggle-password" id="togglePassword" title="Show/Hide Password"></i>
+          <i class="fas fa-eye toggle-password" id="togglePassword" title="{{ __('messages.show_hide_password') ?? 'Show/Hide Password' }}"></i>
         </div>
         @error('password')
           <span class="invalid-feedback"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
@@ -478,16 +486,16 @@
       <div class="actions-row">
         <label class="remember-me">
           <input type="checkbox" name="remember" id="remember_me" {{ old('remember') ? 'checked' : '' }}>
-          Remember me
+          <span>{{ __('messages.remember_me') }}</span>
         </label>
         
         @if (Route::has('password.request'))
-          <a href="{{ route('password.request') }}" class="forgot-link">Forgot Password?</a>
+          <a href="{{ route('password.request') }}" class="forgot-link">{{ __('messages.forgot_password') }}?</a>
         @endif
       </div>
 
       <button type="submit" class="btn-submit">
-        Sign In
+        {{ __('messages.sign_in') }}
       </button>
 
     </form>

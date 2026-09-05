@@ -10,7 +10,7 @@
         border: var(--rule-soft);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         max-width: 720px;
-        margin: 0 auto;
+        margin: 1rem auto 0;
     }
     .license-form-card .card-header {
         border-top-left-radius: 16px !important;
@@ -105,7 +105,7 @@
                 </div>
                 <div>
                     <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.add_license') ?? 'Add Software License' }}</h5>
-                    <small class="text-muted d-block" style="font-size: 0.78rem;">Tambah lisensi perangkat lunak baru dalam inventaris ITAM</small>
+                    <small class="text-muted d-block" style="font-size: 0.78rem;">{{ __('messages.add_license_subtitle') }}</small>
                 </div>
             </div>
         </div>
@@ -116,7 +116,7 @@
                 <label class="form-label form-label-title theme-text">
                     {{ __('messages.name') }} <span class="text-danger">*</span>
                 </label>
-                <input type="text" name="name" class="form-control theme-input custom-license-input @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="Contoh: Microsoft Office 2021, Windows 11 Pro, Adobe CC..." required autocomplete="off">
+                <input type="text" name="name" class="form-control theme-input custom-license-input @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="Microsoft Office 2021, Windows 11 Pro, Adobe CC..." required autocomplete="off">
                 @error('name') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
             </div>
 
@@ -155,7 +155,7 @@
                     {{ __('messages.pic') }}
                 </label>
                 <select name="pic_id" class="form-control select2 @error('pic_id') is-invalid @enderror">
-                    <option value="">Pilih {{ __('messages.pic') }} / Penanggung Jawab...</option>
+                    <option value="">{{ __('messages.select') }} {{ __('messages.pic') }}...</option>
                     @foreach($employees as $emp)
                         <option value="{{ $emp->id }}" {{ old('pic_id') == $emp->id ? 'selected' : '' }}>{{ $emp->name }} ({{ $emp->employee_id }})</option>
                     @endforeach

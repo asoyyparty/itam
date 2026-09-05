@@ -19,28 +19,32 @@ class MaintenanceController extends Controller implements \Illuminate\Routing\Co
 
     public function index(Request $request)
     {
-        $query = Maintenance::with('asset');
+        $query = Maintenance::with(['asset', 'asset.category', 'asset.brand', 'asset.location']);
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->whereHas('asset', function ($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                    ->orWhere('asset_tag', 'like', "%$search%");
-            })->orWhere('description', 'like', "%$search%");
+            $query->where(function ($sub) use ($search) {
+                $sub->whereHas('asset', function ($q) use ($search) {
+                    $q->where('name', 'like', "%$search%")
+                        ->orWhere('asset_tag', 'like', "%$search%");
+                })->orWhere('description', 'like', "%$search%");
+            });
         }
 
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
         }
 
-        $maintenances = $query->latest()->get();
+        $maintenances = $query->latest()->paginate(25)->withQueryString();
 
         return view('maintenances.index', compact('maintenances'));
     }
 
     public function create()
     {
-        $assets = Asset::orderBy('name')->get();
+        $assets = \Illuminate\Support\Facades\Cache::remember('assets_for_maintenance_select', 300, function () {
+            return Asset::select('id', 'name', 'asset_tag')->orderBy('name')->get();
+        });
 
         return view('maintenances.create', compact('assets'));
     }

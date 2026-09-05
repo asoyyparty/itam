@@ -7,16 +7,15 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Crypt;
 
 class Employee extends Model
 {
     /** @use HasFactory<EmployeeFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
-        'employee_id', 'name', 'email', 'phone', 'department_id',
+        'employee_id', 'name', 'email', 'phone', 'photo', 'department_id',
         'status', 'supervisor_id', 'location_id', 'anydesk_id', 'anydesk_password',
         'login_username', 'login_password',
     ];

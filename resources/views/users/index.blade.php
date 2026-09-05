@@ -4,6 +4,10 @@
 
 @section('content')
 <style>
+    .content-header {
+        display: none !important;
+    }
+
     .user-card {
         border-radius: 16px !important;
         overflow: hidden !important;
@@ -18,7 +22,7 @@
         box-shadow: none !important;
         font-size: 0.9rem !important;
         color: var(--color-ink-0) !important;
-        transition: all 0.2s ease !important;
+        transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease !important;
     }
     .custom-search-input:focus {
         border-color: #60a5fa !important;
@@ -33,32 +37,47 @@
 
     @media (max-width: 767.98px) {
         .user-toolbar-box {
-            width: 100%;
+            width: 100% !important;
+        }
+        .user-toolbar-box > .col-12 {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 12px !important;
+        }
+        .user-action-buttons,
+        .header-action-buttons {
+            width: 100% !important;
+            margin-left: 0 !important;
         }
         .user-toolbar-box .btn {
             width: 100% !important;
             justify-content: center !important;
             height: 44px !important;
         }
+        .user-table {
+            min-width: 650px !important;
+        }
     }
 </style>
 
 <!-- Toolbar Header -->
-<div class="row mb-3 user-toolbar-box">
+<div class="row mb-3 user-toolbar-box" style="margin-top: 0 !important;">
     <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div class="d-flex align-items-center" style="gap: 10px;">
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 1.1rem; flex-shrink: 0;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); display: flex; align-items: center; justify-content: center; color: #818cf8; font-size: 1.1rem; flex-shrink: 0;">
                 <i class="fas fa-users-cog"></i>
             </div>
             <div>
-                <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.manage_users') }}</h5>
-                <small class="text-muted d-block" style="font-size: 0.78rem;">Kelola pengguna, hak akses role, dan kredensial akun ITAM</small>
+                <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.user_management') }}</h5>
+                <small class="text-muted d-block" style="font-size: 0.78rem;">{{ __('messages.user_subtitle') }}</small>
             </div>
         </div>
         @can('action_manage_settings')
-        <a href="{{ route('users.create') }}" class="btn btn-primary rounded-pill px-4" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;">
-            {{ __('messages.add_user') }}
-        </a>
+        <div class="d-flex align-items-center flex-wrap user-action-buttons header-action-buttons ml-auto" style="gap: 8px;">
+            <a href="{{ route('users.create') }}" class="btn btn-action-primary px-4 btn-add-main">
+                {{ __('messages.add_user') }}
+            </a>
+        </div>
         @endcan
     </div>
 </div>
@@ -78,19 +97,17 @@
 
 <!-- Main Table Card -->
 <div class="card theme-card user-card">
-    <!-- Clean Search Bar without role filter -->
-    <div class="user-table-header card-header border-bottom py-3 px-3 px-md-4" style="border-color: rgba(148, 163, 184, 0.12) !important;">
+    <!-- Clean Search Bar -->
+    <div class="division-table-header user-table-header card-header border-0 d-flex align-items-center flex-wrap">
         <form action="{{ route('users.index') }}" method="GET" style="width: 100%;">
-            <div class="user-search-input-box">
-                <input type="text" name="search" class="form-control theme-input custom-search-input" placeholder="Search by Name, Username or Email..." value="{{ request('search') }}" autocomplete="off">
+            <div class="sleek-search-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" name="search" class="form-control theme-input sleek-search-input" placeholder="{{ __('messages.search_users_placeholder') }}" value="{{ request('search') }}" autocomplete="off">
                 @if(request('search'))
-                    <a href="{{ route('users.index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="min-width: 44px; height: 44px; border-radius: 10px; border-color: rgba(148, 163, 184, 0.22);" title="Clear">
+                    <a href="{{ route('users.index') }}" class="clear-search-btn" title="{{ __('messages.clear') }}">
                         <i class="fas fa-times"></i>
                     </a>
                 @endif
-                <button class="btn btn-primary d-flex align-items-center justify-content-center px-3" type="submit" style="min-width: 44px; height: 44px; border-radius: 10px;" title="{{ __('messages.search') }}">
-                    <i class="fas fa-search"></i>
-                </button>
             </div>
         </form>
     </div>
@@ -111,7 +128,7 @@
                 <tbody>
                     @forelse($users as $user)
                     <tr>
-                        <td class="theme-text pl-4">{{ $loop->iteration }}</td>
+                        <td class="theme-text pl-4">{{ (method_exists($users, 'firstItem') && $users->firstItem() ? $users->firstItem() + $loop->index : $loop->iteration) }}</td>
                         <td class="font-weight-bold theme-text">{{ $user->name }}</td>
                         <td class="theme-text"><code style="color: #f472b6;">{{ $user->username }}</code></td>
                         <td class="theme-text">{{ $user->email }}</td>

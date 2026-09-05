@@ -22,7 +22,7 @@
         box-shadow: none !important;
         font-size: 0.9rem !important;
         color: var(--color-ink-0) !important;
-        transition: all 0.2s ease !important;
+        transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease !important;
     }
     .custom-modal-input:focus {
         border-color: #60a5fa !important;
@@ -143,7 +143,7 @@
 </style>
 
 <!-- Header Toolbar -->
-<div class="row mb-3 roles-toolbar-box" style="margin-top: 1rem !important;">
+<div class="row mb-3 roles-toolbar-box" style="margin-top: 0 !important;">
     <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div class="d-flex align-items-center" style="gap: 10px;">
             <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); display: flex; align-items: center; justify-content: center; color: #818cf8; font-size: 1.1rem; flex-shrink: 0;">
@@ -151,19 +151,34 @@
             </div>
             <div>
                 <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.roles_permissions') }}</h5>
-                <small class="text-muted d-block" style="font-size: 0.78rem;">{{ __('messages.roles_desc') }}</small>
+                <small class="text-muted d-block" style="font-size: 0.78rem;">{{ __('messages.roles_subtitle') }}</small>
             </div>
         </div>
         @can('action_manage_settings')
-        <button type="button" class="btn btn-primary btn-add-role px-4" style="height: 42px; border-radius: 14px !important; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;" data-toggle="modal" data-target="#addRoleModal">
-            {{ __('messages.add_role') }}
-        </button>
+        <div class="d-flex align-items-center flex-wrap role-action-buttons header-action-buttons ml-auto" style="gap: 8px;">
+            <button type="button" class="btn btn-action-primary btn-add-main px-4" data-toggle="modal" data-target="#addRoleModal">
+                {{ __('messages.add_role') }}
+            </button>
+        </div>
         @endcan
     </div>
 </div>
 
 <!-- Roles Table Card -->
 <div class="card theme-card roles-card">
+    <div class="division-table-header role-table-header card-header border-0 d-flex align-items-center flex-wrap">
+        <form action="{{ route('roles.index') }}" method="GET" style="width: 100%;">
+            <div class="sleek-search-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" name="search" class="form-control theme-input sleek-search-input" placeholder="{{ __('messages.search') }}..." value="{{ request('search') }}" autocomplete="off">
+                @if(request('search'))
+                    <a href="{{ route('roles.index') }}" class="clear-search-btn" title="Clear">
+                        <i class="fas fa-times"></i>
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
     <div class="card-body p-0">
         <div class="theme-scroll-container table-responsive">
             <table class="table table-striped table-hover m-0 theme-table roles-table align-middle">

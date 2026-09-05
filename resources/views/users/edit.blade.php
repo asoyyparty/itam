@@ -4,13 +4,17 @@
 
 @section('content')
 <style>
+    .content-header {
+        display: none !important;
+    }
+
     .user-form-card {
         border-radius: 16px !important;
         overflow: hidden !important;
         border: var(--rule-soft);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         max-width: 720px;
-        margin: 0 auto;
+        margin: 1rem auto 0;
     }
     .user-form-card .card-header {
         border-top-left-radius: 16px !important;
@@ -91,13 +95,13 @@
         @csrf @method('PUT')
         <!-- Header Toolbar -->
         <div class="card-header bg-transparent border-bottom user-card-header py-3 px-3 px-md-4" style="border-color: rgba(148, 163, 184, 0.12) !important;">
-            <div class="user-header-title-box">
-                <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 1.1rem; flex-shrink: 0;">
+            <div class="header-single-row">
+                <div class="header-single-row-icon" style="width: 40px; height: 40px; border-radius: 12px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 1.1rem;">
                     <i class="fas fa-user-edit"></i>
                 </div>
-                <div>
-                    <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">Edit Login Account</h5>
-                    <small class="text-muted d-block" style="font-size: 0.78rem;">Perbarui kredensial dan peran (role) akun {{ $user->name }}</small>
+                <div class="header-single-row-text">
+                    <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.edit') }} {{ __('messages.user') }}</h5>
+                    <small class="text-muted d-block" style="font-size: 0.78rem;">{{ __('messages.edit_user_subtitle') }} ({{ $user->name }})</small>
                 </div>
             </div>
         </div>
@@ -109,7 +113,7 @@
                     <label class="form-label form-label-title theme-text">
                         {{ __('messages.name') }} <span class="text-danger">*</span>
                     </label>
-                    <input type="text" name="name" class="form-control theme-input custom-user-input @error('name') is-invalid @enderror" value="{{ old('name', $user->name) }}" placeholder="Enter full name..." required autocomplete="off">
+                    <input type="text" name="name" class="form-control theme-input custom-user-input @error('name') is-invalid @enderror" value="{{ old('name', $user->name) }}" placeholder="{{ __('messages.enter_full_name_placeholder') }}" required autocomplete="off">
                     @error('name') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
 
@@ -117,7 +121,7 @@
                     <label class="form-label form-label-title theme-text">
                         {{ __('messages.username') }} <span class="text-danger">*</span>
                     </label>
-                    <input type="text" name="username" class="form-control theme-input custom-user-input @error('username') is-invalid @enderror" value="{{ old('username', $user->username) }}" placeholder="Enter username..." required autocomplete="off">
+                    <input type="text" name="username" class="form-control theme-input custom-user-input @error('username') is-invalid @enderror" value="{{ old('username', $user->username) }}" placeholder="{{ __('messages.enter_username_placeholder') }}" required autocomplete="off">
                     @error('username') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
             </div>
@@ -127,7 +131,7 @@
                 <label class="form-label form-label-title theme-text">
                     {{ __('messages.email') }} <span class="text-danger">*</span>
                 </label>
-                <input type="email" name="email" class="form-control theme-input custom-user-input @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" placeholder="Enter email address..." required autocomplete="off">
+                <input type="email" name="email" class="form-control theme-input custom-user-input @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" placeholder="{{ __('messages.enter_email_placeholder') }}" required autocomplete="off">
                 @error('email') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
             </div>
 
@@ -137,7 +141,7 @@
                     <label class="form-label form-label-title theme-text">
                         {{ __('messages.password') }} <small class="text-muted">({{ __('messages.leave_blank_password') }})</small>
                     </label>
-                    <input type="password" name="password" class="form-control theme-input custom-user-input @error('password') is-invalid @enderror" placeholder="Leave blank to keep current..." autocomplete="new-password">
+                    <input type="password" name="password" class="form-control theme-input custom-user-input @error('password') is-invalid @enderror" placeholder="{{ __('messages.enter_password_placeholder') }}" autocomplete="new-password">
                     @error('password') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
 
@@ -145,7 +149,7 @@
                     <label class="form-label form-label-title theme-text">
                         {{ __('messages.confirm_password') }}
                     </label>
-                    <input type="password" name="password_confirmation" class="form-control theme-input custom-user-input" placeholder="Confirm new password..." autocomplete="new-password">
+                    <input type="password" name="password_confirmation" class="form-control theme-input custom-user-input" placeholder="{{ __('messages.confirm_password_placeholder') }}" autocomplete="new-password">
                 </div>
             </div>
 
@@ -155,7 +159,7 @@
                     {{ __('messages.role') }} <span class="text-danger">*</span>
                 </label>
                 <select name="role" class="form-control select2 @error('role') is-invalid @enderror" required>
-                    <option value="">Select Role...</option>
+                    <option value="">{{ __('messages.select_role') }}</option>
                     @foreach($roles as $role)
                         <option value="{{ $role->name }}" {{ (old('role') ?? $user->roles->first()?->name) == $role->name ? 'selected' : '' }}>{{ $role->name }}</option>
                     @endforeach

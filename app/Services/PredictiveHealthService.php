@@ -6,6 +6,7 @@ use App\Models\Asset;
 use App\Models\Maintenance;
 use App\Models\Ticket;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class PredictiveHealthService
 {
@@ -14,136 +15,140 @@ class PredictiveHealthService
      */
     public function calculateAssetHealth(Asset $asset): array
     {
-        $asset->loadMissing(['category', 'brand', 'location', 'computer', 'printer', 'networkDetail', 'cctv', 'maintenances', 'currentAssignment.employee']);
+        $cacheKey = "asset_health_{$asset->id}_" . app()->getLocale();
 
-        $score = 100;
-        $reasons = [];
-        $isEn = app()->getLocale() === 'en';
+        return Cache::remember($cacheKey, 1800, function () use ($asset) {
+            $asset->loadMissing(['category', 'brand', 'location', 'computer', 'printer', 'networkDetail', 'cctv', 'maintenances', 'currentAssignment.employee']);
 
-        // 1. Age & Warranty Factor (Max 30% Deduction)
-        $dateReceived = $asset->date_received ? Carbon::parse($asset->date_received) : null;
-        $warrantyMonths = (int) ($asset->warranty_months ?? 0);
-        $assetAgeMonths = $dateReceived ? $dateReceived->diffInMonths(Carbon::now()) : 0;
-        $assetAgeYears = round($assetAgeMonths / 12, 1);
+            $score = 100;
+            $reasons = [];
+            $isEn = app()->getLocale() === 'en';
 
-        if ($dateReceived) {
-            if ($assetAgeMonths > 60) { // Older than 5 years
-                $score -= 25;
-                $reasons[] = $isEn 
-                    ? "Device age exceeds 5 years ({$assetAgeYears} years)."
-                    : "Usia perangkat melebihi 5 tahun ({$assetAgeYears} tahun).";
-            } elseif ($assetAgeMonths > 36) { // Older than 3 years
-                $score -= 15;
-                $reasons[] = $isEn
-                    ? "Device age reaches {$assetAgeYears} years."
-                    : "Usia perangkat mencapai {$assetAgeYears} tahun.";
-            }
+            // 1. Age & Warranty Factor (Max 30% Deduction)
+            $dateReceived = $asset->date_received ? Carbon::parse($asset->date_received) : null;
+            $warrantyMonths = (int) ($asset->warranty_months ?? 0);
+            $assetAgeMonths = $dateReceived ? $dateReceived->diffInMonths(Carbon::now()) : 0;
+            $assetAgeYears = round($assetAgeMonths / 12, 1);
 
-            // Warranty Expiry
-            if ($warrantyMonths > 0) {
-                $expiryDate = (clone $dateReceived)->addMonths($warrantyMonths);
-                if ($expiryDate->isPast()) {
-                    $monthsExpired = $expiryDate->diffInMonths(Carbon::now());
-                    $score -= 10;
+            if ($dateReceived) {
+                if ($assetAgeMonths > 60) { // Older than 5 years
+                    $score -= 25;
+                    $reasons[] = $isEn 
+                        ? "Device age exceeds 5 years ({$assetAgeYears} years)."
+                        : "Usia perangkat melebihi 5 tahun ({$assetAgeYears} tahun).";
+                } elseif ($assetAgeMonths > 36) { // Older than 3 years
+                    $score -= 15;
                     $reasons[] = $isEn
-                        ? "Manufacturer warranty expired {$monthsExpired} months ago."
-                        : "Garansi resmi pabrikan telah habis sejak {$monthsExpired} bulan lalu.";
+                        ? "Device age reaches {$assetAgeYears} years."
+                        : "Usia perangkat mencapai {$assetAgeYears} tahun.";
+                }
+
+                // Warranty Expiry
+                if ($warrantyMonths > 0) {
+                    $expiryDate = (clone $dateReceived)->addMonths($warrantyMonths);
+                    if ($expiryDate->isPast()) {
+                        $monthsExpired = $expiryDate->diffInMonths(Carbon::now());
+                        $score -= 10;
+                        $reasons[] = $isEn
+                            ? "Manufacturer warranty expired {$monthsExpired} months ago."
+                            : "Garansi resmi pabrikan telah habis sejak {$monthsExpired} bulan lalu.";
+                    }
                 }
             }
-        }
 
-        // 2. Ticket Frequency Factor (Max 30% Deduction)
-        $ticketCount = Ticket::where('asset_id', $asset->id)
-            ->where('created_at', '>=', Carbon::now()->subMonths(12))
-            ->count();
+            // 2. Ticket Frequency Factor (Max 30% Deduction)
+            $ticketCount = Ticket::where('asset_id', $asset->id)
+                ->where('created_at', '>=', Carbon::now()->subMonths(12))
+                ->count();
 
-        if ($ticketCount >= 5) {
-            $score -= 30;
-            $reasons[] = $isEn
-                ? "High vulnerability: Registered {$ticketCount} issue tickets in the past 12 months."
-                : "Tingkat kerentanan tinggi: Terdaftar {$ticketCount} tiket kendala dalam 12 bulan terakhir.";
-        } elseif ($ticketCount >= 3) {
-            $score -= 20;
-            $reasons[] = $isEn
-                ? "Recorded {$ticketCount} technical issue reports in the past 1 year."
-                : "Tercatat {$ticketCount} kali laporan kendala teknis dalam 1 tahun terakhir.";
-        } elseif ($ticketCount >= 1) {
-            $score -= 10;
-            $reasons[] = $isEn
-                ? "Experienced operational issues ({$ticketCount} tickets)."
-                : "Pernah mengalami kendala operasional ({$ticketCount} tiket).";
-        }
-
-        // 3. Maintenance Cost & History Factor (Max 25% Deduction)
-        $maintenanceCount = $asset->maintenances->count();
-        $totalCost = $asset->maintenances->sum('cost');
-
-        if ($totalCost >= 2000000) {
-            $score -= 20;
-            $reasons[] = $isEn
-                ? 'Accumulated repair cost is too high (Rp ' . number_format($totalCost, 0, ',', '.') . ').'
-                : 'Akumulasi biaya perbaikan terlampau tinggi (Rp ' . number_format($totalCost, 0, ',', '.') . ').';
-        } elseif ($maintenanceCount >= 3) {
-            $score -= 15;
-            $reasons[] = $isEn
-                ? "Undergone {$maintenanceCount} maintenance / service processes."
-                : "Telah menjalani {$maintenanceCount} kali proses maintenance / servis.";
-        }
-
-        // 4. Hardware Component Risk Factor (Max 15% Deduction)
-        if ($asset->computer) {
-            $os = mb_strtolower($asset->computer->os ?? '');
-            if (str_contains($os, 'windows 7') || str_contains($os, 'windows 8') || str_contains($os, 'xp')) {
-                $score -= 15;
+            if ($ticketCount >= 5) {
+                $score -= 30;
                 $reasons[] = $isEn
-                    ? "Operating System ({$asset->computer->os}) is end-of-life and no longer receives security updates."
-                    : "Sistem Operasi ({$asset->computer->os}) sudah terdepresiasi dan tidak mendapat pembaruan keamanan.";
-            }
-            if ($asset->computer->hdd > 0 && ($asset->computer->ssd ?? 0) == 0) {
+                    ? "High vulnerability: Registered {$ticketCount} issue tickets in the past 12 months."
+                    : "Tingkat kerentanan tinggi: Terdaftar {$ticketCount} tiket kendala dalam 12 bulan terakhir.";
+            } elseif ($ticketCount >= 3) {
+                $score -= 20;
+                $reasons[] = $isEn
+                    ? "Recorded {$ticketCount} technical issue reports in the past 1 year."
+                    : "Tercatat {$ticketCount} kali laporan kendala teknis dalam 1 tahun terakhir.";
+            } elseif ($ticketCount >= 1) {
                 $score -= 10;
                 $reasons[] = $isEn
-                    ? 'Still relying on mechanical Hard Drive (HDD) without SSD, high risk of slow performance & disk failure.'
-                    : 'Masih menggunakan Harddisk mekanis (HDD) tanpa SSD, berisiko slow performance & disk failure.';
+                    ? "Experienced operational issues ({$ticketCount} tickets)."
+                    : "Pernah mengalami kendala operasional ({$ticketCount} tiket).";
             }
-        }
 
-        // Final score capping (0 - 100)
-        $healthScore = max(5, min(100, $score));
+            // 3. Maintenance Cost & History Factor (Max 25% Deduction)
+            $maintenanceCount = $asset->maintenances->count();
+            $totalCost = $asset->maintenances->sum('cost');
 
-        // Risk Level Classification
-        if ($healthScore >= 80) {
-            $status = 'Healthy';
-            $badgeClass = 'badge-success';
-            $textColor = '#10b981';
-            $remainingLife = __('messages.rul_3_years');
-        } elseif ($healthScore >= 50) {
-            $status = 'Warning';
-            $badgeClass = 'badge-warning';
-            $textColor = '#f59e0b';
-            $remainingLife = __('messages.rul_6_12_months');
-        } else {
-            $status = 'Critical';
-            $badgeClass = 'badge-danger';
-            $textColor = '#ef4444';
-            $remainingLife = __('messages.rul_critical');
-        }
+            if ($totalCost >= 2000000) {
+                $score -= 20;
+                $reasons[] = $isEn
+                    ? 'Accumulated repair cost is too high (Rp ' . number_format($totalCost, 0, ',', '.') . ').'
+                    : 'Akumulasi biaya perbaikan terlampau tinggi (Rp ' . number_format($totalCost, 0, ',', '.') . ').';
+            } elseif ($maintenanceCount >= 3) {
+                $score -= 15;
+                $reasons[] = $isEn
+                    ? "Undergone {$maintenanceCount} maintenance / service processes."
+                    : "Telah menjalani {$maintenanceCount} kali proses maintenance / servis.";
+            }
 
-        // Generate Category-Aware & Risk-Specific AI Recommendation
-        $recommendation = $this->generateCategoryRecommendation($asset, $healthScore, $reasons);
+            // 4. Hardware Component Risk Factor (Max 15% Deduction)
+            if ($asset->computer) {
+                $os = mb_strtolower($asset->computer->os ?? '');
+                if (str_contains($os, 'windows 7') || str_contains($os, 'windows 8') || str_contains($os, 'xp')) {
+                    $score -= 15;
+                    $reasons[] = $isEn
+                        ? "Operating System ({$asset->computer->os}) is end-of-life and no longer receives security updates."
+                        : "Sistem Operasi ({$asset->computer->os}) sudah terdepresiasi dan tidak mendapat pembaruan keamanan.";
+                }
+                if ($asset->computer->hdd > 0 && ($asset->computer->ssd ?? 0) == 0) {
+                    $score -= 10;
+                    $reasons[] = $isEn
+                        ? 'Still relying on mechanical Hard Drive (HDD) without SSD, high risk of slow performance & disk failure.'
+                        : 'Masih menggunakan Harddisk mekanis (HDD) tanpa SSD, berisiko slow performance & disk failure.';
+                }
+            }
 
-        return [
-            'asset_id' => $asset->id,
-            'health_score' => $healthScore,
-            'status' => $status,
-            'badge_class' => $badgeClass,
-            'text_color' => $textColor,
-            'age_years' => $assetAgeYears,
-            'ticket_count' => $ticketCount,
-            'maintenance_cost' => $totalCost,
-            'remaining_life' => $remainingLife,
-            'reasons' => $reasons,
-            'recommendation' => $recommendation,
-        ];
+            // Final score capping (0 - 100)
+            $healthScore = max(5, min(100, $score));
+
+            // Risk Level Classification
+            if ($healthScore >= 80) {
+                $status = 'Healthy';
+                $badgeClass = 'badge-success';
+                $textColor = '#10b981';
+                $remainingLife = __('messages.rul_3_years');
+            } elseif ($healthScore >= 50) {
+                $status = 'Warning';
+                $badgeClass = 'badge-warning';
+                $textColor = '#f59e0b';
+                $remainingLife = __('messages.rul_6_12_months');
+            } else {
+                $status = 'Critical';
+                $badgeClass = 'badge-danger';
+                $textColor = '#ef4444';
+                $remainingLife = __('messages.rul_critical');
+            }
+
+            // Generate Category-Aware & Risk-Specific AI Recommendation
+            $recommendation = $this->generateCategoryRecommendation($asset, $healthScore, $reasons);
+
+            return [
+                'asset_id' => $asset->id,
+                'health_score' => $healthScore,
+                'status' => $status,
+                'badge_class' => $badgeClass,
+                'text_color' => $textColor,
+                'age_years' => $assetAgeYears,
+                'ticket_count' => $ticketCount,
+                'maintenance_cost' => $totalCost,
+                'remaining_life' => $remainingLife,
+                'reasons' => $reasons,
+                'recommendation' => $recommendation,
+            ];
+        });
     }
 
     /**
@@ -282,42 +287,46 @@ class PredictiveHealthService
      */
     public function getDashboardSummary(): array
     {
-        $assets = Asset::with(['category', 'brand', 'location', 'computer', 'printer', 'networkDetail', 'cctv', 'maintenances', 'currentAssignment.employee'])
-            ->get();
+        $cacheKey = 'predictive_health_summary_' . app()->getLocale();
 
-        $healthyCount = 0;
-        $warningCount = 0;
-        $criticalCount = 0;
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 600, function () {
+            $assets = Asset::with(['category', 'brand', 'location', 'computer', 'printer', 'networkDetail', 'cctv', 'maintenances', 'currentAssignment.employee'])
+                ->get();
 
-        $analyzedAssets = [];
-        $totalReplacementEstimate = 0;
+            $healthyCount = 0;
+            $warningCount = 0;
+            $criticalCount = 0;
 
-        foreach ($assets as $asset) {
-            $health = $this->calculateAssetHealth($asset);
-            $asset->health_data = $health;
+            $analyzedAssets = [];
+            $totalReplacementEstimate = 0;
 
-            if ($health['status'] === 'Healthy') {
-                $healthyCount++;
-            } elseif ($health['status'] === 'Warning') {
-                $warningCount++;
-            } else {
-                $criticalCount++;
-                $totalReplacementEstimate += 8500000; // Estimated 8.5M IDR per critical asset replacement
+            foreach ($assets as $asset) {
+                $health = $this->calculateAssetHealth($asset);
+                $asset->health_data = $health;
+
+                if ($health['status'] === 'Healthy') {
+                    $healthyCount++;
+                } elseif ($health['status'] === 'Warning') {
+                    $warningCount++;
+                } else {
+                    $criticalCount++;
+                    $totalReplacementEstimate += 8500000; // Estimated 8.5M IDR per critical asset replacement
+                }
+
+                $analyzedAssets[] = $asset;
             }
 
-            $analyzedAssets[] = $asset;
-        }
+            // Sort assets by health score ascending (most critical first)
+            usort($analyzedAssets, fn($a, $b) => $a->health_data['health_score'] <=> $b->health_data['health_score']);
 
-        // Sort assets by health score ascending (most critical first)
-        usort($analyzedAssets, fn($a, $b) => $a->health_data['health_score'] <=> $b->health_data['health_score']);
-
-        return [
-            'total_assets' => count($assets),
-            'healthy_count' => $healthyCount,
-            'warning_count' => $warningCount,
-            'critical_count' => $criticalCount,
-            'estimated_replacement_budget' => $totalReplacementEstimate,
-            'assets' => $analyzedAssets,
-        ];
+            return [
+                'total_assets' => count($assets),
+                'healthy_count' => $healthyCount,
+                'warning_count' => $warningCount,
+                'critical_count' => $criticalCount,
+                'estimated_replacement_budget' => $totalReplacementEstimate,
+                'assets' => $analyzedAssets,
+            ];
+        });
     }
 }

@@ -4,13 +4,17 @@
 
 @section('content')
 <style>
+    .content-header {
+        display: none !important;
+    }
+
     .user-form-card {
         border-radius: 16px !important;
         overflow: hidden !important;
         border: var(--rule-soft);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         max-width: 720px;
-        margin: 0 auto;
+        margin: 1rem auto 0;
     }
     .user-form-card .card-header {
         border-top-left-radius: 16px !important;
@@ -96,8 +100,8 @@
                     <i class="fas fa-user-plus"></i>
                 </div>
                 <div>
-                    <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">Add New Login Account</h5>
-                    <small class="text-muted d-block" style="font-size: 0.78rem;">Buat akun login pengguna baru dan tentukan peran sistem (role)</small>
+                    <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.add') }} {{ __('messages.user') }}</h5>
+                    <small class="text-muted d-block" style="font-size: 0.78rem;">{{ __('messages.add_user_subtitle') }}</small>
                 </div>
             </div>
         </div>
@@ -109,7 +113,7 @@
                     <label class="form-label form-label-title theme-text">
                         {{ __('messages.name') }} <span class="text-danger">*</span>
                     </label>
-                    <input type="text" name="name" class="form-control theme-input custom-user-input @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="Enter full name..." required autocomplete="off">
+                    <input type="text" name="name" class="form-control theme-input custom-user-input @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="{{ __('messages.enter_full_name_placeholder') }}" required autocomplete="off">
                     @error('name') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
 
@@ -117,7 +121,7 @@
                     <label class="form-label form-label-title theme-text">
                         {{ __('messages.username') }} <span class="text-danger">*</span>
                     </label>
-                    <input type="text" name="username" class="form-control theme-input custom-user-input @error('username') is-invalid @enderror" value="{{ old('username') }}" placeholder="Enter username..." required autocomplete="off">
+                    <input type="text" name="username" class="form-control theme-input custom-user-input @error('username') is-invalid @enderror" value="{{ old('username') }}" placeholder="{{ __('messages.enter_username_placeholder') }}" required autocomplete="off">
                     @error('username') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
             </div>
@@ -127,7 +131,7 @@
                 <label class="form-label form-label-title theme-text">
                     {{ __('messages.email') }} <span class="text-danger">*</span>
                 </label>
-                <input type="email" name="email" class="form-control theme-input custom-user-input @error('email') is-invalid @enderror" value="{{ old('email') }}" placeholder="Enter email address..." required autocomplete="off">
+                <input type="email" name="email" class="form-control theme-input custom-user-input @error('email') is-invalid @enderror" value="{{ old('email') }}" placeholder="{{ __('messages.enter_email_placeholder') }}" required autocomplete="off">
                 @error('email') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
             </div>
 
@@ -137,7 +141,7 @@
                     <label class="form-label form-label-title theme-text">
                         {{ __('messages.password') }} <span class="text-danger">*</span>
                     </label>
-                    <input type="password" name="password" class="form-control theme-input custom-user-input @error('password') is-invalid @enderror" placeholder="Enter password..." required autocomplete="new-password">
+                    <input type="password" name="password" class="form-control theme-input custom-user-input @error('password') is-invalid @enderror" placeholder="{{ __('messages.enter_password_placeholder') }}" required autocomplete="new-password">
                     @error('password') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
 
@@ -145,7 +149,7 @@
                     <label class="form-label form-label-title theme-text">
                         {{ __('messages.confirm_password') }} <span class="text-danger">*</span>
                     </label>
-                    <input type="password" name="password_confirmation" class="form-control theme-input custom-user-input" placeholder="Confirm password..." required autocomplete="new-password">
+                    <input type="password" name="password_confirmation" class="form-control theme-input custom-user-input" placeholder="{{ __('messages.confirm_password_placeholder') }}" required autocomplete="new-password">
                 </div>
             </div>
 
@@ -155,7 +159,7 @@
                     {{ __('messages.role') }} <span class="text-danger">*</span>
                 </label>
                 <select name="role" class="form-control select2 @error('role') is-invalid @enderror" required>
-                    <option value="">Select Role...</option>
+                    <option value="">{{ __('messages.select_role') }}</option>
                     @foreach($roles as $role)
                         <option value="{{ $role->name }}" {{ old('role') == $role->name ? 'selected' : '' }}>{{ $role->name }}</option>
                     @endforeach

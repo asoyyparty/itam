@@ -24,6 +24,7 @@ class User extends Authenticatable
         'username',
         'email',
         'password',
+        'avatar',
         'api_token',
         'anydesk_password',
         'pc_password',

@@ -10,7 +10,7 @@
         border: var(--rule-soft);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         max-width: 720px;
-        margin: 0 auto;
+        margin: 1rem auto 0;
     }
     .license-form-card .card-header {
         border-top-left-radius: 16px !important;
@@ -105,7 +105,7 @@
                 </div>
                 <div>
                     <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.edit_license') ?? 'Edit Software License' }}</h5>
-                    <small class="text-muted d-block" style="font-size: 0.78rem;">Perbarui data lisensi {{ $softwareLicense->name }}</small>
+                    <small class="text-muted d-block" style="font-size: 0.78rem;">{{ __('messages.edit_license_subtitle') }} ({{ $softwareLicense->name }})</small>
                 </div>
             </div>
         </div>
@@ -116,7 +116,7 @@
                 <label class="form-label form-label-title theme-text">
                     {{ __('messages.name') }} <span class="text-danger">*</span>
                 </label>
-                <input type="text" name="name" class="form-control theme-input custom-license-input @error('name') is-invalid @enderror" value="{{ old('name', $softwareLicense->name) }}" placeholder="Masukkan nama lisensi software..." required autocomplete="off">
+                <input type="text" name="name" class="form-control theme-input custom-license-input @error('name') is-invalid @enderror" value="{{ old('name', $softwareLicense->name) }}" placeholder="{{ __('messages.name') }}..." required autocomplete="off">
                 @error('name') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
             </div>
 
@@ -132,7 +132,7 @@
                         </button>
                     @endif
                 </div>
-                <textarea name="license_key" class="form-control theme-input custom-license-textarea @error('license_key') is-invalid @enderror" rows="3" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX...">{{ old('license_key', $softwareLicense->license_key) }}</textarea>
+                <textarea name="license_key" class="form-control theme-input custom-license-textarea @error('license_key') is-invalid @enderror" rows="3" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX...">{{ old('license_key', ($softwareLicense->license_key && $softwareLicense->license_key !== 'null') ? $softwareLicense->license_key : '') }}</textarea>
                 @error('license_key') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
             </div>
 
@@ -162,7 +162,7 @@
                     {{ __('messages.pic') }}
                 </label>
                 <select name="pic_id" class="form-control select2 @error('pic_id') is-invalid @enderror">
-                    <option value="">Pilih {{ __('messages.pic') }} / Penanggung Jawab...</option>
+                    <option value="">{{ __('messages.select') }} {{ __('messages.pic') }}...</option>
                     @foreach($employees as $emp)
                         <option value="{{ $emp->id }}" {{ old('pic_id', $softwareLicense->pic_id) == $emp->id ? 'selected' : '' }}>{{ $emp->name }} ({{ $emp->employee_id }})</option>
                     @endforeach
@@ -175,7 +175,7 @@
                 <label class="form-label form-label-title theme-text">
                     {{ __('messages.notes') }}
                 </label>
-                <textarea name="notes" class="form-control theme-input custom-license-textarea @error('notes') is-invalid @enderror" rows="3" placeholder="Tuliskan catatan lisensi tambahan...">{{ old('notes', $softwareLicense->notes) }}</textarea>
+                <textarea name="notes" class="form-control theme-input custom-license-textarea @error('notes') is-invalid @enderror" rows="3" placeholder="Tuliskan catatan lisensi tambahan...">{{ old('notes', ($softwareLicense->notes && $softwareLicense->notes !== 'null') ? $softwareLicense->notes : '') }}</textarea>
                 @error('notes') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
             </div>
         </div>

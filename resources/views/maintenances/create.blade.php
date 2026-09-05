@@ -92,7 +92,7 @@
     }
 </style>
 
-<div class="card theme-card maint-form-card">
+<div class="card theme-card maint-form-card" style="margin-top: 0 !important;">
     <form action="{{ route('maintenances.store') }}" method="POST">
         @csrf
         <!-- Header Toolbar -->
@@ -103,7 +103,7 @@
                 </div>
                 <div>
                     <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.log_maintenance') }}</h5>
-                    <small class="text-muted d-block" style="font-size: 0.78rem;">Catat perawatan, perbaikan, atau upgrade perangkat IT</small>
+                    <small class="text-muted d-block" style="font-size: 0.78rem;">{{ __('messages.log_maintenance_subtitle') }}</small>
                 </div>
             </div>
         </div>
@@ -153,7 +153,7 @@
                     <label class="form-label form-label-title theme-text">
                         {{ __('messages.estimated_cost') }}
                     </label>
-                    <input type="number" name="cost" class="form-control theme-input custom-maint-input @error('cost') is-invalid @enderror" value="{{ old('cost') }}" step="0.01" placeholder="Estimasi biaya (Rp)..." autocomplete="off">
+                    <input type="number" name="cost" class="form-control theme-input custom-maint-input @error('cost') is-invalid @enderror" value="{{ old('cost') }}" step="0.01" placeholder="{{ __('messages.estimated_cost') }}..." autocomplete="off">
                     @error('cost') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
             </div>
@@ -164,7 +164,7 @@
                     <label class="form-label form-label-title theme-text">
                         {{ __('messages.description_issue') }} <span class="text-danger">*</span>
                     </label>
-                    <textarea name="description" class="form-control theme-input custom-maint-textarea @error('description') is-invalid @enderror" rows="4" placeholder="Tuliskan kendala, rincian perbaikan, atau item upgrade..." required>{{ old('description') }}</textarea>
+                    <textarea name="description" class="form-control theme-input custom-maint-textarea @error('description') is-invalid @enderror" rows="4" placeholder="{{ __('messages.enter_maintenance_desc_placeholder') }}" required>{{ old('description') }}</textarea>
                     @error('description') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                 </div>
             </div>

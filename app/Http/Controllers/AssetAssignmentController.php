@@ -18,7 +18,7 @@ class AssetAssignmentController extends Controller implements \Illuminate\Routin
 
     public function index(Request $request)
     {
-        $query = AssetAssignment::with(['asset', 'employee']);
+        $query = AssetAssignment::with(['asset', 'employee', 'employee.department']);
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
@@ -44,14 +44,28 @@ class AssetAssignmentController extends Controller implements \Illuminate\Routin
 
         $assignments = $query->latest()->paginate(25)->withQueryString();
 
-        return view('assignments.index', compact('assignments'));
+        $statusCounts = \Illuminate\Support\Facades\Cache::remember('assignment_status_counts', 300, function () {
+            return AssetAssignment::selectRaw("status, count(*) as total")
+                ->groupBy('status')
+                ->pluck('total', 'status')
+                ->all();
+        });
+        $totalAssignmentsCount = array_sum($statusCounts);
+        $activeCount = $statusCounts['Assigned'] ?? 0;
+        $returnedCount = $statusCounts['Returned'] ?? 0;
+
+        return view('assignments.index', compact('assignments', 'statusCounts', 'totalAssignmentsCount', 'activeCount', 'returnedCount'));
     }
 
     public function create()
     {
         // Only get assets that are Available
-        $assets = Asset::where('status', 'Available')->orderBy('name')->get();
-        $employees = Employee::orderBy('name')->get();
+        $assets = \Illuminate\Support\Facades\Cache::remember('available_assets_select', 300, function () {
+            return Asset::where('status', 'Available')->select('id', 'name', 'asset_tag')->orderBy('name')->get();
+        });
+        $employees = \Illuminate\Support\Facades\Cache::remember('active_employees_select', 300, function () {
+            return Employee::select('id', 'name', 'employee_id')->orderBy('name')->get();
+        });
 
         return view('assignments.create', compact('assets', 'employees'));
     }
@@ -63,6 +77,7 @@ class AssetAssignmentController extends Controller implements \Illuminate\Routin
             'employee_id' => 'required|exists:employees,id',
             'assigned_date' => 'required|date',
             'notes' => 'nullable|string',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
         ]);
 
         // Check if asset is still available
@@ -71,16 +86,25 @@ class AssetAssignmentController extends Controller implements \Illuminate\Routin
             return back()->with('error', 'Asset is not available for assignment.')->withInput();
         }
 
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('handovers', 'public');
+        }
+
         $assignment = AssetAssignment::create([
             'asset_id' => $request->asset_id,
             'employee_id' => $request->employee_id,
             'assigned_date' => $request->assigned_date,
             'status' => 'Assigned',
             'notes' => $request->notes,
+            'photo' => $photoPath,
         ]);
 
         // Update asset status
         $asset->update(['status' => 'Assigned']);
+
+        \Illuminate\Support\Facades\Cache::forget('assignment_status_counts');
+        \Illuminate\Support\Facades\Cache::forget('asset_status_counts');
 
         return redirect()->route('assignments.index', request()->query())->with('success', 'Asset successfully assigned.');
     }
@@ -98,13 +122,25 @@ class AssetAssignmentController extends Controller implements \Illuminate\Routin
             'employee_id' => 'required|exists:employees,id',
             'assigned_date' => 'required|date',
             'notes' => 'nullable|string',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
         ]);
 
-        $assignment->update([
+        $data = [
             'employee_id' => $request->employee_id,
             'assigned_date' => $request->assigned_date,
             'notes' => $request->notes,
-        ]);
+        ];
+
+        if ($request->hasFile('photo')) {
+            if ($assignment->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($assignment->photo)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($assignment->photo);
+            }
+            $data['photo'] = $request->file('photo')->store('handovers', 'public');
+        }
+
+        $assignment->update($data);
+
+        \Illuminate\Support\Facades\Cache::forget('assignment_status_counts');
 
         return redirect()->route('assignments.index', request()->query())->with('success', 'Assignment updated successfully.');
     }
@@ -116,6 +152,9 @@ class AssetAssignmentController extends Controller implements \Illuminate\Routin
             $assignment->asset->update(['status' => 'Available']);
         }
         $assignment->delete();
+
+        \Illuminate\Support\Facades\Cache::forget('assignment_status_counts');
+        \Illuminate\Support\Facades\Cache::forget('asset_status_counts');
 
         return redirect()->route('assignments.index', request()->query())->with('success', 'Assignment record deleted.');
     }
@@ -145,6 +184,9 @@ class AssetAssignmentController extends Controller implements \Illuminate\Routin
             }
         }
 
+        \Illuminate\Support\Facades\Cache::forget('assignment_status_counts');
+        \Illuminate\Support\Facades\Cache::forget('asset_status_counts');
+
         return response()->json(['success' => true, 'message' => 'Status updated successfully.', 'status' => $assignment->status]);
     }
 
@@ -167,6 +209,9 @@ class AssetAssignmentController extends Controller implements \Illuminate\Routin
         ]);
 
         $assignment->asset->update(['status' => 'Available']);
+
+        \Illuminate\Support\Facades\Cache::forget('assignment_status_counts');
+        \Illuminate\Support\Facades\Cache::forget('asset_status_counts');
 
         return redirect()->route('assignments.index', request()->query())->with('success', 'Asset successfully returned.');
     }

@@ -3,49 +3,50 @@
 @section('title', __('messages.password_vault'))
 
 @section('content')
-<div class="row mb-3 legacy-list-toolbar">
-    <div class="col-sm-8">
-        <form action="{{ route('password_vaults.index') }}" method="GET">
-            <div class="d-flex flex-wrap" style="gap: 10px;">
-                <input type="text" name="search" class="form-control theme-input" placeholder="{{ __('messages.search_vault') }}" value="{{ request('search') }}" style="width: 250px;">
-                
-                <select name="category" class="form-control select2 theme-input" style="width: 150px;">
-                    <option value="" >{{ __('messages.all_category') }}</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat }}"  {{ request('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
-                    @endforeach
-                </select>
-
-                <button class="btn btn-outline-info" type="submit"><i class="fas fa-search"></i></button>
-                @if(request('search') || request('category'))
-                    <a href="{{ route('password_vaults.index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center"  style="min-width: 40px; height: 38px; padding: 0; display: flex !important; align-items: center !important; justify-content: center !important; border-color: rgba(148, 163, 184, 0.22);"><i class="fas fa-times"></i></a>
-                @endif
+<!-- Header Toolbar -->
+<div class="row mb-3 password-vault-toolbar-box" style="margin-top: 0 !important;">
+    <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center" style="gap: 10px;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); display: flex; align-items: center; justify-content: center; color: #818cf8; font-size: 1.1rem; flex-shrink: 0;">
+                <i class="fas fa-key"></i>
             </div>
-        </form>
-    </div>
-    <div class="col-sm-4 text-right">
+            <div>
+                <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">{{ __('messages.password_vault') }}</h5>
+                <small class="text-muted d-block" style="font-size: 0.78rem;">{{ __('messages.vault_subtitle') }}</small>
+            </div>
+        </div>
         @can('action_manage_settings')
-<a href="{{ route('password_vaults.create') }}" class="btn btn-sm btn-primary">
-            <i class="fas fa-plus mr-1"></i>{{ __('messages.add_vault') }}
-        </a>
-@endcan
+        <div class="d-flex align-items-center flex-wrap vault-action-buttons header-action-buttons ml-auto" style="gap: 8px;">
+            <a href="{{ route('password_vaults.create') }}" class="btn btn-action-primary px-4 btn-add-main">
+                {{ __('messages.add_vault') }}
+            </a>
+        </div>
+        @endcan
     </div>
 </div>
 
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible" style="background: rgba(40,167,69,0.2); border: 1px solid rgba(40,167,69,0.5); color: #28a745;">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-        <i class="icon fas fa-check"></i> {{ session('success') }}
-    </div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger alert-dismissible" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.5); color: #dc3545;">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-        <i class="icon fas fa-ban"></i> {{ session('error') }}
-    </div>
-@endif
-
 <div class="card theme-card">
+    <div class="division-table-header vault-table-header card-header border-0 d-flex align-items-center flex-wrap">
+        <form action="{{ route('password_vaults.index') }}" method="GET" class="vault-search-form" style="width: 100%;">
+            <div class="vault-search-controls d-flex align-items-center justify-content-start">
+                <select name="category" class="form-control select2 theme-input vault-filter" onchange="this.form.submit()">
+                    <option value="">{{ __('messages.all_category') }}</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                    @endforeach
+                </select>
+                <div class="sleek-search-wrapper vault-search-input" style="flex: 1; min-width: 0;">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" name="search" class="form-control theme-input sleek-search-input" placeholder="{{ __('messages.search_vault') }}" value="{{ request('search') }}" aria-label="{{ __('messages.search_vault') }}">
+                    @if(request()->anyFilled(['search', 'category']))
+                        <a href="{{ route('password_vaults.index') }}" class="clear-search-btn" title="Clear" aria-label="Clear">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    @endif
+                </div>
+            </div>
+        </form>
+    </div>
     <div class="card-body p-0">
         <div class="theme-scroll-container table-responsive">
             <table class="table table-striped table-hover m-0 theme-table division-table">
@@ -63,12 +64,12 @@
                 <tbody>
                     @forelse($passwords as $pwd)
                     <tr>
-                        <td class="theme-text">{{ $loop->iteration }}</td>
+                        <td class="theme-text">{{ (method_exists($passwords, 'firstItem') && $passwords->firstItem() ? $passwords->firstItem() + $loop->index : $loop->iteration) }}</td>
                         <td class="text-info font-weight-bold">{{ $pwd->device_name }}</td>
-                        <td class="theme-text"><code>{{ $pwd->username }}</code></td>
+                        <td class="theme-text"><code style="font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; font-variant-numeric: tabular-nums; color: var(--color-info, #38bdf8);">{{ $pwd->username }}</code></td>
                         <td>
                             <div class="d-flex align-items-center" style="gap: 5px;">
-                                <input type="password" value="{{ $pwd->encrypted_password }}" class="password-field border-0 bg-transparent theme-text" style="outline: none; width: 100px;" readonly>
+                                <input type="password" value="{{ $pwd->encrypted_password }}" class="password-field border-0 bg-transparent theme-text" style="outline: none; width: 100px; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; font-variant-numeric: tabular-nums;" readonly>
                                 <button type="button" class="btn btn-xs btn-outline-info toggle-password-btn" style="padding: 2px 6px;" title="{{ __('messages.toggle_password') ?? 'Toggle Password' }}"><i class="fas fa-eye"></i></button>
                                 <button type="button" class="btn btn-xs btn-outline-success copy-password-btn" style="padding: 2px 6px;" title="{{ __('messages.copy') ?? 'Copy' }}" data-password="{{ $pwd->encrypted_password }}"><i class="fas fa-copy"></i></button>
                             </div>

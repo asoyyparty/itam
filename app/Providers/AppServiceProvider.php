@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
 
         Paginator::useBootstrapFive();
 
-        if (env('APP_ENV') !== 'local' || request()->header('x-forwarded-proto') === 'https') {
+        if (env('APP_ENV') !== 'local') {
             URL::forceScheme('https');
         }
 
@@ -41,7 +41,9 @@ class AppServiceProvider extends ServiceProvider
 
         try {
             if (Schema::hasTable('settings')) {
-                $settings = Setting::pluck('value', 'key')->toArray();
+                $settings = \Illuminate\Support\Facades\Cache::remember('system_settings_dict', 86400, function () {
+                    return Setting::pluck('value', 'key')->toArray();
+                });
                 View::share('settings', $settings);
                 View::share('app_name', $settings['app_name'] ?? 'ITAM Enterprise');
                 View::share('company_name', $settings['company_name'] ?? 'PT CBA Chemical Industry');
@@ -91,12 +93,27 @@ class AppServiceProvider extends ServiceProvider
             try {
                 $modelClass::created(function ($model) {
                     \App\Helpers\ActivityLogger::log($model, 'created');
+                    \App\Helpers\CacheHelper::clearDashboardCache();
+                    if (in_array(get_class($model), [\App\Models\Category::class, \App\Models\Brand::class, \App\Models\Location::class, \App\Models\Vlan::class])) {
+                        \App\Helpers\CacheHelper::clearMasterDataCache();
+                    }
                 });
                 $modelClass::updated(function ($model) {
                     \App\Helpers\ActivityLogger::log($model, 'updated');
+                    \App\Helpers\CacheHelper::clearDashboardCache();
+                    if ($model instanceof \App\Models\Asset) {
+                        \App\Helpers\CacheHelper::clearAssetHealthCache($model->id);
+                    }
+                    if (in_array(get_class($model), [\App\Models\Category::class, \App\Models\Brand::class, \App\Models\Location::class, \App\Models\Vlan::class])) {
+                        \App\Helpers\CacheHelper::clearMasterDataCache();
+                    }
                 });
                 $modelClass::deleted(function ($model) {
                     \App\Helpers\ActivityLogger::log($model, 'deleted');
+                    \App\Helpers\CacheHelper::clearDashboardCache();
+                    if (in_array(get_class($model), [\App\Models\Category::class, \App\Models\Brand::class, \App\Models\Location::class, \App\Models\Vlan::class])) {
+                        \App\Helpers\CacheHelper::clearMasterDataCache();
+                    }
                 });
             } catch (\Exception $e) {
                 logger()->error("Failed to register activity observers for {$modelClass}: " . $e->getMessage());

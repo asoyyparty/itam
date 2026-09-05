@@ -270,7 +270,7 @@
 </style>
 
 <!-- Clean Header Toolbar -->
-<div class="row mb-3 align-items-center" style="margin-top: 1rem !important; margin-bottom: 0.75rem !important;">
+<div class="row mb-3 align-items-center" style="margin-top: 0 !important; margin-bottom: 0.75rem !important;">
     <div class="col-12 d-flex justify-content-between align-items-center flex-wrap role-perm-header gap-2">
         <div class="d-flex align-items-center" style="gap: 10px;">
             <a href="{{ route('roles.index') }}" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; border-radius: 12px !important; border-color: rgba(148, 163, 184, 0.25);" title="{{ __('messages.back') }}">

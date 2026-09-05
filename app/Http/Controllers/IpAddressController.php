@@ -67,7 +67,13 @@ class IpAddressController extends Controller implements \Illuminate\Routing\Cont
         $ips = $query->orderByRaw('INET_ATON(ip_address)')->paginate(25)->withQueryString();
         $vlans = Vlan::orderBy('vlan_number')->get();
 
-        return view('ips.index', compact('ips', 'vlans'));
+        $totalIps = IpAddress::count();
+        $onlineIps = IpAddress::where('is_online', true)->count();
+        $usedIps = IpAddress::where('status', 'Used')->count();
+        $availableIps = IpAddress::where('status', 'Available')->count();
+        $reservedIps = IpAddress::where('status', 'Reserved')->count();
+
+        return view('ips.index', compact('ips', 'vlans', 'totalIps', 'onlineIps', 'usedIps', 'availableIps', 'reservedIps'));
     }
 
     public function create()

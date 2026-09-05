@@ -5,17 +5,16 @@ namespace App\Models;
 use Database\Factories\AssetFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Asset extends Model
 {
     /** @use HasFactory<AssetFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
-        'asset_tag', 'name', 'serial_number', 'category_id', 'brand_id',
+        'asset_tag', 'name', 'uom', 'serial_number', 'category_id', 'brand_id',
         'location_id', 'date_received', 'delivery_order_number',
-        'warranty_months', 'status', 'notes', 'spec_data',
+        'warranty_months', 'status', 'notes', 'image', 'spec_data',
     ];
 
     protected $casts = [

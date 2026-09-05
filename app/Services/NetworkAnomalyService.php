@@ -42,7 +42,7 @@ class NetworkAnomalyService
                         'ip_id' => $ip->id,
                         'ip_address' => $ipAddress,
                         'mac_address' => $macAddress,
-                        'vlan' => $ip->vlan->vlan_name ?? ($isEn ? 'Default VLAN' : 'VLAN Bawaan'),
+                        'vlan' => $ip->vlan ? ($ip->vlan->name . ' (VLAN ' . $ip->vlan->vlan_number . ')') : ($isEn ? 'Default VLAN' : 'VLAN Bawaan'),
                         'type' => $isEn ? 'IP Conflict / Duplicate MAC' : 'Konflik IP / Duplikasi MAC',
                         'severity' => 'Critical',
                         'badge_class' => 'badge-danger',
@@ -64,7 +64,7 @@ class NetworkAnomalyService
                     'ip_id' => $ip->id,
                     'ip_address' => $ipAddress,
                     'mac_address' => $macAddress ?: '00:1A:2B:3C:4D:' . sprintf('%02X', $ip->id),
-                    'vlan' => $ip->vlan->vlan_name ?? ($isEn ? 'Default Subnet' : 'Subnet Bawaan'),
+                    'vlan' => $ip->vlan ? ($ip->vlan->name . ' (VLAN ' . $ip->vlan->vlan_number . ')') : ($isEn ? 'Default Subnet' : 'Subnet Bawaan'),
                     'type' => $isEn ? 'Rogue / Unauthorized Device' : 'Perangkat Liar / Tak Dikenal',
                     'severity' => 'Critical',
                     'badge_class' => 'badge-danger',
@@ -84,7 +84,7 @@ class NetworkAnomalyService
                     'ip_id' => $ip->id,
                     'ip_address' => $ipAddress,
                     'mac_address' => $macAddress ?: '-',
-                    'vlan' => $ip->vlan->vlan_name ?? ($isEn ? 'Default Subnet' : 'Subnet Bawaan'),
+                    'vlan' => $ip->vlan ? ($ip->vlan->name . ' (VLAN ' . $ip->vlan->vlan_number . ')') : ($isEn ? 'Default Subnet' : 'Subnet Bawaan'),
                     'type' => $isEn ? 'High Latency Spike' : 'Lonjakan Latensi Tinggi',
                     'severity' => 'Warning',
                     'badge_class' => 'badge-warning',
@@ -104,7 +104,7 @@ class NetworkAnomalyService
                     'ip_id' => $ip->id,
                     'ip_address' => $ipAddress,
                     'mac_address' => $macAddress ?: '-',
-                    'vlan' => $ip->vlan->vlan_name ?? ($isEn ? 'Default Subnet' : 'Subnet Bawaan'),
+                    'vlan' => $ip->vlan ? ($ip->vlan->name . ' (VLAN ' . $ip->vlan->vlan_number . ')') : ($isEn ? 'Default Subnet' : 'Subnet Bawaan'),
                     'type' => $isEn ? 'Critical Infrastructure Down' : 'Infrastruktur Kritis Offline',
                     'severity' => 'Warning',
                     'badge_class' => 'badge-warning',
@@ -132,7 +132,7 @@ class NetworkAnomalyService
     public function getNetworkSummary(): array
     {
         $ips = IpAddress::with('vlan')->get();
-        $vlans = Vlan::withCount('ipAddresses')->get();
+        $vlans = Vlan::withCount('ipAddresses')->orderBy('vlan_number')->get();
 
         $totalIps = count($ips);
         $onlineCount = $ips->where('is_online', true)->count();

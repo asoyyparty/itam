@@ -14,11 +14,43 @@ class PicController extends Controller implements \Illuminate\Routing\Controller
         ];
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $pics = Pic::orderBy('name')->get();
+        $query = Pic::query()
+            ->withCount([
+                'tickets as active_tickets_count' => function ($q) {
+                    $q->whereIn('status', ['open', 'in_progress']);
+                },
+                'tickets as resolved_tickets_count' => function ($q) {
+                    $q->whereIn('status', ['resolved', 'closed']);
+                },
+                'tickets as total_tickets_count',
+            ])
+            ->orderBy('name');
 
-        return view('pics.index', compact('pics'));
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $pics = $query->get();
+
+        $totalPics = Pic::count();
+        $totalActiveTickets = \App\Models\Ticket::whereNotNull('pic_id')
+            ->whereIn('status', ['open', 'in_progress'])
+            ->count();
+        $totalResolvedTickets = \App\Models\Ticket::whereNotNull('pic_id')
+            ->whereIn('status', ['resolved', 'closed'])
+            ->count();
+        $standbyPicsCount = $pics->where('active_tickets_count', 0)->count();
+
+        return view('pics.index', compact(
+            'pics',
+            'totalPics',
+            'totalActiveTickets',
+            'totalResolvedTickets',
+            'standbyPicsCount'
+        ));
     }
 
     public function store(Request $request)
@@ -28,10 +60,10 @@ class PicController extends Controller implements \Illuminate\Routing\Controller
         ]);
 
         Pic::create([
-            'name' => $request->name,
+            'name' => trim($request->name),
         ]);
 
-        return redirect()->back()->with('success', 'PIC ditambahkan berhasil.');
+        return redirect()->back()->with('success', __('messages.pic_created_success') ?? 'PIC ditambahkan berhasil.');
     }
 
     public function update(Request $request, Pic $pic)
@@ -41,16 +73,16 @@ class PicController extends Controller implements \Illuminate\Routing\Controller
         ]);
 
         $pic->update([
-            'name' => $request->name,
+            'name' => trim($request->name),
         ]);
 
-        return redirect()->back()->with('success', 'PIC diperbarui berhasil.');
+        return redirect()->back()->with('success', __('messages.pic_updated_success') ?? 'PIC diperbarui berhasil.');
     }
 
     public function destroy(Pic $pic)
     {
         $pic->delete();
 
-        return redirect()->back()->with('success', 'PIC dihapus berhasil.');
+        return redirect()->back()->with('success', __('messages.pic_deleted_success') ?? 'PIC dihapus berhasil.');
     }
 }

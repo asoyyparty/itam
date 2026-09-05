@@ -4,149 +4,465 @@
 
 @section('content')
 <style>
-    .cat-card {
-        border-radius: 16px !important;
-        overflow: hidden !important;
-        border: var(--rule-soft);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    }
-    .custom-search-input {
-        height: 44px !important;
-        border-radius: 10px !important;
-        border: 1px solid rgba(148, 163, 184, 0.22) !important;
-        background: rgba(15, 23, 42, 0.22) !important;
-        box-shadow: none !important;
-        font-size: 0.9rem !important;
-        color: var(--color-ink-0) !important;
-        transition: all 0.2s ease !important;
-    }
-    .custom-search-input:focus {
-        border-color: #60a5fa !important;
-        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) !important;
-        background: rgba(15, 23, 42, 0.35) !important;
-    }
-    .modal-content {
-        border-radius: 16px !important;
-        overflow: hidden !important;
-        background: var(--color-paper-0) !important;
-        border: var(--rule-soft) !important;
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 */
+:root {
+    --hl-bg-canvas: #090d16;
+    --hl-bg-surface: #0f172a;
+    --hl-bg-card: rgba(15, 23, 42, 0.78);
+    --hl-border-subtle: rgba(148, 163, 184, 0.14);
+    --hl-border-active: rgba(148, 163, 184, 0.28);
+    --hl-text-bright: #f8fafc;
+    --hl-text-muted: #94a3b8;
+    --hl-text-dim: #64748b;
+    --hl-accent-amber: #f59e0b;
+    --hl-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.master-header-banner {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.82) 100%);
+    border: 1px solid var(--hl-border-subtle);
+    border-radius: 16px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(12px);
+}
+body.light-mode .master-header-banner {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.95));
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+}
+
+.master-banner-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.master-banner-title-box {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    flex: 1 1 300px;
+}
+
+.master-banner-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fbbf24;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.2);
+}
+
+.master-count-pill {
+    font-family: var(--hl-font-mono);
+    font-size: 0.72rem;
+    padding: 5px 12px;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #fbbf24;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+
+.live-dot-amber {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #f59e0b;
+    box-shadow: 0 0 8px #f59e0b;
+    display: inline-block;
+}
+
+.master-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-tactile-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none !important;
+    white-space: nowrap;
+}
+.btn-tactile-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(217, 119, 6, 0.45);
+    filter: brightness(1.08);
+}
+
+.btn-tactile-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--hl-text-bright) !important;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--hl-border-active);
+    transition: all 0.2s;
+    text-decoration: none !important;
+    white-space: nowrap;
+}
+.btn-tactile-secondary:hover {
+    background: rgba(30, 41, 59, 0.9);
+    border-color: rgba(148, 163, 184, 0.45);
+    transform: translateY(-1px);
+}
+body.light-mode .btn-tactile-secondary {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #1e293b !important;
+}
+
+/* Master Table Card */
+.master-table-card {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    border: 1px solid var(--hl-border-subtle) !important;
+    background: var(--hl-bg-card) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px);
+}
+body.light-mode .master-table-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+}
+
+.master-card-header {
+    background: rgba(15, 23, 42, 0.4) !important;
+    border-bottom: 1px solid var(--hl-border-subtle) !important;
+    padding: 14px 18px !important;
+}
+body.light-mode .master-card-header {
+    background: #f8fafc !important;
+    border-bottom-color: #e2e8f0 !important;
+}
+
+.sleek-search-wrapper {
+    position: relative;
+    width: 100%;
+}
+.sleek-search-wrapper .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--hl-text-dim);
+    font-size: 0.85rem;
+    pointer-events: none;
+}
+.sleek-search-input {
+    height: 42px !important;
+    padding-left: 38px !important;
+    padding-right: 38px !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--hl-border-subtle) !important;
+    background: rgba(15, 23, 42, 0.6) !important;
+    color: var(--hl-text-bright) !important;
+    font-size: 0.84rem !important;
+    transition: all 0.2s !important;
+}
+.sleek-search-input:focus {
+    border-color: var(--hl-accent-amber) !important;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2) !important;
+    background: rgba(15, 23, 42, 0.9) !important;
+}
+body.light-mode .sleek-search-input {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #1e293b !important;
+}
+
+/* Action Icon Buttons */
+.btn-action-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    transition: all 0.15s;
+    text-decoration: none !important;
+    border: 1px solid transparent;
+}
+.btn-action-edit {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.25);
+    color: #fbbf24 !important;
+}
+.btn-action-edit:hover {
+    background: rgba(245, 158, 11, 0.25);
+    border-color: rgba(245, 158, 11, 0.5);
+    transform: translateY(-1px);
+}
+.btn-action-delete {
+    background: rgba(244, 63, 94, 0.12);
+    border-color: rgba(244, 63, 94, 0.25);
+    color: #f43f5e !important;
+}
+.btn-action-delete:hover {
+    background: rgba(244, 63, 94, 0.25);
+    border-color: rgba(244, 63, 94, 0.5);
+    transform: translateY(-1px);
+}
+
+/* Mobile Tactile Feed */
+.master-mobile-feed {
+    padding: 10px 12px;
+}
+
+.master-mobile-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--hl-border-subtle);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: border-color 0.15s;
+}
+body.light-mode .master-mobile-card {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.master-mobile-card:last-child {
+    margin-bottom: 0;
+}
+
+.master-mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.master-mobile-idx {
+    font-family: var(--hl-font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--hl-text-dim);
+    background: rgba(148, 163, 184, 0.1);
+    padding: 2px 6px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.master-mobile-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(245, 158, 11, 0.12);
+    color: #fbbf24;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.master-mobile-name {
+    font-size: 0.94rem;
+    font-weight: 700;
+    color: var(--hl-text-bright);
+    line-height: 1.35;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    min-width: 0;
+}
+body.light-mode .master-mobile-name {
+    color: #0f172a;
+}
+
+.master-mobile-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.master-mobile-desc {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+    font-size: 0.8rem;
+    color: var(--hl-text-muted);
+    line-height: 1.4;
+    word-break: break-word;
+}
+body.light-mode .master-mobile-desc {
+    color: #64748b;
+}
+
+/* Responsive Rules */
+@media (max-width: 767.98px) {
+    .master-header-banner {
+        padding: 14px 16px;
+        border-radius: 14px;
+        margin-bottom: 14px;
     }
 
-    /* Mobile Responsive Optimization */
-    @media (max-width: 767.98px) {
-        .cat-toolbar-box {
-            width: 100%;
-        }
-        .cat-action-buttons {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 8px !important;
-            width: 100% !important;
-            margin-top: 10px !important;
-        }
-        .cat-action-buttons .btn-add-main {
-            grid-column: span 2 !important;
-            order: -1 !important;
-            height: 44px !important;
-        }
-        .cat-action-buttons .btn {
-            height: 42px !important;
-            font-size: 0.88rem !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            padding: 0 12px !important;
-        }
-        .cat-search-box {
-            display: flex !important;
-            flex-direction: row !important;
-            flex-wrap: nowrap !important;
-            align-items: center !important;
-            width: 100% !important;
-            gap: 8px !important;
-        }
-        .cat-search-input {
-            flex: 1 1 auto !important;
-            width: 100% !important;
-            height: 44px !important;
-        }
-        .cat-search-btn {
-            width: 44px !important;
-            height: 44px !important;
-            min-width: 44px !important;
-            flex-shrink: 0 !important;
-            border-radius: 10px !important;
-            background: #3b82f6 !important;
-            color: #ffffff !important;
-            border: none !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-        }
-        .modal-footer-actions {
-            flex-direction: column-reverse;
-            width: 100%;
-            gap: 10px !important;
-        }
-        .modal-footer-actions .btn {
-            width: 100% !important;
-            justify-content: center !important;
-            height: 44px !important;
-        }
+    .master-banner-top {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 12px !important;
     }
+
+    .master-banner-title-box {
+        width: 100% !important;
+        flex: 0 0 auto !important;
+    }
+
+    .master-banner-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 1.1rem;
+    }
+
+    .master-banner-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .master-banner-actions .btn-tactile-secondary {
+        width: 100%;
+        height: 38px;
+        font-size: 0.78rem;
+    }
+
+    .master-banner-actions .btn-tactile-primary {
+        grid-column: 1 / -1;
+        width: 100%;
+        height: 42px;
+        font-size: 0.84rem;
+        order: 3;
+    }
+
+    .master-card-header {
+        padding: 12px 14px !important;
+    }
+
+    .btn-action-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 0.88rem;
+    }
+}
 </style>
 
-<!-- Header Toolbar -->
-<div class="row mb-3 cat-toolbar-box">
-    <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div class="d-flex align-items-center" style="gap: 10px;">
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 1.1rem; flex-shrink: 0;">
-                <i class="fas fa-th-large"></i>
+<!-- Hallmark Master Header Banner -->
+<div class="master-header-banner">
+    <div class="master-banner-top">
+        <div class="master-banner-title-box">
+            <div class="master-banner-icon">
+                <i class="fas fa-cube"></i>
             </div>
-            <div>
-                <h5 class="mb-0 font-weight-bold theme-text" style="font-size: 1.08rem; line-height: 1.2;">Manage Category</h5>
-                <small class="text-muted d-block" style="font-size: 0.78rem;">Kelola kategori klasifikasi aset IT perusahaan</small>
+            <div style="flex: 1; min-width: 0;">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <h5 class="mb-0 font-weight-bold theme-text text-truncate" style="font-size: 1.12rem; line-height: 1.2;">
+                        {{ __('messages.manage') }} {{ __('messages.category') }}
+                    </h5>
+                    <span class="master-count-pill">
+                        <span class="live-dot-amber"></span>
+                        {{ count($categories) }} {{ __('messages.recorded') ?? 'RECORDED' }}
+                    </span>
+                </div>
+                <small class="text-muted d-block" style="font-size: 0.78rem; margin-top: 3px; line-height: 1.35;">
+                    {{ __('messages.category_subtitle') }}
+                </small>
             </div>
         </div>
 
-        <div class="d-flex align-items-center cat-action-buttons" style="gap: 8px;">
-            <a href="{{ route('categories.create') }}" class="btn btn-primary rounded-pill px-4 btn-add-main" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;">
-                Add Category
-            </a>
-            <button type="button" class="btn btn-outline-info rounded-pill px-4" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;" data-toggle="modal" data-target="#importModal">
-                Import
+        <div class="master-banner-actions">
+            <button type="button" class="btn btn-tactile-secondary" data-toggle="modal" data-target="#importModal" title="{{ __('messages.import') }}">
+                <i class="fas fa-file-import mr-1"></i>
+                <span>{{ __('messages.import') }}</span>
             </button>
-            <a href="{{ route('categories.export', request()->query()) }}" class="btn btn-outline-success rounded-pill px-4" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;">
-                {{ __('messages.export') }}
+            <a href="{{ route('categories.export', request()->query()) }}" class="btn btn-tactile-secondary" title="{{ __('messages.export') }}">
+                <i class="fas fa-file-export mr-1"></i>
+                <span>{{ __('messages.export') }}</span>
+            </a>
+            <a href="{{ route('categories.create') }}" class="btn btn-tactile-primary" title="{{ __('messages.add_category') }}">
+                <i class="fas fa-plus mr-1"></i>
+                <span>{{ __('messages.add_category') }}</span>
             </a>
         </div>
     </div>
 </div>
 
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; border-radius: 12px;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <i class="fas fa-check-circle mr-1"></i> {{ session('success') }}
+    </div>
+@endif
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; border-radius: 12px;">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <i class="fas fa-exclamation-triangle mr-1"></i> {{ session('error') }}
+    </div>
+@endif
+
 <!-- Main Table Card -->
-<div class="card theme-card cat-card">
-    <div class="card-header border-bottom py-3 px-3 px-md-4" style="border-color: rgba(148, 163, 184, 0.12) !important;">
-        <form action="{{ route('categories.index') }}" method="GET" style="width: 100%;">
-            <div class="cat-search-box">
-                <input type="text" name="search" class="form-control theme-input custom-search-input cat-search-input" placeholder="Search..." value="{{ request('search') }}" autocomplete="off">
+<div class="card theme-card master-table-card">
+    <div class="card-header border-0 master-card-header">
+        <form action="{{ route('categories.index') }}" method="GET" class="w-100 m-0">
+            <div class="sleek-search-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" name="search" class="form-control theme-input sleek-search-input" placeholder="{{ __('messages.search_category_placeholder') }}" value="{{ request('search') }}" autocomplete="off">
                 @if(request('search'))
-                    <a href="{{ route('categories.index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="min-width: 44px; height: 44px; border-radius: 10px; border-color: rgba(148, 163, 184, 0.22);" title="Clear">
+                    <a href="{{ route('categories.index') }}" class="clear-search-btn" title="Clear">
                         <i class="fas fa-times"></i>
                     </a>
                 @endif
-                <button class="btn btn-primary cat-search-btn" type="submit" title="{{ __('messages.search') }}">
-                    <i class="fas fa-search"></i>
-                </button>
             </div>
         </form>
     </div>
 
     <div class="card-body p-0">
-        <div class="theme-scroll-container table-responsive">
+        <!-- Desktop Table View (>= 768px) -->
+        <div class="d-none d-md-block theme-scroll-container table-responsive">
             <table class="table table-striped table-hover m-0 theme-table division-table">
                 <thead>
-                    <tr>
-                        <th width="60" class="pl-4">{{ __('messages.no') }}</th>
+                    <tr style="font-family: var(--hl-font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;">
+                        <th width="70" class="pl-4">{{ __('messages.no') }}</th>
                         <th>{{ __('messages.name') }}</th>
                         <th>{{ __('messages.description') }}</th>
                         <th width="120" class="text-center pr-4">{{ __('messages.actions') }}</th>
@@ -155,17 +471,24 @@
                 <tbody>
                     @forelse($categories as $item)
                     <tr>
-                        <td class="theme-text pl-4">{{ $loop->iteration }}</td>
-                        <td class="font-weight-bold theme-text">{{ $item->name }}</td>
-                        <td class="theme-text">{{ $item->description ?: '-' }}</td>
+                        <td class="theme-text pl-4 font-weight-bold" style="font-family: var(--hl-font-mono); font-size: 0.85rem;">{{ $loop->iteration }}</td>
+                        <td class="font-weight-bold theme-text" style="font-size: 0.92rem;">
+                            <div class="d-flex align-items-center" style="gap: 10px;">
+                                <div style="width: 30px; height: 30px; border-radius: 8px; background: rgba(245, 158, 11, 0.12); color: #fbbf24; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0;">
+                                    <i class="fas fa-cube"></i>
+                                </div>
+                                <span style="line-height: 1.35; word-break: break-word;">{{ $item->name }}</span>
+                            </div>
+                        </td>
+                        <td class="theme-text text-muted" style="font-size: 0.85rem; line-height: 1.4;">{{ $item->description ?: '-' }}</td>
                         <td class="theme-text pr-4">
                             <div class="d-flex justify-content-center" style="gap: 8px;">
-                                <a href="{{ route('categories.edit', $item) }}" class="btn action-btn btn-outline-warning" style="border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.15); color: #ffc107;" title="{{ __('messages.edit') }}">
+                                <a href="{{ route('categories.edit', $item) }}" class="btn-action-icon btn-action-edit" title="{{ __('messages.edit') }}">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="{{ route('categories.destroy', $item) }}" method="POST" class="d-inline">
+                                <form action="{{ route('categories.destroy', $item) }}" method="POST" class="d-inline m-0">
                                     @csrf @method('DELETE')
-                                    <button class="btn btn-delete action-btn btn-outline-danger" style="border: 1px solid rgba(220, 53, 69, 0.3); background: rgba(220, 53, 69, 0.15); color: #dc3545;" title="{{ __('messages.delete') }}" data-confirm-message="{{ __('messages.confirm_delete') }}">
+                                    <button type="button" class="btn-action-icon btn-action-delete btn-delete border-0" title="{{ __('messages.delete') }}" data-confirm-message="{{ __('messages.confirm_delete') }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -174,24 +497,70 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="text-center text-muted py-4">{{ __('messages.no_data') }}</td>
+                        <td colspan="4" class="text-center text-muted py-5">{{ __('messages.no_data') }}</td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        <!-- Mobile Tactile Feed View (< 768px) - Zero Truncation -->
+        <div class="d-block d-md-none master-mobile-feed">
+            @forelse($categories as $item)
+            <div class="master-mobile-card">
+                <div class="master-mobile-header">
+                    <div class="d-flex align-items-center" style="gap: 10px; min-width: 0; flex: 1;">
+                        <span class="master-mobile-idx">#{{ $loop->iteration }}</span>
+                        <div class="master-mobile-icon">
+                            <i class="fas fa-cube"></i>
+                        </div>
+                        <div class="master-mobile-name">
+                            {{ $item->name }}
+                        </div>
+                    </div>
+                    <div class="master-mobile-actions">
+                        <a href="{{ route('categories.edit', $item) }}" class="btn-action-icon btn-action-edit" title="{{ __('messages.edit') }}">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form action="{{ route('categories.destroy', $item) }}" method="POST" class="d-inline m-0">
+                            @csrf @method('DELETE')
+                            <button type="button" class="btn-action-icon btn-action-delete btn-delete border-0" title="{{ __('messages.delete') }}" data-confirm-message="{{ __('messages.confirm_delete') }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                @if($item->description)
+                <div class="master-mobile-desc">
+                    {{ $item->description }}
+                </div>
+                @endif
+            </div>
+            @empty
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-inbox fa-2x mb-2 d-block opacity-50"></i>
+                {{ __('messages.no_data') }}
+            </div>
+            @endforelse
+        </div>
     </div>
 </div>
+
+@if(method_exists($categories, 'links'))
+    <div class="d-flex justify-content-end mt-3">
+        {{ $categories->links() }}
+    </div>
+@endif
 
 <!-- Import Modal -->
 <div class="modal fade theme-modal" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <form action="{{ route('categories.import') }}" method="POST" enctype="multipart/form-data" style="width: 100%;">
             @csrf
-            <div class="modal-content">
+            <div class="modal-content" style="border-radius: 16px; background: rgba(15, 23, 42, 0.98); border: 1px solid var(--hl-border-active); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);">
                 <div class="modal-header py-3 px-4" style="border-color: rgba(148, 163, 184, 0.12) !important;">
                     <div class="d-flex align-items-center" style="gap: 10px;">
-                        <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 1rem;">
+                        <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 1.1rem;">
                             <i class="fas fa-file-import"></i>
                         </div>
                         <h5 class="modal-title font-weight-bold theme-text" id="importModalLabel" style="font-size: 1.05rem;">Import {{ __('messages.category') }}</h5>
@@ -201,7 +570,7 @@
                     </button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="file-dropzone">
+                    <div class="file-dropzone" style="border: 2px dashed rgba(245, 158, 11, 0.3); border-radius: 14px; padding: 24px; text-align: center; background: rgba(15, 23, 42, 0.3);">
                         <input type="file" name="file" class="import-file-input" accept=".xlsx,.xls,.csv" required>
                         <div class="icon-box mb-2">
                             <i class="fas fa-cloud-upload-alt text-info fa-2x"></i>
@@ -214,9 +583,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-top py-3 px-4 d-flex align-items-center justify-content-end modal-footer-actions" style="border-color: rgba(148, 163, 184, 0.12) !important; gap: 10px;">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;" data-dismiss="modal">{{ __('messages.cancel') }}</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4" style="height: 42px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center;">Import</button>
+                <div class="modal-footer border-top py-3 px-4 d-flex align-items-center justify-content-end" style="border-color: rgba(148, 163, 184, 0.12) !important; gap: 10px;">
+                    <button type="button" class="btn btn-tactile-secondary" data-dismiss="modal">{{ __('messages.cancel') }}</button>
+                    <button type="submit" class="btn btn-tactile-primary">Import</button>
                 </div>
             </div>
         </form>

@@ -164,12 +164,22 @@ class AiService
             return $internalResult;
         }
 
-        if (env('AI_CHAT_MODE', 'internal') === 'internal') {
-            return $this->queryGeneralNL($promptLower);
+        // 1.5. Coba cari di General DB dulu sebelum fallback ke AI
+        $generalResult = $this->queryGeneralNL($promptLower, true);
+        if ($generalResult !== null) {
+            return $generalResult;
         }
 
-        // 1.5. If API Key is configured, attempt Live AI API Call
-        if ($this->apiKey && $this->provider !== 'none' && env('AI_CHAT_MODE', 'internal') !== 'internal') {
+        if (env('AI_CHAT_MODE', 'internal') === 'internal') {
+            return $this->queryGeneralNL($promptLower, false) ?? [
+                'summary' => "Pencarian tidak ditemukan.",
+                'type' => 'general',
+                'items' => []
+            ];
+        }
+
+        // 1.8. If API Key is configured and no internal DB matched, attempt Live AI API Call
+        if ($this->apiKey && $this->provider !== 'none') {
             try {
                 $liveResult = $this->callAiApiForQuery($promptTrimmed, $history);
                 if (!empty($liveResult)) {
@@ -262,7 +272,8 @@ Data Ringkasan Sistem ITAM Saat Ini:
 - Total Entri Brankas Sandi (Vault): {$totalVaults}
 - Total VLAN Jaringan: {$totalVlans}
 
-Tugas: Jawab pertanyaan pengguna secara ringkas, ramah, dan profesional dalam Bahasa Indonesia. Gunakan data internal ITAM sebagai sumber utama untuk pertanyaan tentang perusahaan. Gunakan pengetahuan internet hanya sebagai referensi tambahan untuk solusi teknis umum. Jangan mengarang fakta, angka, konfigurasi, atau status yang tidak ada dalam data. Jika konteks tidak cukup, katakan bahwa informasi belum tersedia. Kembalikan format JSON valid tanpa markdown formatting dengan key:
+Tugas: Jawab pertanyaan pengguna secara ringkas, ramah, dan profesional dalam Bahasa Indonesia. Gunakan data internal ITAM sebagai sumber utama untuk pertanyaan tentang perusahaan. Gunakan pengetahuan internet hanya sebagai referensi tambahan untuk solusi teknis umum. Jangan mengarang fakta, angka, konfigurasi, atau status yang tidak ada dalam data. 
+PENTING: Jika kueri pencarian ini sampai kepada Anda, berarti mesin pencari lokal ITAM telah menelusuri seluruh tabel database (Aset, Karyawan, IP, Tiket, Lisensi, Vault, Vendor) dan TIDAK menemukan hasil. Beritahukan pengguna bahwa data tersebut benar-benar tidak ditemukan di seluruh sistem aplikasi, dan jangan mengasumsikan data tersebut hanya milik satu modul tertentu (seperti Brankas Sandi). Kembalikan format JSON valid tanpa markdown formatting dengan key:
 - summary: Ringkasan singkat jawaban (1-2 kalimat)
 - answer: Jawaban/penjelasan detail atau panduan teknis yang bermanfaat bagi pengguna
 - items: Array kosong [] jika tidak ada record spesifik yang ditautkan";
@@ -602,6 +613,19 @@ Tiket:
             });
         }
 
+        // Stop words cleanup to allow filtering by the remaining exact words
+        $stopWords = ['asset', 'aset', 'komputer', 'laptop', 'printer', 'cctv', 'switch', 'access point', 'ap', 'router', 'perangkat', 'garansi', 'warranty', 'expired', 'pc', 'desktop', 'notebook', 'server', 'monitor', 'layar', 'display', 'storage', 'harddisk', 'hdd', 'ssd', 'ram', 'memory', 'cpu', 'processor', 'intel', 'amd', 'core i3', 'core i5', 'core i7', 'ryzen', 'vga', 'gpu', 'os', 'windows', 'linux', 'macbook', 'macos', 'tag', 'kode aset', 'sn', 'serial number', 'surat jalan', 'do', 'lenovo', 'dell', 'hp', 'epson', 'canon', 'asus', 'acer', 'mikrotik', 'unifi', 'hikvision', 'logitech', 'brother', 'oumax', 'toshiba', 'solution', 'cooca', 'yamaha', 'lokasi', 'di', 'area', 'ruangan', 'lab', 'available', 'tersedia', 'assigned', 'diserahkan', 'dipakai', 'maintenance', 'rusak', 'perawatan', 'tampilkan', 'cari', 'data', 'semua'];
+        $cleanPrompt = preg_replace('/\b(' . implode('|', $stopWords) . ')\b/i', '', $promptLower);
+        $cleanPrompt = trim(preg_replace('/\s+/', ' ', $cleanPrompt));
+
+        if (!empty($cleanPrompt) && strlen($cleanPrompt) >= 2) {
+            $query->where(function($q) use ($cleanPrompt) {
+                $q->where('name', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('asset_tag', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('serial_number', 'like', "%{$cleanPrompt}%");
+            });
+        }
+
         // Status Filter
         if (Str::contains($promptLower, ['available', 'tersedia'])) {
             $query->where('status', 'Available');
@@ -735,33 +759,62 @@ Tiket:
         // 2. General Listing / Filtering IP Query
         $query = IpAddress::with(['asset', 'employee', 'vlan']);
 
-        if (Str::contains($promptLower, ['available', 'kosong', 'bebas'])) {
+        // Detect VLAN filter in prompt (e.g. "vlan 1", "vlan id 10", "vlan number 2", "vlan 1")
+        $vlanNum = null;
+        if (preg_match('/\bvlan\s*(?:id|number|nomor)?\s*([0-9]+)\b/i', $promptLower, $vlanMatch)) {
+            $vlanNum = (int)$vlanMatch[1];
+        }
+
+        if ($vlanNum !== null) {
+            $query->whereHas('vlan', function ($q) use ($vlanNum) {
+                $q->where('vlan_number', $vlanNum);
+            });
+        }
+
+        // Status filter
+        $statusLabel = '';
+        if (Str::contains($promptLower, ['available', 'kosong', 'bebas', 'belum terpakai', 'belum dipakai'])) {
             $query->where('status', 'Available');
-        } elseif (Str::contains($promptLower, ['used', 'terpakai'])) {
+            $statusLabel = 'Available (kosong)';
+        } elseif (Str::contains($promptLower, ['used', 'terpakai', 'dipakai', 'digunakan'])) {
             $query->where('status', 'Used');
+            $statusLabel = 'Used (terpakai)';
+        } elseif (Str::contains($promptLower, ['reserved', 'dipesan'])) {
+            $query->where('status', 'Reserved');
+            $statusLabel = 'Reserved (dipesan)';
         }
 
         if (Str::contains($promptLower, ['online', 'aktif'])) {
             $query->where('is_online', true);
+            $statusLabel .= ($statusLabel ? ' & ' : '') . 'Online';
         } elseif (Str::contains($promptLower, ['offline', 'mati'])) {
             $query->where('is_online', false);
+            $statusLabel .= ($statusLabel ? ' & ' : '') . 'Offline';
         }
 
         $totalCount = (clone $query)->count();
         $ips = $query->orderByRaw('INET_ATON(ip_address)')->take(10)->get();
 
         $items = $ips->map(fn($ip) => [
-            'title' => $ip->ip_address . ($ip->vlan ? ' (VLAN ' . $ip->vlan->vlan_number . ')' : ''),
+            'title' => $ip->ip_address . ($ip->vlan ? ' (VLAN ' . $ip->vlan->vlan_number . ' - ' . $ip->vlan->name . ')' : ''),
             'subtitle' => ($ip->employee ? 'User: ' . $ip->employee->name : ($ip->asset ? 'Perangkat: ' . $ip->asset->name : 'Unmapped')) . ' • Gateway: ' . ($ip->gateway ?? '-'),
-            'badge' => $ip->is_online === true ? 'badge-success' : ($ip->is_online === false ? 'badge-danger' : 'badge-secondary'),
+            'badge' => $ip->is_online === true ? 'badge-success' : ($ip->is_online === false ? 'badge-danger' : ($ip->status === 'Available' ? 'badge-success' : 'badge-secondary')),
             'badge_text' => $ip->is_online === true ? 'Online' : ($ip->is_online === false ? 'Offline' : $ip->status),
             'url' => route('ips.index', ['search' => $ip->ip_address]),
         ])->toArray();
 
         $showingSuffix = $totalCount > 10 ? " (menampilkan 10 data pertama)" : "";
+        $vlanSuffix = $vlanNum !== null ? " pada VLAN {$vlanNum}" : "";
+        $statusSuffix = $statusLabel ? " berstatus {$statusLabel}" : "";
+
+        if ($totalCount === 0) {
+            $summary = "Tidak ditemukan IP Address{$statusSuffix}{$vlanSuffix}.";
+        } else {
+            $summary = "Ditemukan {$totalCount} IP Address{$statusSuffix}{$vlanSuffix}{$showingSuffix}.";
+        }
 
         return [
-            'summary' => "Ditemukan {$totalCount} catatan IP Address jaringan{$showingSuffix}.",
+            'summary' => $summary,
             'type' => 'ips',
             'items' => $items,
         ];
@@ -780,6 +833,17 @@ Tiket:
             $query->where('status', 'In Progress');
         } elseif (Str::contains($prompt, ['closed', 'resolved', 'selesai'])) {
             $query->whereIn('status', ['Closed', 'Resolved']);
+        }
+
+        $stopWords = ['tiket', 'ticket', 'kendala', 'laporan', 'masalah', 'trouble', 'komplain', 'issue', 'open', 'progress', 'closed', 'resolved', 'prioritas', 'support', 'terbuka', 'proses', 'selesai', 'tampilkan', 'cari', 'data'];
+        $cleanPrompt = preg_replace('/\b(' . implode('|', $stopWords) . ')\b/i', '', mb_strtolower($prompt));
+        $cleanPrompt = trim(preg_replace('/\s+/', ' ', $cleanPrompt));
+
+        if (!empty($cleanPrompt) && strlen($cleanPrompt) >= 2) {
+            $query->where(function($q) use ($cleanPrompt) {
+                $q->where('title', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('ticket_number', 'like', "%{$cleanPrompt}%");
+            });
         }
 
         $totalCount = (clone $query)->count();
@@ -814,6 +878,9 @@ Tiket:
             return $this->queryVaultsNL($prompt);
         }
         if ($this->containsAnyKeyword($prompt, ['vlan', 'subnet', 'segmentasi', 'netmask', 'gateway'])) {
+            if ($this->containsAnyKeyword($prompt, ['ip', 'alamat ip', 'kosong', 'available', 'terpakai', 'used', 'online', 'offline', 'bebas'])) {
+                return $this->queryIpsNL($prompt);
+            }
             return $this->queryVlansNL($prompt);
         }
         if ($this->containsAnyKeyword($prompt, ['vendor', 'pemasok', 'supplier', 'distributor', 'mitra', 'sales', 'pembelian'])) {
@@ -1031,7 +1098,9 @@ Tiket:
                 if (strlen($nameSearch) >= 2) {
                     $query->where(function($q) use ($nameSearch) {
                         $q->where('name', 'like', "%{$nameSearch}%")
-                          ->orWhere('employee_id', 'like', "%{$nameSearch}%");
+                          ->orWhere('employee_id', 'like', "%{$nameSearch}%")
+                          ->orWhere('login_username', 'like', "%{$nameSearch}%")
+                          ->orWhere('email', 'like', "%{$nameSearch}%");
                     });
                 }
             }
@@ -1082,8 +1151,21 @@ Tiket:
      */
     protected function queryLicensesNL(string $prompt): array
     {
-        $totalCount = SoftwareLicense::count();
-        $licenses = SoftwareLicense::with('pic')->latest()->take(10)->get();
+        $query = SoftwareLicense::with('pic');
+
+        $stopWords = ['lisensi', 'license', 'software', 'perangkat lunak', 'license key', 'seats', 'tampilkan', 'cari', 'data'];
+        $cleanPrompt = preg_replace('/\b(' . implode('|', $stopWords) . ')\b/i', '', mb_strtolower($prompt));
+        $cleanPrompt = trim(preg_replace('/\s+/', ' ', $cleanPrompt));
+
+        if (!empty($cleanPrompt) && strlen($cleanPrompt) >= 2) {
+            $query->where(function($q) use ($cleanPrompt) {
+                $q->where('name', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('license_key', 'like', "%{$cleanPrompt}%");
+            });
+        }
+
+        $totalCount = (clone $query)->count();
+        $licenses = $query->latest()->take(10)->get();
 
         $items = $licenses->map(fn($l) => [
             'title' => $l->name,
@@ -1113,6 +1195,17 @@ Tiket:
             $query->where('status', 'Completed');
         }
 
+        $stopWords = ['maintenance', 'perawatan', 'servis', 'service', 'reparasi', 'biaya', 'repair', 'upgrade', 'pengeluaran', 'perbaikan', 'ongoing', 'proses', 'berjalan', 'completed', 'selesai', 'tampilkan', 'cari', 'data'];
+        $cleanPrompt = preg_replace('/\b(' . implode('|', $stopWords) . ')\b/i', '', mb_strtolower($prompt));
+        $cleanPrompt = trim(preg_replace('/\s+/', ' ', $cleanPrompt));
+
+        if (!empty($cleanPrompt) && strlen($cleanPrompt) >= 2) {
+            $query->where(function($q) use ($cleanPrompt) {
+                $q->where('description', 'like', "%{$cleanPrompt}%")
+                  ->orWhereHas('asset', fn($aq) => $aq->where('name', 'like', "%{$cleanPrompt}%")->orWhere('asset_tag', 'like', "%{$cleanPrompt}%"));
+            });
+        }
+
         $totalCount = (clone $query)->count();
         $maintenances = $query->latest()->take(10)->get();
 
@@ -1140,8 +1233,22 @@ Tiket:
      */
     protected function queryVaultsNL(string $prompt): array
     {
-        $totalCount = PasswordVault::count();
-        $vaults = PasswordVault::latest()->take(10)->get();
+        $query = PasswordVault::query();
+
+        $stopWords = ['vault', 'password', 'sandi', 'brankas', 'kredensial', 'akun', 'login', 'pass', 'username', 'akses', 'perangkat', 'cctv', 'router', 'switch', 'tampilkan', 'cari', 'data', 'siapa', 'yang', 'untuk'];
+        $cleanPrompt = preg_replace('/\b(' . implode('|', $stopWords) . ')\b/i', '', mb_strtolower($prompt));
+        $cleanPrompt = trim(preg_replace('/\s+/', ' ', $cleanPrompt));
+
+        if (!empty($cleanPrompt) && strlen($cleanPrompt) >= 2) {
+            $query->where(function($q) use ($cleanPrompt) {
+                $q->where('device_name', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('username', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('category', 'like', "%{$cleanPrompt}%");
+            });
+        }
+
+        $totalCount = (clone $query)->count();
+        $vaults = $query->latest()->take(10)->get();
 
         $items = $vaults->map(fn($v) => [
             'title' => 'Akun/Perangkat: ' . $v->device_name,
@@ -1186,8 +1293,21 @@ Tiket:
      */
     protected function queryVendorsNL(string $prompt): array
     {
-        $totalCount = Vendor::count();
-        $vendors = Vendor::latest()->take(10)->get();
+        $query = Vendor::query();
+
+        $stopWords = ['vendor', 'pemasok', 'supplier', 'distributor', 'mitra', 'sales', 'pembelian', 'tampilkan', 'cari', 'data'];
+        $cleanPrompt = preg_replace('/\b(' . implode('|', $stopWords) . ')\b/i', '', mb_strtolower($prompt));
+        $cleanPrompt = trim(preg_replace('/\s+/', ' ', $cleanPrompt));
+
+        if (!empty($cleanPrompt) && strlen($cleanPrompt) >= 2) {
+            $query->where(function($q) use ($cleanPrompt) {
+                $q->where('name', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('contact_person', 'like', "%{$cleanPrompt}%");
+            });
+        }
+
+        $totalCount = (clone $query)->count();
+        $vendors = $query->latest()->take(10)->get();
 
         $items = $vendors->map(fn($vd) => [
             'title' => $vd->name,
@@ -1230,7 +1350,7 @@ Tiket:
     /**
      * Comprehensive App-Wide Multi-Entity Search & Deep Connected Data Resolver
      */
-    protected function queryGeneralNL(string $prompt): array
+    protected function queryGeneralNL(string $prompt, bool $returnNullIfEmpty = false): ?array
     {
         $promptTrimmed = trim($prompt);
         $promptLower = mb_strtolower($promptTrimmed);
@@ -1246,6 +1366,8 @@ Tiket:
             ->where('name', 'like', "%{$promptTrimmed}%")
             ->orWhere('employee_id', 'like', "%{$promptTrimmed}%")
             ->orWhere('anydesk_id', 'like', "%{$promptTrimmed}%")
+            ->orWhere('login_username', 'like', "%{$promptTrimmed}%")
+            ->orWhere('email', 'like', "%{$promptTrimmed}%")
             ->take(5)->get();
 
         $tickets = Ticket::with(['employee', 'asset'])
@@ -1484,6 +1606,10 @@ Tiket:
             $summary = 'Menampilkan ' . count($items) . ' hasil data terkait untuk pencarian "' . $promptTrimmed . '".';
             $answer = null;
         } else {
+            if ($returnNullIfEmpty) {
+                return null;
+            }
+
             // Live Web Search Fallback for broader internet knowledge
             $webSources = $this->fetchWebKnowledgeSources($promptTrimmed);
             $webResult = collect($webSources)->pluck('snippet')->filter()->implode("\n\n");

@@ -4,19 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Vlan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class VlanController extends Controller implements \Illuminate\Routing\Controllers\HasMiddleware
 {
     public static function middleware(): array
     {
         return [
-            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_network', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_network', only: ['create', 'store', 'edit', 'update', 'destroy', 'updateStatus']),
         ];
     }
 
     public function index(Request $request)
     {
-        $query = Vlan::query();
+        $query = Vlan::withCount('ipAddresses');
 
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
@@ -27,11 +28,12 @@ class VlanController extends Controller implements \Illuminate\Routing\Controlle
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%$search%")
                     ->orWhere('vlan_number', 'like', "%$search%")
-                    ->orWhere('subnet', 'like', "%$search%");
+                    ->orWhere('subnet', 'like', "%$search%")
+                    ->orWhere('gateway', 'like', "%$search%");
             });
         }
 
-        $vlans = $query->orderBy('vlan_number')->get();
+        $vlans = $query->orderBy('vlan_number', 'asc')->get();
 
         return view('vlans.index', compact('vlans'));
     }
@@ -47,14 +49,21 @@ class VlanController extends Controller implements \Illuminate\Routing\Controlle
             'vlan_number' => 'required|integer|unique:vlans,vlan_number',
             'name' => 'required|string|max:255',
             'subnet' => 'nullable|string|max:255',
-            'gateway' => 'nullable|ip',
-            'status' => 'required|in:Active,Inactive',
+            'gateway' => 'nullable|string|max:255',
+            'status' => 'nullable|in:Active,Inactive',
             'notes' => 'nullable|string',
+            'description' => 'nullable|string',
         ]);
 
         try {
-            Vlan::create($request->all());
-            \Illuminate\Support\Facades\Cache::forget('master_vlans_all');
+            $data = $request->all();
+            $data['status'] = $request->input('status', 'Active');
+            if (empty($data['notes']) && !empty($data['description'])) {
+                $data['notes'] = $data['description'];
+            }
+
+            Vlan::create($data);
+            Cache::forget('master_vlans_all');
 
             return redirect()->route('vlans.index', request()->query())->with('success', __('messages.created_success'));
         } catch (\Exception $e) {
@@ -73,14 +82,20 @@ class VlanController extends Controller implements \Illuminate\Routing\Controlle
             'vlan_number' => 'required|integer|unique:vlans,vlan_number,'.$vlan->id,
             'name' => 'required|string|max:255',
             'subnet' => 'nullable|string|max:255',
-            'gateway' => 'nullable|ip',
-            'status' => 'required|in:Active,Inactive',
+            'gateway' => 'nullable|string|max:255',
+            'status' => 'nullable|in:Active,Inactive',
             'notes' => 'nullable|string',
+            'description' => 'nullable|string',
         ]);
 
         try {
-            $vlan->update($request->all());
-            \Illuminate\Support\Facades\Cache::forget('master_vlans_all');
+            $data = $request->all();
+            if (empty($data['notes']) && !empty($data['description'])) {
+                $data['notes'] = $data['description'];
+            }
+
+            $vlan->update($data);
+            Cache::forget('master_vlans_all');
 
             return redirect()->route('vlans.index', request()->query())->with('success', __('messages.updated_success'));
         } catch (\Exception $e) {
@@ -90,10 +105,14 @@ class VlanController extends Controller implements \Illuminate\Routing\Controlle
 
     public function destroy(Vlan $vlan)
     {
-        $vlan->delete();
-        \Illuminate\Support\Facades\Cache::forget('master_vlans_all');
+        try {
+            $vlan->delete();
+            Cache::forget('master_vlans_all');
 
-        return redirect()->route('vlans.index', request()->query())->with('success', __('messages.deleted_success'));
+            return redirect()->route('vlans.index', request()->query())->with('success', __('messages.deleted_success'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to delete VLAN: '.$e->getMessage());
+        }
     }
 
     public function updateStatus(Request $request, Vlan $vlan)
@@ -103,7 +122,7 @@ class VlanController extends Controller implements \Illuminate\Routing\Controlle
         ]);
 
         $vlan->update(['status' => $request->status]);
-        \Illuminate\Support\Facades\Cache::forget('master_vlans_all');
+        Cache::forget('master_vlans_all');
 
         return response()->json(['success' => true, 'message' => 'Status updated successfully.', 'status' => $vlan->status]);
     }
