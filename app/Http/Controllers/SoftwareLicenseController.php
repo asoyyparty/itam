@@ -17,7 +17,56 @@ class SoftwareLicenseController extends Controller implements \Illuminate\Routin
 
     public function index(Request $request)
     {
+        $now = now()->startOfDay();
+        $in30Days = now()->addDays(30)->endOfDay();
+
+        // Calculate KPI Summary from all licenses
+        $allLicenses = SoftwareLicense::all();
+        $totalLicenses = $allLicenses->count();
+        $totalSeats = (int) $allLicenses->sum('total_seats');
+
+        $expiringSoonCount = $allLicenses->filter(function ($lic) use ($now, $in30Days) {
+            return $lic->expiry_date && $lic->expiry_date >= $now && $lic->expiry_date <= $in30Days;
+        })->count();
+
+        $expiredCount = $allLicenses->filter(function ($lic) use ($now) {
+            return $lic->expiry_date && $lic->expiry_date < $now;
+        })->count();
+
+        $lifetimeCount = $allLicenses->filter(function ($lic) {
+            return is_null($lic->expiry_date);
+        })->count();
+
+        $activeCount = $allLicenses->filter(function ($lic) use ($now) {
+            return is_null($lic->expiry_date) || $lic->expiry_date >= $now;
+        })->count();
+
+        $summary = [
+            'total_licenses' => $totalLicenses,
+            'total_seats' => $totalSeats,
+            'active_count' => $activeCount,
+            'expiring_soon' => $expiringSoonCount,
+            'expired_count' => $expiredCount,
+            'lifetime_count' => $lifetimeCount,
+        ];
+
+        $statusFilter = $request->get('status', 'all');
+
         $query = SoftwareLicense::with('pic');
+
+        if ($statusFilter === 'active') {
+            $query->where(function ($q) use ($now) {
+                $q->whereNull('expiry_date')->orWhere('expiry_date', '>=', $now);
+            });
+        } elseif ($statusFilter === 'expiring_soon') {
+            $query->whereNotNull('expiry_date')
+                  ->whereBetween('expiry_date', [$now, $in30Days]);
+        } elseif ($statusFilter === 'expired') {
+            $query->whereNotNull('expiry_date')
+                  ->where('expiry_date', '<', $now);
+        } elseif ($statusFilter === 'lifetime') {
+            $query->whereNull('expiry_date');
+        }
 
         if ($request->has('pic_id') && $request->pic_id != '') {
             $query->where('pic_id', $request->pic_id);
@@ -34,7 +83,7 @@ class SoftwareLicenseController extends Controller implements \Illuminate\Routin
         $software_licenses = $query->orderBy('name')->get();
         $employees = Employee::orderBy('name')->get();
 
-        return view('software_licenses.index', compact('software_licenses', 'employees'));
+        return view('software_licenses.index', compact('software_licenses', 'employees', 'summary', 'statusFilter'));
     }
 
     public function create()

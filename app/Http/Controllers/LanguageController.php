@@ -11,6 +11,7 @@ class LanguageController extends Controller
         if (in_array($lang, ['en', 'id'])) {
             session()->put('locale', $lang);
             App::setLocale($lang);
+            \Carbon\Carbon::setLocale($lang);
         }
 
         return redirect()->back();

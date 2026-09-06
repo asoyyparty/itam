@@ -947,15 +947,17 @@ body {
   padding-bottom: 24px !important;
 }
 
-.content-wrapper,
-.layout-navbar-fixed .content-wrapper,
-.layout-navbar-fixed .wrapper .content-wrapper {
-  flex: 1 0 auto !important;
-  display: flex !important;
-  flex-direction: column !important;
-  min-height: calc(100vh - 66px) !important;
-  margin-top: 0 !important;
-  padding-top: 0 !important;
+@media (min-width: 768px) {
+  .content-wrapper,
+  .layout-navbar-fixed .content-wrapper,
+  .layout-navbar-fixed .wrapper .content-wrapper {
+    flex: 1 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: calc(100vh - 66px) !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
 }
 
 .content-header {
@@ -1009,23 +1011,6 @@ body.light-mode .master-header-banner {
   flex: 1 0 auto !important;
 }
 
-.main-footer {
-  position: relative !important;
-  bottom: 0 !important;
-  margin-top: auto !important;
-  margin-left: 0 !important;
-  width: 100% !important;
-  flex-shrink: 0 !important;
-  background: var(--color-paper-0) !important;
-  border-top: var(--rule-soft) !important;
-  padding: 12px 20px !important;
-  z-index: 1020 !important;
-}
-
-body.dark-mode .main-footer {
-  background: #090d16 !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
 
 /* ── Modal Change Password Dual-Mode Theme (Light & Dark) ── */
 #changePasswordModal .modal-content {
@@ -5090,52 +5075,441 @@ body.dark-mode .btn-floating-ai:hover .chatbot-icon {
   box-shadow: 0 0 0 3px var(--color-accent-tint) !important;
 }
 
-/* Compact Content Wrapper Flex Layout */
-.content-wrapper {
-  display: flex !important;
-  flex-direction: column !important;
-  min-height: calc(100vh - 57px) !important;
+/* Compact Content Wrapper Flex Layout (Desktop Sticky Footer Only) */
+@media (min-width: 768px) {
+  .content-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: calc(100vh - 66px) !important;
+    min-height: calc(100dvh - 66px) !important;
+  }
+
+  section.content {
+    flex: 1 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  section.content > .container-fluid {
+    flex: 1 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
 }
 
-section.content {
-  flex: 1 0 auto !important;
+/* ═══════════════════════════════════════════════════════
+   Hallmark Global Footer Architecture (Ft2 / Ft1 Hybrid)
+   Pre-emit critique: P5 H5 E5 S5 R5 V5
+   Discipline: True Flexbox Sticky-Bottom, Zero Slop, Locked Tokens
+   ══════════════════════════════════════════════════════ */
+
+/* Structural Layout: Sticky to Viewport Bottom on Desktop */
+html, body {
+  min-height: 100% !important;
+  height: auto !important;
 }
 
-/* Clean Compact Footer - Zero Excess Empty Space */
+@media (min-width: 768px) {
+  .wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
+    width: 100% !important;
+    position: relative !important;
+  }
+
+  .content-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 0 auto !important;
+    min-height: calc(100vh - 66px - 60px) !important;
+    background: transparent !important;
+    padding-bottom: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .content-wrapper > section.content {
+    flex: 1 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .content-wrapper > section.content > .container-fluid {
+    flex: 1 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+}
+
+/* Hallmark Main Footer Styling — Compact 44px Single-Line with AI Bot Clearance */
 .main-footer,
-body.dark-mode .main-footer,
-body.light-mode .main-footer,
-.dark-mode .main-footer,
-.light-mode .main-footer {
-  position: static !important;
+.main-footer.hallmark-footer {
+  position: relative !important;
+  bottom: 0 !important;
+  left: auto !important;
+  right: auto !important;
+  flex-shrink: 0 !important;
+  z-index: 20 !important;
+  padding: 12px 88px 14px 24px !important;
+  min-height: 44px !important;
+  margin-right: 0 !important;
+  margin-bottom: 0 !important;
   background: transparent !important;
   background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   border: none !important;
+  border-top: none !important;
   border-left: none !important;
   border-right: none !important;
   border-bottom: none !important;
+  box-shadow: none !important;
+  transition: margin-left 0.3s ease-in-out !important;
+  box-sizing: border-box !important;
+}
+
+/* Align margin-left and sticky auto margin with AdminLTE sidebar states on Desktop */
+@media (min-width: 768px) {
+  .main-footer,
+  .main-footer.hallmark-footer {
+    margin-top: auto !important;
+    margin-left: 250px !important;
+  }
+  .sidebar-collapse .main-footer,
+  body.sidebar-collapse .main-footer {
+    margin-left: 4.6rem !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  html, body {
+    height: auto !important;
+    min-height: 100% !important;
+  }
+
+  .wrapper,
+  body .wrapper {
+    display: block !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  .content-wrapper,
+  .layout-navbar-fixed .content-wrapper,
+  .layout-navbar-fixed .wrapper .content-wrapper,
+  body.layout-navbar-fixed .content-wrapper,
+  body .content-wrapper {
+    min-height: 0 !important;
+    min-height: auto !important;
+    height: auto !important;
+    flex: none !important;
+    display: block !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  section.content,
+  .content-wrapper > section.content,
+  body section.content {
+    min-height: 0 !important;
+    min-height: auto !important;
+    height: auto !important;
+    flex: none !important;
+    display: block !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .container-fluid,
+  .content-wrapper > section.content > .container-fluid,
+  body .container-fluid {
+    min-height: 0 !important;
+    min-height: auto !important;
+    height: auto !important;
+    flex: none !important;
+    display: block !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .iam-workbench,
+  .iam-vault-wrapper,
+  [class*="-workbench"],
+  [class*="-vault-wrapper"] {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .iam-table-card {
+    margin-bottom: 0 !important;
+  }
+
+  .main-footer,
+  .main-footer.hallmark-footer {
+    margin-left: 0 !important;
+    margin-top: 14px !important;
+    margin-bottom: 0 !important;
+    padding: 8px 16px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+    text-align: center !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    border-top: none !important;
+    box-shadow: none !important;
+    flex-shrink: 0 !important;
+    position: static !important;
+  }
+}
+
+body.light-mode .main-footer,
+body.light-mode .main-footer.hallmark-footer,
+.light-mode .main-footer,
+.light-mode .main-footer.hallmark-footer,
+body.dark-mode .main-footer,
+body.dark-mode .main-footer.hallmark-footer,
+.dark-mode .main-footer,
+.dark-mode .main-footer.hallmark-footer {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
   border-top: none !important;
   box-shadow: none !important;
-  padding: 0.5rem 1rem 0.6rem 1rem !important;
-  margin-top: 0.75rem !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  margin-bottom: 0 !important;
-  font-size: 0.78rem;
+}
+
+.hallmark-footer-inner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  gap: 16px !important;
+  font-size: 0.75rem !important;
+  line-height: 1.5 !important;
   color: var(--color-ink-2) !important;
-  text-align: center !important;
+  width: 100% !important;
 }
 
-.main-footer a {
+.hallmark-foot-group {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  white-space: nowrap !important;
+}
+
+.hallmark-foot-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.hallmark-brand-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.hallmark-brand-name {
+  font-weight: 600 !important;
+  font-size: 0.8125rem !important;
+  color: var(--color-ink-0) !important;
+  letter-spacing: -0.015em !important;
+  transition: color 0.15s ease !important;
+}
+
+.hallmark-brand-link:hover .hallmark-brand-name {
   color: var(--color-accent) !important;
-  text-decoration: none;
-  font-weight: 600;
-  transition: opacity 0.2s;
 }
 
-.main-footer a:hover {
-  text-decoration: underline;
-  opacity: 0.85;
+/* Pure Monospace Version Tag — Completely Borderless & Clean */
+.hallmark-ver-badge {
+  font-family: var(--font-mono, 'JetBrains Mono', ui-monospace, monospace) !important;
+  font-size: 0.72rem !important;
+  color: var(--color-ink-3) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  display: inline-block !important;
+}
+
+/* Pure Status Telemetry — Completely Borderless & Inline */
+.hallmark-status-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 0.72rem !important;
+  font-weight: 500 !important;
+  color: #10b981 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  user-select: none !important;
+}
+
+.hallmark-status-label {
+  color: #10b981 !important;
+  font-size: 0.72rem !important;
+  font-weight: 500 !important;
+}
+
+.hallmark-live-dot {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background-color: #10b981 !important;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6) !important;
+  display: inline-block !important;
+  flex-shrink: 0 !important;
+  animation: liveDotPulse 2.4s infinite ease-in-out !important;
+}
+
+@keyframes liveDotPulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.3); opacity: 0.45; }
+}
+
+.hallmark-foot-sep {
+  color: var(--color-ink-3) !important;
+  opacity: 0.45 !important;
+  font-size: 0.72rem !important;
+  line-height: 1 !important;
+  margin: 0 1px !important;
+  user-select: none !important;
+}
+
+.hallmark-foot-legal {
+  font-size: 0.74rem !important;
+  color: var(--color-ink-3) !important;
+}
+
+.hallmark-company-name {
+  font-weight: 600 !important;
+  color: var(--color-ink-1) !important;
+  letter-spacing: -0.01em !important;
+}
+
+.hallmark-rights-text {
+  color: var(--color-ink-3) !important;
+  font-size: 0.72rem !important;
+}
+
+.hallmark-meta-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  color: var(--color-ink-2) !important;
+}
+
+.hallmark-sec-link {
+  color: var(--color-ink-2) !important;
+  font-size: 0.74rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: color 0.15s ease !important;
+}
+
+.hallmark-sec-link:hover {
+  color: var(--color-ink-0) !important;
+}
+
+.hallmark-sec-icon {
+  font-size: 0.72rem !important;
+  color: var(--color-accent, #6366f1) !important;
+  opacity: 0.85 !important;
+}
+
+.hallmark-creator-credit {
+  font-size: 0.74rem !important;
+  color: var(--color-ink-3) !important;
+}
+
+.hallmark-creator-name,
+.hallmark-creator-credit strong {
+  font-weight: 600 !important;
+  color: var(--color-ink-0) !important;
+  font-size: 0.74rem !important;
+}
+
+/* Dark Mode Fine-Tuning */
+body.dark-mode .hallmark-brand-name {
+  color: #f1f5f9 !important;
+}
+body.dark-mode .hallmark-company-name {
+  color: #cbd5e1 !important;
+}
+body.dark-mode .hallmark-creator-name,
+body.dark-mode .hallmark-creator-credit strong {
+  color: #f8fafc !important;
+}
+body.dark-mode .hallmark-status-pill,
+body.dark-mode .hallmark-status-label {
+  color: #34d399 !important;
+}
+body.dark-mode .hallmark-sec-link {
+  color: #94a3b8 !important;
+}
+body.dark-mode .hallmark-sec-link:hover {
+  color: #f1f5f9 !important;
+}
+body.dark-mode .hallmark-ver-badge,
+body.dark-mode .hallmark-foot-sep,
+body.dark-mode .hallmark-rights-text,
+body.dark-mode .hallmark-foot-legal span:first-child,
+body.dark-mode .hallmark-creator-credit span {
+  color: #64748b !important;
+}
+
+/* Mobile Responsiveness for Hallmark Footer */
+@media (max-width: 767.98px) {
+  .hallmark-footer-inner {
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 4px !important;
+  }
+
+  .hallmark-foot-group {
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    white-space: normal !important;
+    gap: 6px !important;
+    width: 100% !important;
+    line-height: 1.5 !important;
+  }
+
+  .hallmark-foot-item {
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+  }
+
+  .hallmark-foot-right {
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  /* Mobile screen rule: replace security & privacy with pure Asoyy Dev credit */
+  .hallmark-sec-link,
+  .hallmark-sec-sep,
+  .hallmark-crafted-by,
+  .hallmark-rights-text,
+  .hallmark-status-pill {
+    display: none !important;
+  }
+
+  .floating-quick-actions {
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 16px !important;
+  }
 }
 
 /* ══════════════════════════════════════════════════════

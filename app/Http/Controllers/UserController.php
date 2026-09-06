@@ -20,9 +20,22 @@ class UserController extends Controller implements \Illuminate\Routing\Controlle
 
     public function index(Request $request)
     {
-        $query = User::whereDoesntHave('roles', function ($q) {
+        $baseQuery = User::whereDoesntHave('roles', function ($q) {
             $q->where('name', 'Super Admin');
         });
+
+        // Honest IAM telemetry counts (computed across active manageable users)
+        $totalUsersCount = (clone $baseQuery)->count();
+        $verifiedUsersCount = (clone $baseQuery)->whereNotNull('email_verified_at')->count();
+        $rolesWithCount = Role::where('name', '!=', 'Super Admin')
+            ->withCount(['users' => function ($q) {
+                $q->whereDoesntHave('roles', function ($r) {
+                    $r->where('name', 'Super Admin');
+                });
+            }])
+            ->get();
+
+        $query = clone $baseQuery;
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
@@ -42,7 +55,7 @@ class UserController extends Controller implements \Illuminate\Routing\Controlle
         $users = $query->orderBy('name')->get();
         $roles = Role::where('name', '!=', 'Super Admin')->get();
 
-        return view('users.index', compact('users', 'roles'));
+        return view('users.index', compact('users', 'roles', 'totalUsersCount', 'verifiedUsersCount', 'rolesWithCount'));
     }
 
     public function create()
@@ -112,15 +125,15 @@ class UserController extends Controller implements \Illuminate\Routing\Controlle
     public function destroy(User $user)
     {
         if ($user->hasRole('Super Admin') || $user->id === auth()->id()) {
-            return back()->with('error', 'Cannot delete this user.');
+            return back()->with('error', __('messages.cannot_delete_user') ?? 'Cannot delete this user.');
         }
 
         try {
             $user->delete();
 
-            return redirect()->route('users.index', request()->query())->with('success', __('messages.deleted_success') ?? 'User deleted successfully');
+            return redirect()->route('users.index', request()->query())->with('success', __('messages.user_deleted_success') ?? __('messages.deleted_success'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Failed to delete user: '.$e->getMessage());
+            return back()->with('error', __('messages.user_delete_failed') ?? 'Failed to delete user.');
         }
     }
 }

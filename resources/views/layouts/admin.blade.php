@@ -466,20 +466,48 @@
         @yield('content')
       </div>
     </section>
-
-    <!-- Main Footer -->
-    <footer class="main-footer text-center">
-      <div class="container-fluid">
-        <div style="font-size: 0.8rem; color: var(--color-ink-1); font-weight: 500;">
-          &copy; {{ date('Y') }}
-          <a href="{{ route('dashboard') }}" style="color: var(--color-accent); font-weight: 600; text-decoration: none;">{{ $app_name ?? 'ITAM Enterprise' }}</a>
-          <span style="color: var(--color-ink-2); font-weight: 400; margin-left: 4px;">{{ $company_name ?? 'Team IT Pabrik' }}</span>
-          <span style="color: var(--color-ink-3); margin-left: 6px;">Asoyy Dev.</span>
-        </div>
-      </div>
-    </footer>
   </div>
   <!-- /.content-wrapper -->
+
+  <!-- Hallmark Anti-AI-Slop Footer (Border-Free Pure Typography Edition) -->
+  <footer class="main-footer hallmark-footer">
+    <div class="hallmark-footer-inner">
+      <!-- Left: Identity & System Telemetry -->
+      <div class="hallmark-foot-group hallmark-foot-left">
+        <a href="{{ route('dashboard') }}" class="hallmark-brand-link">
+          <span class="hallmark-brand-name">{{ $app_name ?? 'ITAM Enterprise' }}</span>
+        </a>
+        <span class="hallmark-ver-badge">v2.4 LTS</span>
+        <span class="hallmark-foot-sep d-none d-sm-inline">·</span>
+        <span class="hallmark-status-pill d-none d-sm-inline-flex" title="{{ __('messages.system_operational') }}">
+          <span class="hallmark-live-dot"></span>
+          <span class="hallmark-status-label">{{ __('messages.system_operational') }}</span>
+        </span>
+      </div>
+
+      <!-- Right: Legal & System Meta -->
+      <div class="hallmark-foot-group hallmark-foot-right">
+        <div class="hallmark-foot-item hallmark-foot-legal">
+          <span>&copy; {{ date('Y') }}</span>
+          <span class="hallmark-company-name">{{ $company_name ?? 'Team IT Pabrik' }}</span>
+          <span class="hallmark-foot-sep d-none d-xl-inline">·</span>
+          <span class="hallmark-rights-text d-none d-xl-inline">{{ __('messages.all_rights_reserved') }}</span>
+        </div>
+        <span class="hallmark-foot-sep">·</span>
+        <div class="hallmark-foot-item hallmark-foot-meta">
+          <span class="hallmark-meta-item hallmark-sec-link d-none d-md-inline-flex">
+            <i class="fas fa-shield-alt hallmark-sec-icon"></i>
+            <span>{{ __('messages.security_privacy') }}</span>
+          </span>
+          <span class="hallmark-foot-sep hallmark-sec-sep d-none d-md-inline">·</span>
+          <span class="hallmark-meta-item hallmark-creator-credit">
+            <span class="hallmark-crafted-by d-none d-md-inline">{{ __('messages.crafted_by') }} </span>
+            <strong class="hallmark-creator-name">Asoyy Dev</strong>
+          </span>
+        </div>
+      </div>
+    </div>
+  </footer>
 </div>
 <!-- ./wrapper -->
 

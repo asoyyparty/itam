@@ -21,11 +21,55 @@ class BudgetPlannerController extends Controller
         $selectedProjection = $fiveYearProjections[$selectedYear] ?? $fiveYearProjections[2026];
         $deptBreakdown = $this->budgetService->getDepartmentBreakdown($selectedYear);
 
+        // Calculate CapEx vs OpEx Telemetry Ratios
+        $capex = $selectedProjection['replacement_cost'];
+        $opex = $selectedProjection['maintenance_cost'] + $selectedProjection['license_cost'];
+        $total = max(1, $selectedProjection['grand_total']);
+        $capexPercent = round(($capex / $total) * 100);
+        $opexPercent = 100 - $capexPercent;
+
+        $financialRatios = [
+            'capex_amount' => $capex,
+            'opex_amount' => $opex,
+            'capex_percent' => $capexPercent,
+            'opex_percent' => $opexPercent,
+        ];
+
+        // Replacement assets categorization & filtering
+        $allReplacementAssets = $selectedProjection['replacement_assets'];
+        $replacementCategories = collect($allReplacementAssets)->pluck('category')->unique()->sort()->values()->toArray();
+
+        $selectedCategory = $request->query('category', 'all');
+        $search = trim($request->query('search', ''));
+
+        $filteredReplacements = collect($allReplacementAssets)->filter(function ($item) use ($selectedCategory, $search) {
+            $matchCat = ($selectedCategory === 'all' || strcasecmp($item['category'], $selectedCategory) === 0);
+            if (!$matchCat) {
+                return false;
+            }
+
+            if ($search !== '') {
+                $s = mb_strtolower($search);
+                $matchSearch = str_contains(mb_strtolower($item['asset_name']), $s)
+                    || str_contains(mb_strtolower($item['asset_tag']), $s)
+                    || str_contains(mb_strtolower($item['category']), $s)
+                    || str_contains(mb_strtolower($item['department']), $s);
+                return $matchSearch;
+            }
+
+            return true;
+        })->values()->toArray();
+
         return view('budget_planner.index', [
             'selectedYear' => $selectedYear,
             'projections' => $fiveYearProjections,
             'current' => $selectedProjection,
             'deptBreakdown' => $deptBreakdown,
+            'financialRatios' => $financialRatios,
+            'replacementAssets' => $filteredReplacements,
+            'replacementCategories' => $replacementCategories,
+            'selectedCategory' => $selectedCategory,
+            'search' => $search,
         ]);
     }
 

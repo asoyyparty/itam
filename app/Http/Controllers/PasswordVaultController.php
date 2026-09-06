@@ -16,6 +16,27 @@ class PasswordVaultController extends Controller implements \Illuminate\Routing\
 
     public function index(Request $request)
     {
+        $totalPasswords = PasswordVault::count();
+
+        // Count per category for ribbon tab counters
+        $categoryCounts = PasswordVault::select('category', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+            ->groupBy('category')
+            ->pluck('count', 'category')
+            ->toArray();
+
+        $categories = collect(array_keys($categoryCounts))->filter()->sort()->values();
+        $categoriesCount = $categories->count();
+
+        // Infrastructure credentials count (Switch, Wifi, Router, CCTV, etc.)
+        $networkInfraCount = PasswordVault::whereIn('category', ['Switch', 'Wifi', 'Router', 'Network', 'Firewall', 'CCTV'])->count();
+
+        $summary = [
+            'total_passwords' => $totalPasswords,
+            'categories_count' => $categoriesCount,
+            'network_infra_count' => $networkInfraCount,
+            'category_counts' => $categoryCounts,
+        ];
+
         $query = PasswordVault::query();
 
         if ($request->has('search') && $request->search != '') {
@@ -23,18 +44,21 @@ class PasswordVaultController extends Controller implements \Illuminate\Routing\
             $query->where(function ($q) use ($search) {
                 $q->where('device_name', 'like', "%$search%")
                     ->orWhere('username', 'like', "%$search%")
-                    ->orWhere('category', 'like', "%$search%");
+                    ->orWhere('category', 'like', "%$search%")
+                    ->orWhere('notes', 'like', "%$search%");
             });
         }
 
-        if ($request->has('category') && $request->category != '') {
-            $query->where('category', $request->category);
+        $activeCategory = $request->query('category', 'all');
+        if (!empty($activeCategory) && $activeCategory !== 'all') {
+            $query->where('category', $activeCategory);
+        } else {
+            $activeCategory = 'all';
         }
 
         $passwords = $query->orderBy('device_name')->get();
-        $categories = PasswordVault::select('category')->distinct()->pluck('category');
 
-        return view('password_vaults.index', compact('passwords', 'categories'));
+        return view('password_vaults.index', compact('passwords', 'categories', 'summary', 'activeCategory'));
     }
 
     public function create()
@@ -65,7 +89,7 @@ class PasswordVaultController extends Controller implements \Illuminate\Routing\
 
             return redirect()->route('password_vaults.index', request()->query())->with('success', __('messages.created_success'));
         } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'Failed to save password: '.$e->getMessage());
+            return back()->withInput()->with('error', __('messages.failed_to_save_vault').$e->getMessage());
         }
     }
 
@@ -97,7 +121,7 @@ class PasswordVaultController extends Controller implements \Illuminate\Routing\
 
             return redirect()->route('password_vaults.index', request()->query())->with('success', __('messages.updated_success'));
         } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'Failed to update password: '.$e->getMessage());
+            return back()->withInput()->with('error', __('messages.failed_to_update_vault').$e->getMessage());
         }
     }
 
