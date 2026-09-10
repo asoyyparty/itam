@@ -111,6 +111,11 @@ Route::middleware('auth')->group(function () {
         Route::post('settings/update-all', [SettingController::class, 'updateAll'])->name('settings.updateAll');
     });
 
+    // System Performance & APM Telemetry Routes
+    Route::get('system-performance', [\App\Http\Controllers\SystemPerformanceController::class, 'index'])->name('system-performance.index');
+    Route::get('system-performance/api-stats', [\App\Http\Controllers\SystemPerformanceController::class, 'apiStats'])->name('system-performance.api-stats');
+    Route::delete('system-performance/clear', [\App\Http\Controllers\SystemPerformanceController::class, 'clearLogs'])->name('system-performance.clear');
+
     Route::middleware(['permission:menu_assets'])->group(function () {
         Route::post('assets/import', [AssetController::class, 'importExcel'])->name('assets.import');
         Route::get('assets/export', [AssetController::class, 'exportExcel'])->name('assets.export');

@@ -12,31 +12,31 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('maintenances', function (Blueprint $table) {
-            $table->index('status', 'idx_maint_status');
-            $table->index('type', 'idx_maint_type');
-            $table->index('start_date', 'idx_maint_start_date');
-            $table->index('asset_id', 'idx_maint_asset_id');
+            if (!Schema::hasIndex('maintenances', 'idx_maint_status')) $table->index('status', 'idx_maint_status');
+            if (!Schema::hasIndex('maintenances', 'idx_maint_type')) $table->index('type', 'idx_maint_type');
+            if (!Schema::hasIndex('maintenances', 'idx_maint_start_date')) $table->index('start_date', 'idx_maint_start_date');
+            if (!Schema::hasIndex('maintenances', 'idx_maint_asset_id')) $table->index('asset_id', 'idx_maint_asset_id');
         });
 
         Schema::table('asset_assignments', function (Blueprint $table) {
-            $table->index('status', 'idx_assign_status');
-            $table->index('assigned_date', 'idx_assign_assigned_date');
-            $table->index('return_date', 'idx_assign_return_date');
-            $table->index('asset_id', 'idx_assign_asset_id');
-            $table->index('employee_id', 'idx_assign_employee_id');
+            if (!Schema::hasIndex('asset_assignments', 'idx_assign_status')) $table->index('status', 'idx_assign_status');
+            if (!Schema::hasIndex('asset_assignments', 'idx_assign_assigned_date')) $table->index('assigned_date', 'idx_assign_assigned_date');
+            if (!Schema::hasIndex('asset_assignments', 'idx_assign_return_date')) $table->index('return_date', 'idx_assign_return_date');
+            if (!Schema::hasIndex('asset_assignments', 'idx_assign_asset_id')) $table->index('asset_id', 'idx_assign_asset_id');
+            if (!Schema::hasIndex('asset_assignments', 'idx_assign_employee_id')) $table->index('employee_id', 'idx_assign_employee_id');
         });
 
         Schema::table('assets', function (Blueprint $table) {
-            $table->index('status', 'idx_assets_status');
-            $table->index('category_id', 'idx_assets_category_id');
-            $table->index('brand_id', 'idx_assets_brand_id');
-            $table->index('location_id', 'idx_assets_location_id');
-            $table->index('department_id', 'idx_assets_department_id');
+            if (!Schema::hasIndex('assets', 'idx_assets_status')) $table->index('status', 'idx_assets_status');
+            if (!Schema::hasIndex('assets', 'idx_assets_category_id')) $table->index('category_id', 'idx_assets_category_id');
+            if (!Schema::hasIndex('assets', 'idx_assets_brand_id')) $table->index('brand_id', 'idx_assets_brand_id');
+            if (!Schema::hasIndex('assets', 'idx_assets_location_id')) $table->index('location_id', 'idx_assets_location_id');
+            if (Schema::hasColumn('assets', 'department_id') && !Schema::hasIndex('assets', 'idx_assets_department_id')) $table->index('department_id', 'idx_assets_department_id');
         });
 
         Schema::table('tickets', function (Blueprint $table) {
-            $table->index('status', 'idx_tickets_status');
-            $table->index('priority', 'idx_tickets_priority');
+            if (!Schema::hasIndex('tickets', 'idx_tickets_status')) $table->index('status', 'idx_tickets_status');
+            if (!Schema::hasIndex('tickets', 'idx_tickets_priority')) $table->index('priority', 'idx_tickets_priority');
         });
     }
 

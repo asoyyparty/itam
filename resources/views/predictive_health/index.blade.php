@@ -27,6 +27,18 @@
     --hl-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
+body.light-mode {
+    --hl-bg-canvas: #f8fafc;
+    --hl-bg-surface: #ffffff;
+    --hl-bg-card: #ffffff;
+    --hl-bg-card-hover: #f1f5f9;
+    --hl-border-subtle: #e2e8f0;
+    --hl-border-active: #cbd5e1;
+    --hl-text-bright: #0f172a;
+    --hl-text-muted: #475569;
+    --hl-text-dim: #64748b;
+}
+
 /* Command Center Container */
 .telemetry-dashboard {
     width: 100%;
@@ -49,6 +61,11 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 16px;
+}
+body.light-mode .telemetry-banner {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.95));
+    border-color: #e2e8f0;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
 }
 
 .telemetry-banner-title {

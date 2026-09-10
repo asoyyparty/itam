@@ -121,17 +121,22 @@
         height: 42px !important;
         border-radius: 12px !important;
         border: 1px solid rgba(148, 163, 184, 0.2) !important;
-        background: rgba(15, 23, 42, 0.35) !important;
+        background-color: rgba(15, 23, 42, 0.35) !important;
         color: var(--color-ink-0) !important;
         font-size: 0.84rem !important;
-        padding: 0 12px !important;
+        padding: 0 32px 0 12px !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        background-repeat: no-repeat !important;
+        background-position: right 12px center !important;
+        background-size: 14px 14px !important;
         transition: all 0.2s ease !important;
         flex: 1 1 130px;
         min-width: 120px;
         max-width: 170px;
     }
     body.light-mode .custom-filter-select {
-        background: #f8fafc !important;
+        background-color: #ffffff !important;
         border-color: #cbd5e1 !important;
         color: #0f172a !important;
     }

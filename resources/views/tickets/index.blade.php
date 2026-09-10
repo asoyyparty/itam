@@ -877,6 +877,198 @@
         border-radius: 12px !important;
     }
 }
+
+/* ══════════════════════════════════════════════════════════
+   Hallmark Light Mode — Incident Operations Dispatch
+   ══════════════════════════════════════════════════════════ */
+body.light-mode {
+    --hl-bg-canvas: #f8fafc;
+    --hl-bg-surface: #ffffff;
+    --hl-bg-card: #ffffff;
+    --hl-bg-card-hover: #f8fafc;
+    --hl-border-subtle: #e2e8f0;
+    --hl-border-active: #cbd5e1;
+    --hl-text-bright: #0f172a;
+    --hl-text-muted: #475569;
+    --hl-text-dim: #64748b;
+    --hl-accent-cyan: #0284c7;
+    --hl-accent-cyan-glow: rgba(2, 132, 199, 0.15);
+    --hl-status-open: #0284c7;
+    --hl-status-open-glow: rgba(2, 132, 199, 0.12);
+    --hl-status-progress: #d97706;
+    --hl-status-progress-glow: rgba(217, 119, 6, 0.12);
+    --hl-status-resolved: #059669;
+    --hl-status-resolved-glow: rgba(5, 150, 105, 0.12);
+    --hl-status-closed: #64748b;
+}
+
+body.light-mode .ticket-banner {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05) !important;
+}
+
+body.light-mode .ticket-banner-icon {
+    background: rgba(99, 102, 241, 0.1) !important;
+    border-color: rgba(99, 102, 241, 0.25) !important;
+    color: #4f46e5 !important;
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.12) !important;
+}
+
+body.light-mode .telemetry-badge-pulse {
+    background: rgba(14, 165, 233, 0.1) !important;
+    border-color: rgba(14, 165, 233, 0.3) !important;
+    color: #0369a1 !important;
+}
+
+body.light-mode .btn-tactile-export {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #334155 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+body.light-mode .btn-tactile-export:hover {
+    background: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
+}
+
+body.light-mode .bento-kpi-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+}
+body.light-mode .bento-kpi-card:hover {
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08) !important;
+    border-color: #cbd5e1 !important;
+}
+
+body.light-mode .bento-kpi-card.kpi-total .kpi-card-label {
+    color: #4f46e5 !important;
+}
+body.light-mode .bento-kpi-card.kpi-total .kpi-card-icon {
+    color: #4f46e5 !important;
+}
+
+body.light-mode .ribbon-pill {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #475569 !important;
+}
+body.light-mode .ribbon-pill:hover {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+body.light-mode .ribbon-count {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+}
+body.light-mode .ribbon-pill.active-all {
+    background: rgba(99, 102, 241, 0.1) !important;
+    border-color: rgba(99, 102, 241, 0.4) !important;
+    color: #4338ca !important;
+}
+body.light-mode .ribbon-pill.active-all .ribbon-count {
+    background: #4f46e5 !important;
+    color: #ffffff !important;
+}
+body.light-mode .ribbon-pill.active-open {
+    background: rgba(14, 165, 233, 0.1) !important;
+    border-color: rgba(14, 165, 233, 0.4) !important;
+    color: #0369a1 !important;
+}
+body.light-mode .ribbon-pill.active-open .ribbon-count {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+}
+body.light-mode .ribbon-pill.active-progress {
+    background: rgba(245, 158, 11, 0.1) !important;
+    border-color: rgba(245, 158, 11, 0.4) !important;
+    color: #b45309 !important;
+}
+body.light-mode .ribbon-pill.active-progress .ribbon-count {
+    background: #d97706 !important;
+    color: #ffffff !important;
+}
+body.light-mode .ribbon-pill.active-resolved {
+    background: rgba(16, 185, 129, 0.1) !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+    color: #047857 !important;
+}
+body.light-mode .ribbon-pill.active-resolved .ribbon-count {
+    background: #059669 !important;
+    color: #ffffff !important;
+}
+body.light-mode .ribbon-pill.active-closed {
+    background: rgba(100, 116, 139, 0.1) !important;
+    border-color: rgba(100, 116, 139, 0.4) !important;
+    color: #334155 !important;
+}
+body.light-mode .ribbon-pill.active-closed .ribbon-count {
+    background: #64748b !important;
+    color: #ffffff !important;
+}
+
+body.light-mode .ticket-panel {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05) !important;
+}
+body.light-mode .ticket-filter-toolbar {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+body.light-mode .filter-select {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+}
+body.light-mode .ticket-search-field {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+}
+body.light-mode .ticket-panel-subheader {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+body.light-mode .ticket-telemetry-table thead th {
+    background: #f1f5f9 !important;
+    border-color: #e2e8f0 !important;
+    color: #475569 !important;
+}
+body.light-mode .ticket-telemetry-table tbody td {
+    border-color: #f1f5f9 !important;
+    color: #1e293b !important;
+}
+body.light-mode .ticket-telemetry-table tbody tr:hover {
+    background-color: #f8fafc !important;
+}
+body.light-mode .status-menu-tactile {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1) !important;
+}
+body.light-mode .status-menu-tactile .dropdown-item {
+    color: #334155 !important;
+}
+body.light-mode .status-menu-tactile .dropdown-item:hover {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+body.light-mode .mobile-bento-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05) !important;
+}
+body.light-mode .mobile-bento-meta {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+body.light-mode .mobile-card-footer {
+    border-top-color: #f1f5f9 !important;
+}
 </style>
 
 <div class="ticket-dashboard">

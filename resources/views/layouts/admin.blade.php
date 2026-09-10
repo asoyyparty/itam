@@ -82,12 +82,12 @@
           <span>{{ App::getLocale() == 'id' ? 'ID' : 'EN' }}</span>
           <i class="fas fa-chevron-down" style="font-size: 0.6rem; opacity: 0.7;"></i>
         </a>
-        <div class="dropdown-menu dropdown-menu-right p-1" style="border-radius: 14px; min-width: 175px; background: #0f172a; border: 1px solid rgba(148, 163, 184, 0.18); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35); overflow: hidden;">
+        <div class="dropdown-menu dropdown-menu-right p-1 header-lang-menu" style="border-radius: 14px; min-width: 175px; overflow: hidden;">
           <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('lang.switch', 'id') }}" style="gap: 10px; font-size: 0.85rem; border-radius: 8px; transition: all 0.2s; background: {{ App::getLocale() == 'id' ? 'rgba(99, 102, 241, 0.15)' : 'transparent' }}; color: {{ App::getLocale() == 'id' ? '#818cf8 !important' : 'var(--color-ink-0) !important' }}; font-weight: 600;">
             <i class="fas fa-check text-success" style="font-size: 0.75rem; visibility: {{ App::getLocale() == 'id' ? 'visible' : 'hidden' }};"></i>
             <span>Bahasa Indonesia</span>
           </a>
-          <div class="dropdown-divider my-1" style="border-top: 1px solid rgba(148, 163, 184, 0.12);"></div>
+          <div class="dropdown-divider my-1"></div>
           <a class="dropdown-item d-flex align-items-center py-2 px-3" href="{{ route('lang.switch', 'en') }}" style="gap: 10px; font-size: 0.85rem; border-radius: 8px; transition: all 0.2s; background: {{ App::getLocale() == 'en' ? 'rgba(99, 102, 241, 0.15)' : 'transparent' }}; color: {{ App::getLocale() == 'en' ? '#818cf8 !important' : 'var(--color-ink-0) !important' }}; font-weight: 600;">
             <i class="fas fa-check text-success" style="font-size: 0.75rem; visibility: {{ App::getLocale() == 'en' ? 'visible' : 'hidden' }};"></i>
             <span>English</span>
@@ -116,7 +116,7 @@
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right user-dropdown-menu">
           <!-- User Header Info Card -->
-          <div class="p-3 text-center" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(30, 41, 59, 0.6)); border-bottom: 1px solid rgba(148, 163, 184, 0.12);">
+          <div class="p-3 text-center user-dropdown-header-card">
             @if(Auth::user()->avatar)
               <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="mx-auto mb-2 user-avatar-ring" style="width: 52px !important; height: 52px !important;">
             @else
@@ -124,8 +124,8 @@
                 {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
               </div>
             @endif
-            <div style="font-weight: 700; font-size: 0.95rem; color: #f8fafc;">{{ Auth::user()->name ?? __('messages.user') }}</div>
-            <div style="font-size: 0.75rem; color: #94a3b8; font-family: var(--font-mono); margin-top: 2px;">{{ Auth::user()->email ?? '' }}</div>
+            <div class="user-dropdown-name">{{ Auth::user()->name ?? __('messages.user') }}</div>
+            <div class="user-dropdown-email">{{ Auth::user()->email ?? '' }}</div>
             <div class="mt-2">
               <span class="badge badge-pill" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); font-size: 0.7rem; font-weight: 600; padding: 4px 12px; font-family: var(--font-mono);">
                 <i class="fas fa-user-shield mr-1"></i> {{ Auth::user()->getRoleNames()->first() ?? 'User' }}
@@ -450,6 +450,15 @@
             </a>
           </li>
           @endcan
+
+          @if(auth()->check() && (auth()->user()->hasRole('Super Admin') || auth()->user()->can('menu_settings')))
+          <li class="nav-item">
+            <a href="{{ route('system-performance.index') }}" class="nav-link {{ request()->routeIs('system-performance.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-bolt text-warning"></i>
+              <p>{{ __('messages.system_performance') }}</p>
+            </a>
+          </li>
+          @endif
           @endcanany
 
 
@@ -2122,6 +2131,664 @@
   </button>
   @endcan
 </div>
+
+@if(auth()->check() && (auth()->user()->hasRole('Super Admin') || auth()->user()->can('menu_settings')))
+<!-- Mini Diagnostic Floating HUD Capsule & Drawer for Super Admin -->
+<div id="itam-perf-hud" style="display: none;">
+  <!-- Floating Pill Capsule (Bottom-Left) -->
+  <div id="itam-hud-pill" class="itam-hud-pill" onclick="toggleItamPerfDrawer()" title="{{ __('messages.perf_hud_title') }} &bull; {{ App::getLocale() === 'id' ? 'Klik untuk rincian' : 'Click for breakdown' }}">
+    <span id="itam-hud-dot" class="itam-hud-dot"></span>
+    <span class="itam-hud-stat"><i class="fas fa-bolt text-warning" style="font-size:0.72rem;"></i> <span id="itam-hud-time">--ms</span></span>
+    <span class="itam-hud-sep"></span>
+    <span class="itam-hud-stat"><i class="fas fa-database text-info" style="font-size:0.72rem;"></i> <span id="itam-hud-queries">--Q</span> (<span id="itam-hud-qtime">--ms</span>)</span>
+    <span class="itam-hud-sep d-none d-sm-inline"></span>
+    <span class="itam-hud-stat d-none d-sm-inline"><i class="fas fa-memory text-success" style="font-size:0.72rem;"></i> <span id="itam-hud-ram">--MB</span></span>
+  </div>
+
+  <!-- Slide-out Diagnostic Drawer / Modal Overlay -->
+  <div id="itam-hud-drawer-backdrop" class="itam-hud-backdrop" onclick="toggleItamPerfDrawer(false)"></div>
+  <div id="itam-hud-drawer" class="itam-hud-drawer">
+    <div class="itam-hud-drawer-header">
+      <div class="itam-hud-header-info">
+        <span class="badge itam-hud-telemetry-badge">
+          <i class="fas fa-chart-line mr-1"></i> {{ __('messages.perf_telemetry_badge') }}
+        </span>
+        <span id="itam-hud-route" class="itam-hud-route-title" title=""></span>
+      </div>
+      <button type="button" class="itam-hud-close-btn" onclick="toggleItamPerfDrawer(false)" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="itam-hud-drawer-body">
+      <!-- 3 Diagnostic Metric Cards -->
+      <div class="row g-2 mb-3">
+        <div class="col-4">
+          <div class="itam-hud-card">
+            <span class="itam-hud-label">{{ __('messages.perf_avg_latency') }}</span>
+            <span id="itam-hud-card-duration" class="itam-hud-val text-warning">--</span>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="itam-hud-card">
+            <span class="itam-hud-label">{{ __('messages.perf_db_queries') }}</span>
+            <span id="itam-hud-card-queries" class="itam-hud-val text-info">--</span>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="itam-hud-card">
+            <span class="itam-hud-label">{{ __('messages.perf_server_memory') }}</span>
+            <span id="itam-hud-card-ram" class="itam-hud-val text-success">--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Query Breakdown List -->
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="itam-hud-section-label">
+          {{ __('messages.perf_hud_queries_breakdown') }}
+        </span>
+        <span id="itam-hud-query-count-badge" class="itam-hud-badge-pill">0 queries</span>
+      </div>
+
+      <div id="itam-hud-queries-list" class="itam-hud-queries-container">
+        <!-- Rendered queries go here -->
+      </div>
+    </div>
+
+    <div class="itam-hud-drawer-footer">
+      <a href="{{ route('system-performance.index') }}" class="itam-hud-action-btn">
+        <span class="d-inline-flex align-items-center" style="gap: 8px;">
+          <i class="fas fa-tachometer-alt"></i> {{ __('messages.perf_hud_open_console') }}
+        </span>
+        <i class="fas fa-arrow-right" style="font-size: 0.75rem; opacity: 0.85;"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Hallmark Language & User Dropdown Harmonization */
+.header-lang-menu {
+  background: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+body.light-mode .header-lang-menu {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1) !important;
+}
+body.light-mode .header-lang-menu .dropdown-item {
+  color: #334155 !important;
+}
+body.light-mode .header-lang-menu .dropdown-item:hover {
+  background: #f1f5f9 !important;
+  color: #4f46e5 !important;
+}
+body.light-mode .header-lang-menu .dropdown-divider {
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+.user-dropdown-header-card {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(30, 41, 59, 0.6));
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+.user-dropdown-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #f8fafc;
+}
+.user-dropdown-email {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-family: var(--font-mono);
+  margin-top: 2px;
+}
+body.light-mode .user-dropdown-header-card {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(241, 245, 249, 0.95)) !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+body.light-mode .user-dropdown-name {
+  color: #0f172a !important;
+}
+body.light-mode .user-dropdown-email {
+  color: #64748b !important;
+}
+
+/* Light Mode Telemetry HUD Drawer */
+body.light-mode .itam-hud-drawer {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15) !important;
+}
+body.light-mode .itam-hud-drawer-header {
+  background: #f8fafc !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+body.light-mode .itam-hud-route-title {
+  color: #0f172a !important;
+}
+body.light-mode .itam-hud-card {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+body.light-mode .itam-hud-card:hover {
+  background: #f1f5f9 !important;
+}
+body.light-mode .itam-hud-label {
+  color: #64748b !important;
+}
+body.light-mode .itam-hud-section-label {
+  color: #64748b !important;
+}
+body.light-mode .itam-hud-badge-pill {
+  color: #334155 !important;
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+body.light-mode .itam-hud-drawer-footer {
+  background: #f8fafc !important;
+  border-top-color: #e2e8f0 !important;
+}
+body.light-mode .itam-hud-close-btn {
+  background: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #64748b !important;
+}
+body.light-mode .itam-hud-close-btn:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+body.light-mode .itam-hud-query-item {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+body.light-mode .itam-hud-query-sql {
+  color: #334155 !important;
+}
+
+/* Hallmark HUD Styles */
+.itam-hud-pill {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1040;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 6px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.74rem;
+  color: #cbd5e1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+.itam-hud-pill:hover {
+  background: rgba(15, 23, 42, 0.98);
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px -4px rgba(0, 0, 0, 0.6), 0 0 12px rgba(99, 102, 241, 0.25);
+}
+.itam-hud-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  display: inline-block;
+  animation: itamHudPulse 2s infinite;
+}
+@keyframes itamHudPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+.itam-hud-sep {
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.15);
+}
+.itam-hud-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 1048;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.itam-hud-backdrop.open {
+  display: block;
+  opacity: 1;
+}
+.itam-hud-drawer {
+  position: fixed;
+  bottom: 65px;
+  left: 20px;
+  width: min(480px, calc(100vw - 40px));
+  max-height: calc(100vh - 120px);
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  z-index: 1049;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(12px) scale(0.97);
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.itam-hud-drawer.open {
+  display: flex;
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+.itam-hud-drawer-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+}
+.itam-hud-header-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+  margin-right: 8px;
+}
+.itam-hud-telemetry-badge {
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  padding: 3px 6px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.itam-hud-route-title {
+  color: #f1f5f9;
+  font-size: 0.80rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.itam-hud-close-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+.itam-hud-close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.itam-hud-drawer-body {
+  padding: 14px 16px;
+  overflow-y: auto;
+  flex: 1;
+  max-height: 420px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+.itam-hud-drawer-body::-webkit-scrollbar {
+  width: 5px;
+}
+.itam-hud-drawer-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.itam-hud-drawer-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+.itam-hud-drawer-footer {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+.itam-hud-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 8px 6px;
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: background 0.15s ease;
+}
+.itam-hud-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.itam-hud-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #94a3b8;
+  min-height: 26px;
+  line-height: 1.15;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: normal;
+  word-break: normal;
+  margin-bottom: 2px;
+}
+.itam-hud-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.itam-hud-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+}
+.itam-hud-badge-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+.itam-hud-queries-container {
+  max-height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+.itam-hud-queries-container::-webkit-scrollbar {
+  width: 5px;
+}
+.itam-hud-queries-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.itam-hud-queries-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+.itam-hud-queries-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+.itam-hud-query-item {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-size: 0.72rem;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+.itam-hud-query-item:hover {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+.itam-hud-query-item.is-expanded {
+  background: rgba(99, 102, 241, 0.05);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+.itam-hud-query-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+.itam-hud-query-index {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+.itam-hud-query-time {
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+.itam-hud-query-sql {
+  color: #cbd5e1;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  line-height: 1.45;
+  font-size: 0.71rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: max-height 0.2s ease;
+}
+.itam-hud-query-item.is-expanded .itam-hud-query-sql {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+  color: #f8fafc;
+}
+.itam-hud-query-expand-hint {
+  font-size: 0.62rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 4px;
+  transition: color 0.15s ease;
+}
+.itam-hud-query-item:hover .itam-hud-query-expand-hint {
+  color: #94a3b8;
+}
+.itam-hud-chevron {
+  transition: transform 0.2s ease;
+  font-size: 0.58rem;
+}
+.itam-hud-query-item.is-expanded .itam-hud-chevron {
+  transform: rotate(180deg);
+}
+.itam-hud-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-decoration: none !important;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.itam-hud-action-btn:hover {
+  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+  transform: translateY(-1px);
+  color: #ffffff !important;
+}
+@media (max-width: 576px) {
+  .itam-hud-pill {
+    bottom: 15px;
+    left: 12px;
+    padding: 5px 10px;
+    font-size: 0.7rem;
+  }
+  .itam-hud-drawer {
+    left: 10px;
+    bottom: 60px;
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 80px);
+  }
+  .itam-hud-val {
+    font-size: 0.75rem;
+  }
+  .itam-hud-card {
+    padding: 8px 4px;
+  }
+}
+</style>
+
+<script>
+window.toggleItamPerfDrawer = function(forceState) {
+  var drawer = document.getElementById('itam-hud-drawer');
+  var backdrop = document.getElementById('itam-hud-drawer-backdrop');
+  if (!drawer || !backdrop) return;
+  var isOpen = drawer.classList.contains('open');
+  var targetState = (typeof forceState === 'boolean') ? forceState : !isOpen;
+  if (targetState) {
+    drawer.classList.add('open');
+    backdrop.classList.add('open');
+  } else {
+    drawer.classList.remove('open');
+    backdrop.classList.remove('open');
+  }
+};
+
+function __itamEscapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+window.__itamRenderHud = function() {
+  var data = window.__itamTelemetry;
+  if (!data) return;
+  var container = document.getElementById('itam-perf-hud');
+  if (!container) return;
+  container.style.display = 'block';
+
+  // Populate Pill
+  var timeEl = document.getElementById('itam-hud-time');
+  var queriesEl = document.getElementById('itam-hud-queries');
+  var qtimeEl = document.getElementById('itam-hud-qtime');
+  var ramEl = document.getElementById('itam-hud-ram');
+  var dotEl = document.getElementById('itam-hud-dot');
+
+  if (timeEl) timeEl.textContent = data.duration_ms + 'ms';
+  if (queriesEl) queriesEl.textContent = data.query_count + 'Q';
+  if (qtimeEl) qtimeEl.textContent = data.query_time_ms + 'ms';
+  if (ramEl) ramEl.textContent = data.memory_peak_mb + 'MB';
+
+  if (dotEl) {
+    if (data.duration_ms > 600) {
+      dotEl.style.background = '#f43f5e';
+      dotEl.style.boxShadow = '0 0 8px #f43f5e';
+    } else if (data.duration_ms > 300) {
+      dotEl.style.background = '#f59e0b';
+      dotEl.style.boxShadow = '0 0 8px #f59e0b';
+    } else {
+      dotEl.style.background = '#10b981';
+      dotEl.style.boxShadow = '0 0 8px #10b981';
+    }
+  }
+
+  // Populate Drawer Details
+  var routeEl = document.getElementById('itam-hud-route');
+  var routeName = data.route || window.location.pathname;
+  if (routeEl) {
+    routeEl.textContent = routeName;
+    routeEl.title = routeName;
+  }
+
+  var cardDurEl = document.getElementById('itam-hud-card-duration');
+  var cardQEl = document.getElementById('itam-hud-card-queries');
+  var cardRamEl = document.getElementById('itam-hud-card-ram');
+
+  if (cardDurEl) cardDurEl.textContent = data.duration_ms + ' ms';
+  if (cardQEl) cardQEl.textContent = data.query_count + ' (' + data.query_time_ms + ' ms)';
+  if (cardRamEl) cardRamEl.textContent = data.memory_peak_mb + ' MB';
+
+  var countBadge = document.getElementById('itam-hud-query-count-badge');
+  var isId = '{{ App::getLocale() }}' === 'id';
+  if (countBadge) countBadge.textContent = data.query_count + (isId ? ' query' : ' queries');
+
+  // Populate Queries List
+  var listEl = document.getElementById('itam-hud-queries-list');
+  if (listEl) {
+    listEl.innerHTML = '';
+    if (!data.queries || data.queries.length === 0) {
+      listEl.innerHTML = '<div class="text-center py-3 text-muted" style="font-size:0.75rem;">{{ __("messages.perf_hud_no_queries") }}</div>';
+    } else {
+      var expandText = isId ? 'Klik untuk perluas' : 'Click to expand';
+      var collapseText = isId ? 'Klik untuk ciutkan' : 'Click to collapse';
+
+      data.queries.forEach(function(q, idx) {
+        var isSlow = q.time > 40;
+        var badgeColor = isSlow ? '#f43f5e' : (q.time > 15 ? '#f59e0b' : '#10b981');
+        var item = document.createElement('div');
+        item.className = 'itam-hud-query-item';
+        if (isSlow) item.style.borderColor = 'rgba(244, 63, 94, 0.35)';
+
+        item.innerHTML = `
+          <div class="itam-hud-query-meta">
+            <span class="itam-hud-query-index">#${idx + 1}</span>
+            <span class="itam-hud-query-time" style="color: ${badgeColor};">${q.time} ms</span>
+          </div>
+          <div class="itam-hud-query-sql">${__itamEscapeHtml(q.sql)}</div>
+          <div class="itam-hud-query-expand-hint">
+            <span class="hint-text">${expandText}</span>
+            <i class="fas fa-chevron-down itam-hud-chevron"></i>
+          </div>
+        `;
+
+        item.onclick = function() {
+          var isExp = this.classList.toggle('is-expanded');
+          var ht = this.querySelector('.hint-text');
+          if (ht) ht.textContent = isExp ? collapseText : expandText;
+        };
+
+        listEl.appendChild(item);
+      });
+    }
+  }
+};
+
+// Initial trigger if data already available
+if (window.__itamTelemetry) {
+  window.__itamRenderHud();
+}
+</script>
+@endif
 
 @stack('scripts')
 </body>

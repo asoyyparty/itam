@@ -325,6 +325,31 @@
             </div>
 
             <div class="row">
+                <div class="col-md-6 form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        <i class="fas fa-user-tie mr-1 text-info"></i> {{ __('messages.hris_username') }}
+                    </label>
+                    <input type="text" name="hris_username" class="form-control theme-input custom-emp-input @error('hris_username') is-invalid @enderror" value="{{ old('hris_username') }}" placeholder="{{ __('messages.hris_username') }}..." autocomplete="off">
+                    @error('hris_username') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="col-md-6 form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
+                        <i class="fas fa-shield-alt mr-1 text-info"></i> {{ __('messages.hris_password') }}
+                    </label>
+                    <div class="input-group">
+                        <input type="password" id="hris_password" name="hris_password" class="form-control theme-input custom-emp-input border-right-0 @error('hris_password') is-invalid @enderror" value="{{ old('hris_password') }}" placeholder="{{ __('messages.hris_password') }}..." autocomplete="off">
+                        <div class="input-group-append">
+                            <span class="input-group-text cursor-pointer" onclick="togglePassword('hris_password', this)">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                    @error('hris_password') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="row">
                 <div class="col-md-6 form-group mb-2">
                     <label class="form-label form-label-title theme-text">
                         <i class="fas fa-toggle-on mr-1 text-primary"></i> Status <span class="text-danger">*</span>

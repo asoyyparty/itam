@@ -714,6 +714,170 @@
             margin-bottom: 0 !important;
         }
     }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       HALLMARK LIGHT MODE SUITE: USER & LOGIN MANAGEMENT
+       ═══════════════════════════════════════════════════════════════════ */
+    body.light-mode .iam-header-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05) !important;
+    }
+    body.light-mode .iam-header-title {
+        color: #0f172a !important;
+    }
+    body.light-mode .iam-header-meta {
+        color: #64748b !important;
+    }
+    body.light-mode .iam-bento-tile {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+    }
+    body.light-mode .iam-bento-tile:hover {
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
+    }
+    body.light-mode .iam-bento-label {
+        color: #64748b !important;
+    }
+    body.light-mode .iam-bento-val {
+        color: #0f172a !important;
+    }
+    body.light-mode .iam-bento-sub {
+        color: #64748b !important;
+    }
+    body.light-mode .iam-role-pill-sm {
+        background: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: #334155 !important;
+    }
+    body.light-mode .iam-progress-bar {
+        background: #f1f5f9 !important;
+    }
+    body.light-mode .iam-toolbar-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+    }
+    body.light-mode .iam-search-input {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+    }
+    body.light-mode .iam-search-input:focus {
+        background: #ffffff !important;
+        border-color: #6366f1 !important;
+    }
+    body.light-mode .iam-pill {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #475569 !important;
+    }
+    body.light-mode .iam-pill:hover {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+        border-color: #94a3b8 !important;
+    }
+    body.light-mode .iam-pill.active {
+        background: rgba(99, 102, 241, 0.1) !important;
+        border-color: rgba(99, 102, 241, 0.4) !important;
+        color: #4338ca !important;
+    }
+    body.light-mode .iam-pill-badge {
+        background: #e2e8f0 !important;
+        color: #334155 !important;
+    }
+    body.light-mode .iam-pill.active .iam-pill-badge {
+        background: #4f46e5 !important;
+        color: #ffffff !important;
+    }
+    body.light-mode .iam-table-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+    }
+    body.light-mode .iam-table {
+        color: #1e293b !important;
+    }
+    body.light-mode .iam-table thead th {
+        background: #f8fafc !important;
+        color: #475569 !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
+    body.light-mode .iam-table tbody td {
+        border-bottom: 1px solid #f1f5f9 !important;
+        color: #1e293b !important;
+    }
+    body.light-mode .iam-table tbody tr:hover {
+        background: #f8fafc !important;
+    }
+    body.light-mode .iam-user-name {
+        color: #0f172a !important;
+    }
+    body.light-mode .iam-user-email {
+        color: #64748b !important;
+    }
+    body.light-mode .iam-username-chip {
+        background: #fdf2f8 !important;
+        border-color: #fbcfe8 !important;
+        color: #db2777 !important;
+    }
+    body.light-mode .iam-role-admin {
+        background: rgba(245, 158, 11, 0.1) !important;
+        border-color: rgba(245, 158, 11, 0.3) !important;
+        color: #b45309 !important;
+    }
+    body.light-mode .iam-role-user {
+        background: rgba(59, 130, 246, 0.1) !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+        color: #1d4ed8 !important;
+    }
+    body.light-mode .iam-role-other {
+        background: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: #475569 !important;
+    }
+    body.light-mode .btn-iam-edit {
+        background: #fef3c7 !important;
+        border-color: #fde68a !important;
+        color: #b45309 !important;
+    }
+    body.light-mode .btn-iam-edit:hover {
+        background: #fde68a !important;
+        color: #92400e !important;
+    }
+    body.light-mode .btn-iam-delete {
+        background: #fee2e2 !important;
+        border-color: #fecaca !important;
+        color: #dc2626 !important;
+    }
+    body.light-mode .btn-iam-delete:hover {
+        background: #fecaca !important;
+        color: #b91c1c !important;
+    }
+    body.light-mode .iam-m-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+    }
+    body.light-mode .iam-m-name {
+        color: #0f172a !important;
+    }
+    body.light-mode .iam-m-email {
+        color: #64748b !important;
+    }
+    body.light-mode .iam-m-mid {
+        border-top-color: #f1f5f9 !important;
+        border-bottom-color: #f1f5f9 !important;
+    }
+    body.light-mode .iam-toast {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15) !important;
+    }
+}
 </style>
 
 <div class="iam-workbench">

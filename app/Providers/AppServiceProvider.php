@@ -40,32 +40,26 @@ class AppServiceProvider extends ServiceProvider
         });
 
         try {
-            if (Schema::hasTable('settings')) {
-                $settings = \Illuminate\Support\Facades\Cache::remember('system_settings_dict', 86400, function () {
-                    return Setting::pluck('value', 'key')->toArray();
-                });
-                View::share('settings', $settings);
-                View::share('app_name', $settings['app_name'] ?? 'ITAM Enterprise');
-                View::share('company_name', $settings['company_name'] ?? 'PT CBA Chemical Industry');
-                View::share('company_email', $settings['company_email'] ?? 'itcbachemical23@gmail.com');
+            $settings = \Illuminate\Support\Facades\Cache::remember('system_settings_dict', 86400, function () {
+                return Setting::pluck('value', 'key')->toArray();
+            });
+            View::share('settings', $settings);
+            View::share('app_name', $settings['app_name'] ?? 'ITAM Enterprise');
+            View::share('company_name', $settings['company_name'] ?? 'PT CBA Chemical Industry');
+            View::share('company_email', $settings['company_email'] ?? 'itcbachemical23@gmail.com');
 
-                // Dynamic Mail Configuration
-                if (($settings['email_notification'] ?? '0') == '1') {
-                    config([
-                        'mail.mailers.smtp.host' => $settings['smtp_host'] ?? config('mail.mailers.smtp.host'),
-                        'mail.mailers.smtp.port' => $settings['smtp_port'] ?? config('mail.mailers.smtp.port'),
-                        'mail.mailers.smtp.username' => $settings['smtp_username'] ?? config('mail.mailers.smtp.username'),
-                        'mail.mailers.smtp.password' => $settings['smtp_password'] ?? config('mail.mailers.smtp.password'),
-                        'mail.from.address' => $settings['company_email'] ?? config('mail.from.address'),
-                        'mail.from.name' => $settings['app_name'] ?? config('mail.from.name'),
-                    ]);
-                }
-            } else {
-                View::share('app_name', 'ITAM Enterprise');
-                View::share('company_name', 'PT CBA Chemical Industry');
-                View::share('company_email', 'itcbachemical23@gmail.com');
+            // Dynamic Mail Configuration
+            if (($settings['email_notification'] ?? '0') == '1') {
+                config([
+                    'mail.mailers.smtp.host' => $settings['smtp_host'] ?? config('mail.mailers.smtp.host'),
+                    'mail.mailers.smtp.port' => $settings['smtp_port'] ?? config('mail.mailers.smtp.port'),
+                    'mail.mailers.smtp.username' => $settings['smtp_username'] ?? config('mail.mailers.smtp.username'),
+                    'mail.mailers.smtp.password' => $settings['smtp_password'] ?? config('mail.mailers.smtp.password'),
+                    'mail.from.address' => $settings['company_email'] ?? config('mail.from.address'),
+                    'mail.from.name' => $settings['app_name'] ?? config('mail.from.name'),
+                ]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             View::share('app_name', 'ITAM Enterprise');
             View::share('company_name', 'PT CBA Chemical Industry');
             View::share('company_email', 'itcbachemical23@gmail.com');

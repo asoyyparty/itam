@@ -22,6 +22,7 @@ return new class extends Migration
         DB::table('tickets')->update(['pic_id' => null]);
 
         Schema::table('tickets', function (Blueprint $table) {
+            $table->dropForeign(['pic_id']);
             $table->foreign('pic_id')->references('id')->on('pics')->nullOnDelete();
         });
     }

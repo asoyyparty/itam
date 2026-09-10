@@ -36,6 +36,8 @@ class UpdateEmployeeRequest extends FormRequest
             'anydesk_password' => 'nullable|string|max:100',
             'login_username' => 'nullable|string|max:255',
             'login_password' => 'nullable|string',
+            'hris_username' => 'nullable|string|max:255',
+            'hris_password' => 'nullable|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'status' => 'required|in:Active,Inactive',
         ];

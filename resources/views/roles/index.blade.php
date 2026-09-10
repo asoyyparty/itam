@@ -48,8 +48,15 @@
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 16px;
         margin-bottom: 1.25rem;
+    }
+    .header-titles {
+        flex: 1 1 auto;
+        min-width: 260px;
+    }
+    .header-action-wrap {
+        flex-shrink: 0;
     }
     .hallmark-tag-pill {
         font-size: 0.7rem;
@@ -166,6 +173,21 @@
         border: 1px solid rgba(148, 163, 184, 0.25);
     }
 
+    /* Action Buttons & Primary CTA */
+    .btn-action-primary {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+        border: 1px solid rgba(129, 140, 248, 0.4) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3) !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .btn-action-primary:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45) !important;
+        filter: brightness(1.08) !important;
+        color: #ffffff !important;
+    }
+
     /* Clearance Tier Badges */
     .tier-badge {
         display: inline-flex;
@@ -197,6 +219,28 @@
         background: rgba(168, 85, 247, 0.14);
         color: #c084fc;
         border: 1px solid rgba(168, 85, 247, 0.4);
+    }
+
+    /* Light Mode Contrast Enhancements */
+    body.light-mode .tier-restricted {
+        background: rgba(100, 116, 139, 0.1);
+        color: #475569;
+        border-color: rgba(100, 116, 139, 0.3);
+    }
+    body.light-mode .tier-standard {
+        background: rgba(2, 132, 199, 0.1);
+        color: #0369a1;
+        border-color: rgba(2, 132, 199, 0.3);
+    }
+    body.light-mode .tier-elevated {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border-color: rgba(16, 185, 129, 0.3);
+    }
+    body.light-mode .tier-full-access {
+        background: rgba(147, 51, 234, 0.1);
+        color: #7e22ce;
+        border-color: rgba(147, 51, 234, 0.3);
     }
 
     /* Role Type Tag */
@@ -371,7 +415,7 @@
 <div class="hallmark-roles-container">
     <!-- Header Toolbar -->
     <div class="hallmark-header">
-        <div class="w-100">
+        <div class="header-titles">
             <div class="d-flex align-items-center gap-2 mb-1.5">
                 <span class="hallmark-tag-pill">
                     <i class="fas fa-shield-alt"></i> {{ __('messages.access_governance_console') }}

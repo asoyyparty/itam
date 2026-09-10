@@ -411,6 +411,40 @@
                                     @endif
                                 </div>
                             </div>
+
+                            <!-- HRIS Username -->
+                            <div class="col-6 mt-2">
+                                <div class="tech-param-pill d-flex align-items-center justify-content-between">
+                                    <div class="text-truncate">
+                                        <small class="text-muted d-block" style="font-size: 0.68rem; font-weight: 600;">HRIS USERNAME</small>
+                                        <span class="font-weight-bold text-info text-truncate d-block" style="font-family: var(--font-mono); font-size: 0.85rem;">
+                                            {{ $employee->hris_username ?? '-' }}
+                                        </span>
+                                    </div>
+                                    @if($employee->hris_username)
+                                        <button type="button" class="btn btn-xs btn-outline-info copy-license-btn ml-1" data-license-key="{{ $employee->hris_username }}" data-label="HRIS Username" title="Copy HRIS Username" style="border-radius: 6px; padding: 2px 6px;">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- HRIS Password -->
+                            <div class="col-6 mt-2">
+                                <div class="tech-param-pill d-flex align-items-center justify-content-between">
+                                    <div class="text-truncate">
+                                        <small class="text-muted d-block" style="font-size: 0.68rem; font-weight: 600;">HRIS PASSWORD</small>
+                                        @if($employee->hris_password)
+                                            <input type="password" value="{{ $employee->hris_password }}" id="emp-hris-pass" class="border-0 bg-transparent theme-text font-weight-bold p-0" readonly style="outline:none; width: 65px; font-family: var(--font-mono); font-size: 0.85rem;">
+                                        @else
+                                            <span class="text-muted small">-</span>
+                                        @endif
+                                    </div>
+                                    @if($employee->hris_password)
+                                        <button class="btn btn-xs btn-outline-info toggle-hris-btn ml-1" type="button" style="border-radius: 6px; padding: 2px 6px;"><i class="fas fa-eye"></i></button>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -741,6 +775,18 @@ $(document).ready(function() {
 
     $('.toggle-login-btn').click(function() {
         var input = $('#emp-login-pass');
+        var icon = $(this).find('i');
+        if (input.attr('type') === 'password') {
+            input.attr('type', 'text');
+            icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            input.attr('type', 'password');
+            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+
+    $('.toggle-hris-btn').click(function() {
+        var input = $('#emp-hris-pass');
         var icon = $(this).find('i');
         if (input.attr('type') === 'password') {
             input.attr('type', 'text');

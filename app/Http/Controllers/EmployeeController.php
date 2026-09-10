@@ -32,7 +32,8 @@ class EmployeeController extends Controller implements \Illuminate\Routing\Contr
                     ->orWhere('employee_id', 'like', "%$search%")
                     ->orWhere('email', 'like', "%$search%")
                     ->orWhere('anydesk_id', 'like', "%$search%")
-                    ->orWhere('login_username', 'like', "%$search%");
+                    ->orWhere('login_username', 'like', "%$search%")
+                    ->orWhere('hris_username', 'like', "%$search%");
             });
         }
         if ($request->has('department_id') && $request->department_id != '') {

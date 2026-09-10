@@ -17,10 +17,27 @@ class Employee extends Model
     protected $fillable = [
         'employee_id', 'name', 'email', 'phone', 'photo', 'department_id',
         'status', 'supervisor_id', 'location_id', 'anydesk_id', 'anydesk_password',
-        'login_username', 'login_password',
+        'login_username', 'login_password', 'hris_username', 'hris_password',
     ];
 
     protected function loginPassword(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (empty($value)) {
+                    return null;
+                }
+                try {
+                    return Crypt::decryptString($value);
+                } catch (DecryptException $e) {
+                    return '[Decryption Failed]';
+                }
+            },
+            set: fn ($value) => empty($value) ? null : Crypt::encryptString($value),
+        );
+    }
+
+    protected function hrisPassword(): Attribute
     {
         return Attribute::make(
             get: function ($value) {

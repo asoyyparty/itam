@@ -21,7 +21,7 @@ class TicketController extends Controller implements \Illuminate\Routing\Control
 
     public function index(Request $request)
     {
-        $query = Ticket::with(['employee', 'asset']);
+        $query = Ticket::with(['employee', 'asset', 'pic']);
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;

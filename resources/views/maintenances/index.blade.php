@@ -131,10 +131,15 @@
         height: 44px !important;
         border-radius: 12px !important;
         border: 1px solid rgba(148, 163, 184, 0.22) !important;
-        background: rgba(15, 23, 42, 0.3) !important;
+        background-color: rgba(15, 23, 42, 0.3) !important;
         color: var(--color-ink-0) !important;
         font-size: 0.88rem !important;
-        padding: 0 14px !important;
+        padding: 0 32px 0 14px !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        background-repeat: no-repeat !important;
+        background-position: right 12px center !important;
+        background-size: 14px 14px !important;
         transition: all 0.2s ease !important;
         width: auto !important;
         min-width: 160px !important;
@@ -143,8 +148,9 @@
         margin: 0 !important;
     }
     body.light-mode .custom-filter-select {
-        background: #f8fafc !important;
+        background-color: #ffffff !important;
         border-color: #cbd5e1 !important;
+        color: #0f172a !important;
     }
     .custom-filter-select:focus {
         border-color: #6366f1 !important;

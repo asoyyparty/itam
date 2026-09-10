@@ -31,7 +31,8 @@ class EmployeeExport implements FromCollection, ShouldAutoSize, WithHeadings, Wi
                         ->orWhere('employee_id', 'like', "%$search%")
                         ->orWhere('email', 'like', "%$search%")
                         ->orWhere('anydesk_id', 'like', "%$search%")
-                        ->orWhere('login_username', 'like', "%$search%");
+                        ->orWhere('login_username', 'like', "%$search%")
+                        ->orWhere('hris_username', 'like', "%$search%");
                 });
             }
 
@@ -65,6 +66,8 @@ class EmployeeExport implements FromCollection, ShouldAutoSize, WithHeadings, Wi
             'AnyDesk Password',
             'PC Username',
             'PC Password',
+            'HRIS Username',
+            'HRIS Password',
             'Supervisor',
             'Status',
         ];
@@ -86,6 +89,8 @@ class EmployeeExport implements FromCollection, ShouldAutoSize, WithHeadings, Wi
             $employee->anydesk_password ?: '-',
             $employee->login_username ?: '-',
             $employee->login_password ?: '-',
+            $employee->hris_username ?: '-',
+            $employee->hris_password ?: '-',
             $employee->supervisor ? $employee->supervisor->name : '-',
             $employee->status,
         ];
