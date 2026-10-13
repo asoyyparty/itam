@@ -7,6 +7,10 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
+        <!-- Favicon / App Logo -->
+        <link rel="icon" href="{{ vasset('logo-192.png') }}" type="image/png" sizes="192x192">
+        <link rel="shortcut icon" href="{{ vasset('logo.png') }}" type="image/png">
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />

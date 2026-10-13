@@ -841,7 +841,7 @@ body.light-mode .telemetry-banner {
         </div>
 
         <!-- Mobile Bento Feed View -->
-        <div class="d-block d-md-none p-3" style="max-height: calc(100vh - 240px); overflow-y: auto; -webkit-overflow-scrolling: touch;">
+        <div class="d-block d-md-none p-3 health-mobile-feed" style="max-height: calc(100vh - 240px); overflow-y: auto; -webkit-overflow-scrolling: touch;">
             @forelse($assets as $asset)
                 @php $h = $asset->health_data; @endphp
                 <div class="mobile-bento-card">

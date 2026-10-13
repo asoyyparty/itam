@@ -13,7 +13,7 @@
             </div>
             <div style="flex: 1; min-width: 0;">
                 <h5 class="mb-0 font-weight-bold theme-text text-truncate" style="font-size: 1.15rem; line-height: 1.2;">{{ __('messages.add') }} {{ __('messages.asset') }}</h5>
-                <small class="text-muted d-block" style="font-size: 0.8rem; margin-top: 2px; white-space: normal; line-height: 1.3;">Registrasi fisik, pemindaian OCR dokumen, & spesifikasi teknis ITAM</small>
+                <small class="text-muted d-block" style="font-size: 0.8rem; margin-top: 2px; white-space: normal; line-height: 1.3;">{{ __('messages.asset_create_subtitle') }}</small>
             </div>
         </div>
     </div>
@@ -28,7 +28,7 @@
 
     @if($errors->any())
         <div class="alert alert-danger mx-4 mt-4 mb-0" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; border-radius: 14px; backdrop-filter: blur(10px);">
-            <i class="fas fa-exclamation-triangle mr-1"></i> Terjadi kesalahan input:
+            <i class="fas fa-exclamation-triangle mr-1"></i> {{ __('messages.input_error_occurred') }}
             <ul class="mb-0 mt-1 pl-4">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -71,8 +71,8 @@
             <!-- Panel Loading Overlay for Rescan / Switch Document -->
             <div id="ocrPanelLoadingOverlay" style="display: none; position: absolute; inset: 0; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(8px); border-radius: 16px; z-index: 20; align-items: center; justify-content: center; flex-direction: column;">
                 <i class="fas fa-spinner fa-spin text-info mb-3" style="font-size: 2.4rem; color: #818cf8;"></i>
-                <h6 class="font-weight-bold theme-text mb-1" style="font-size: 0.98rem;">Memindai Dokumen Baru...</h6>
-                <small class="text-muted" style="font-size: 0.8rem;">Mengekstrak rincian surat jalan dengan AI Vision...</small>
+                <h6 class="font-weight-bold theme-text mb-1" style="font-size: 0.98rem;">{{ __('messages.ocr_scanning_overlay_title') }}</h6>
+                <small class="text-muted" style="font-size: 0.8rem;">{{ __('messages.ocr_scanning_overlay_subtitle') }}</small>
             </div>
 
             <!-- Document Meta Header -->
@@ -80,7 +80,7 @@
                 <div style="flex: 1; min-width: 260px;">
                     <div class="d-flex align-items-center flex-wrap" style="gap: 8px; margin-bottom: 8px;">
                         <span class="badge badge-indigo px-2.5 py-1" style="font-size: 0.78rem; display: inline-flex; align-items: center;">
-                            <i class="fas fa-file-invoice mr-1.5"></i> <span id="ocrMetaDo">Surat Jalan</span>
+                            <i class="fas fa-file-invoice mr-1.5"></i> <span id="ocrMetaDo">{{ __('messages.ocr_delivery_order') }}</span>
                         </span>
                         <span id="ocrMetaPoWrap" style="display: none;">
                             <span class="badge badge-secondary font-mono px-2 py-1" style="font-size: 0.75rem;" id="ocrMetaPo"></span>
@@ -93,13 +93,13 @@
 
                 <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
                     <!-- Ganti / Pindai Dokumen Lain -->
-                    <button type="button" class="btn btn-sm ocr-btn-rescan" id="btnRescanOcr" title="Ganti atau unggah dokumen surat jalan lain">
-                        <i class="fas fa-file-upload mr-1.5"></i> Ganti / Pindai Dokumen Lain
+                    <button type="button" class="btn btn-sm ocr-btn-rescan" id="btnRescanOcr" title="{{ __('messages.ocr_change_rescan') }}">
+                        <i class="fas fa-file-upload mr-1.5"></i> {{ __('messages.ocr_change_rescan') }}
                     </button>
 
                     <!-- Tutup Dokumen -->
-                    <button type="button" class="btn btn-sm ocr-btn-close" id="btnCloseOcrPanel" title="Tutup dokumen ini dan kembali isi form secara manual">
-                        <i class="fas fa-times mr-1"></i> Tutup
+                    <button type="button" class="btn btn-sm ocr-btn-close" id="btnCloseOcrPanel" title="{{ __('messages.ocr_close') }}">
+                        <i class="fas fa-times mr-1"></i> {{ __('messages.ocr_close') }}
                     </button>
                 </div>
             </div>
@@ -109,13 +109,13 @@
                 <div class="d-flex align-items-center" style="gap: 10px; min-width: 0; flex: 1;">
                     <span class="ocr-pulse-dot"></span>
                     <div class="text-truncate" style="min-width: 0;">
-                        <span class="text-muted" style="font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.5px;">Mengisi Form:</span>
+                        <span class="text-muted" style="font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.5px;">{{ __('messages.ocr_filling_form') }}</span>
                         <strong class="theme-text ml-1" style="font-size: 0.86rem;" id="ocrActiveItemName">-</strong>
                     </div>
                 </div>
                 <div class="d-flex align-items-center" style="gap: 10px; flex-shrink: 0;">
-                    <span class="badge badge-indigo" id="ocrActiveItemBadge" style="font-size: 0.74rem;">Item #1 Terpilih</span>
-                    <span class="text-muted" style="font-size: 0.76rem;"><span id="ocrItemCount">0</span> Item Ditemukan</span>
+                    <span class="badge badge-indigo" id="ocrActiveItemBadge" style="font-size: 0.74rem;">{{ __('messages.ocr_item_selected', ['num' => 1]) }}</span>
+                    <span class="text-muted" style="font-size: 0.76rem;"><span id="ocrItemCount">0</span> <span id="ocrItemCountLabel">{{ __('messages.ocr_items_found') }}</span></span>
                 </div>
             </div>
 
@@ -202,7 +202,7 @@
 
                 <div class="col-md-12 form-group mt-2 mb-2">
                     <label class="field-label" style="font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-ink-1); margin-bottom: 8px;">
-                        Foto / Gambar Aset <small class="text-muted font-weight-normal">(Optional)</small>
+                        {{ __('messages.asset_image') }} <small class="text-muted font-weight-normal">({{ __('messages.optional') }})</small>
                     </label>
                     <div class="custom-file-upload-card rounded-lg" style="padding: 16px 20px !important; background: rgba(15, 23, 42, 0.35); border: 1px dashed rgba(148, 163, 184, 0.25); border-radius: 12px; transition: all 0.2s ease;">
                         <div class="d-flex align-items-center flex-nowrap" style="gap: 16px;">
@@ -216,19 +216,19 @@
                                     <div class="position-relative">
                                         <input type="file" name="image" id="create-asset-camera-input" class="custom-file-input-field @error('image') is-invalid @enderror" accept="image/*" capture="environment" style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2;" onchange="previewSelectedImage(this, 'create-asset-img-preview', 'create-asset-img-icon')">
                                         <label for="create-asset-camera-input" class="btn btn-sm btn-indigo mb-0 px-3 py-1.5 text-nowrap" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: #ffffff; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 3px 10px rgba(99, 102, 241, 0.35);">
-                                            <i class="fas fa-camera"></i> Kamera
+                                            <i class="fas fa-camera"></i> {{ __('messages.camera') }}
                                         </label>
                                     </div>
                                     <!-- File / Gallery Input -->
                                     <div class="position-relative">
                                         <input type="file" name="image" id="create-asset-file-input" class="custom-file-input-field @error('image') is-invalid @enderror" accept="image/jpeg,image/png,image/jpg,image/webp" style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2;" onchange="previewSelectedImage(this, 'create-asset-img-preview', 'create-asset-img-icon')">
                                         <label for="create-asset-file-input" class="btn btn-sm btn-outline-secondary mb-0 px-3 py-1.5 text-nowrap" style="border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(148, 163, 184, 0.1); color: var(--color-ink-1); border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                                            <i class="fas fa-folder-open"></i> Berkas
+                                            <i class="fas fa-folder-open"></i> {{ __('messages.file') }}
                                         </label>
                                     </div>
                                 </div>
                                 <div class="field-hint text-muted text-truncate" style="font-size: 0.72rem; margin-top: 4px;">
-                                    <i class="fas fa-info-circle mr-1"></i> Kamera / berkas (Max 4MB)
+                                    <i class="fas fa-info-circle mr-1"></i> {{ __('messages.camera') }} / {{ strtolower(__('messages.file')) }} ({{ App::getLocale() === 'en' ? 'Max 4MB' : 'Maks. 4MB' }})
                                 </div>
                                 @error('image')<div class="field-error text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
@@ -314,13 +314,13 @@
                 </div>
 
                 <div class="col-md-3 form-group mb-3">
-                    <label class="field-label">{{ __('messages.warranty_months') }} <small class="text-muted">(Bulan)</small></label>
+                    <label class="field-label">{{ __('messages.warranty_months') }} <small class="text-muted">({{ __('messages.months') }})</small></label>
                     <div class="input-wrap">
                         <span class="input-icon"><i class="fas fa-shield-alt"></i></span>
                         <input type="number" name="warranty_months"
                             class="field-input font-mono @error('warranty_months') is-invalid @enderror"
                             value="{{ old('warranty_months', 60) }}" min="0"
-                            placeholder="e.g., 60 (5 tahun)">
+                            placeholder="{{ __('messages.warranty_placeholder') }}">
                     </div>
                 </div>
 
@@ -399,17 +399,17 @@
                         <div class="col-md-4 form-group mb-3">
                             <label class="field-label">{{ __('messages.printer_type') }}</label>
                             <select name="printer_type" class="field-select custom-filter-select">
-                                <option value="Laser">Laser</option>
-                                <option value="Inkjet">Inkjet</option>
-                                <option value="Thermal">Thermal</option>
-                                <option value="DotMatrix">Dot Matrix</option>
+                                <option value="Laser">{{ __('messages.printer_type_laser') }}</option>
+                                <option value="Inkjet">{{ __('messages.printer_type_inkjet') }}</option>
+                                <option value="Thermal">{{ __('messages.printer_type_thermal') }}</option>
+                                <option value="DotMatrix">{{ __('messages.printer_type_dotmatrix') }}</option>
                             </select>
                         </div>
                         <div class="col-md-4 form-group mb-3">
                             <label class="field-label">{{ __('messages.connection') }}</label>
                             <select name="connection_type" class="field-select custom-filter-select">
-                                <option value="USB">USB Only</option>
-                                <option value="Network">Network (Ethernet/WiFi)</option>
+                                <option value="USB">{{ __('messages.printer_conn_usb') }}</option>
+                                <option value="Network">{{ __('messages.printer_conn_network') }}</option>
                             </select>
                         </div>
                         <div class="col-md-4 form-group mb-3 d-flex align-items-end pb-2">
@@ -424,11 +424,11 @@
                         </div>
                         <div class="col-md-4 form-group mb-3">
                             <label class="field-label">{{ __('messages.toner_status') }}</label>
-                            <input type="text" name="toner_status" class="field-input font-mono" placeholder="e.g., 80% / Baru">
+                            <input type="text" name="toner_status" class="field-input font-mono" placeholder="{{ __('messages.toner_status_placeholder') }}">
                         </div>
                         <div class="col-md-4 form-group mb-3">
                             <label class="field-label">{{ __('messages.drum_status') }}</label>
-                            <input type="text" name="drum_status" class="field-input font-mono" placeholder="e.g., Bagus / OK">
+                            <input type="text" name="drum_status" class="field-input font-mono" placeholder="{{ __('messages.drum_status_placeholder') }}">
                         </div>
                     </div>
                 </div>
@@ -699,25 +699,25 @@ body.light-mode .ocr-active-banner {
 /* Card Grid View (Exclusive View) */
 .ocr-items-grid-container {
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-    gap: 14px !important;
-    max-height: 440px !important;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+    gap: 16px !important;
+    max-height: 460px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding: 4px !important;
+    padding: 6px !important;
 }
 
 @media (max-width: 640px) {
     .ocr-items-grid-container {
         grid-template-columns: 1fr !important;
         gap: 12px !important;
-        max-height: 380px !important;
+        max-height: 400px !important;
     }
 }
 
 .ocr-item-card {
     border-radius: 12px !important;
-    padding: 14px 16px !important;
+    padding: 13px 15px !important;
     background: rgba(30, 41, 59, 0.75) !important;
     border: 1px solid rgba(148, 163, 184, 0.22) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
@@ -725,9 +725,11 @@ body.light-mode .ocr-active-banner {
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
-    min-height: 130px;
+    min-height: 132px;
     cursor: pointer;
     position: relative;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
 }
 body.light-mode .ocr-item-card {
     background: #ffffff !important;
@@ -750,22 +752,24 @@ body.light-mode .ocr-item-card:hover {
 body.light-mode .ocr-item-card.active-ocr-card {
     background: #eef2ff !important;
     border-color: #6366f1 !important;
+    box-shadow: 0 0 0 1px #6366f1, 0 4px 16px rgba(99, 102, 241, 0.15) !important;
 }
 .ocr-item-card.saved-ocr-card {
     opacity: 0.55;
 }
 .ocr-item-title {
-    font-size: 0.88rem;
+    font-size: 0.86rem;
     font-weight: 600;
-    line-height: 1.4;
-    margin-top: 8px;
+    line-height: 1.42;
+    margin-top: 6px;
     margin-bottom: 12px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-height: 2.5em;
+    min-height: 2.45em;
+    word-break: break-word;
     color: var(--color-ink-0, #f8fafc);
 }
 body.light-mode .ocr-item-title {
@@ -989,6 +993,39 @@ $(document).ready(function () {
 
     $('select[name="category_id"]').trigger('change');
 
+    // OCR & Save Localization Helper
+    const i18n = {
+        saving: @json(__('messages.saving')),
+        saved: @json(__('messages.ocr_saved')),
+        savedSuccess: @json(__('messages.item_saved_success')),
+        saveFailed: @json(__('messages.save_failed')),
+        saveFailedMsg: @json(__('messages.save_failed_msg')),
+        scanning: @json(__('messages.ocr_scanning')),
+        changeRescan: @json(__('messages.ocr_change_rescan')),
+        selectItem: @json(__('messages.ocr_select_item')),
+        selected: @json(__('messages.ocr_selected')),
+        noBrand: @json(__('messages.ocr_no_brand')),
+        noItems: @json(__('messages.ocr_no_items')),
+        deliveryOrder: @json(__('messages.ocr_delivery_order')),
+        closeConfirmTitle: @json(__('messages.ocr_close_confirm_title')),
+        closeConfirmText: @json(__('messages.ocr_close_confirm_text')),
+        closeConfirmBtn: @json(__('messages.ocr_close_confirm_btn')),
+        cancel: @json(__('messages.cancel')),
+        closedToastTitle: @json(__('messages.ocr_closed_toast_title')),
+        closedToastDesc: @json(__('messages.ocr_closed_toast_desc')),
+        scanFailed: @json(__('messages.ocr_scan_failed')),
+        scanFailedDefault: @json(__('messages.ocr_scan_failed_default')),
+        itemSelectedTemplate: @json(__('messages.ocr_item_selected')),
+        itemSavedTemplate: @json(__('messages.ocr_item_saved')),
+        itemFilledToastTemplate: @json(__('messages.ocr_item_filled_toast')),
+        itemsFound: @json(__('messages.ocr_items_found')),
+        itemFoundSingular: @json(__('messages.ocr_item_found_singular')),
+        date: @json(App::getLocale() === 'en' ? 'Date:' : 'Tanggal:'),
+        recipient: @json(App::getLocale() === 'en' ? 'Recipient:' : 'Penerima:'),
+        vendor: @json('Vendor:'),
+        docReady: @json(App::getLocale() === 'en' ? 'Document Ready to Process' : 'Dokumen Siap Diproses'),
+    };
+
     // OCR Auto-Scan Document Handler (Event Delegation)
     let currentOcrData = null;
 
@@ -1030,7 +1067,7 @@ $(document).ready(function () {
         const isPanelOpen = $('#ocrMultiItemPanel').is(':visible');
         if (isPanelOpen) {
             $('#ocrPanelLoadingOverlay').css('display', 'flex').hide().fadeIn(200);
-            $('#btnRescanOcr').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1.5"></i> Memindai...');
+            $('#btnRescanOcr').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1.5"></i> ' + escapeHtml(i18n.scanning));
         } else {
             $('#ocrInitialState').hide();
             $('#ocrLoadingState').show();
@@ -1047,7 +1084,7 @@ $(document).ready(function () {
                 $('#ocrLoadingState').hide();
                 $('#ocrInitialState').show();
                 $('#ocrPanelLoadingOverlay').fadeOut(200);
-                $('#btnRescanOcr').prop('disabled', false).html('<i class="fas fa-file-upload mr-1.5"></i> Ganti / Pindai Dokumen Lain');
+                $('#btnRescanOcr').prop('disabled', false).html('<i class="fas fa-file-upload mr-1.5"></i> ' + escapeHtml(i18n.changeRescan));
 
                 if (response.success && response.data) {
                     currentOcrData = response.data;
@@ -1058,10 +1095,10 @@ $(document).ready(function () {
                 $('#ocrLoadingState').hide();
                 $('#ocrInitialState').show();
                 $('#ocrPanelLoadingOverlay').fadeOut(200);
-                $('#btnRescanOcr').prop('disabled', false).html('<i class="fas fa-file-upload mr-1.5"></i> Ganti / Pindai Dokumen Lain');
-                const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Gagal memindai dokumen.';
+                $('#btnRescanOcr').prop('disabled', false).html('<i class="fas fa-file-upload mr-1.5"></i> ' + escapeHtml(i18n.changeRescan));
+                const msg = xhr.responseJSON ? xhr.responseJSON.message : i18n.scanFailedDefault;
                 if (window.showHallmarkToast) {
-                    window.showHallmarkToast('error', 'Gagal Memindai', msg);
+                    window.showHallmarkToast('error', i18n.scanFailed, msg);
                 } else {
                     Swal.fire({ icon: 'error', text: msg, toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc' });
                 }
@@ -1099,13 +1136,13 @@ $(document).ready(function () {
         $('.ocr-item-card').each(function() {
             const i = parseInt($(this).data('item-index'), 10);
             if (!savedItemIndices.has(i)) {
-                $(this).find('.btn-select-item').html('<i class="far fa-circle mr-1"></i> Pilih Item Ini').removeClass('text-success').addClass('text-primary');
+                $(this).find('.btn-select-item').html('<i class="far fa-circle mr-1"></i> ' + escapeHtml(i18n.selectItem)).removeClass('text-success').addClass('text-primary');
             }
         });
         const $activeCard = $(`.ocr-item-card[data-item-index="${idx}"]`);
         $activeCard.addClass('active-ocr-card');
         if (!savedItemIndices.has(idx)) {
-            $activeCard.find('.btn-select-item').html('<i class="fas fa-check-circle mr-1"></i> Terpilih').removeClass('text-primary').addClass('text-success');
+            $activeCard.find('.btn-select-item').html('<i class="fas fa-check-circle mr-1"></i> ' + escapeHtml(i18n.selected)).removeClass('text-primary').addClass('text-success');
         }
 
         // Update Active Tracker Banner
@@ -1114,9 +1151,9 @@ $(document).ready(function () {
         const cleanName = cleanOcrItemName(item.name || currentOcrData?.name || 'Item #' + (idx + 1));
         $('#ocrActiveItemName').text(cleanName);
         if (savedItemIndices.has(idx)) {
-            $('#ocrActiveItemBadge').html(`<i class="fas fa-check-double mr-1"></i> Item #${idx + 1} Tersimpan`).removeClass('badge-indigo').addClass('badge-info');
+            $('#ocrActiveItemBadge').html(`<i class="fas fa-check-double mr-1"></i> ${i18n.itemSavedTemplate.replace(':num', idx + 1)}`).removeClass('badge-indigo').addClass('badge-info');
         } else {
-            $('#ocrActiveItemBadge').html(`Item #${idx + 1} Terpilih`).removeClass('badge-info').addClass('badge-indigo');
+            $('#ocrActiveItemBadge').html(i18n.itemSelectedTemplate.replace(':num', idx + 1)).removeClass('badge-info').addClass('badge-indigo');
         }
 
         populateFormWithItem(idx);
@@ -1128,10 +1165,10 @@ $(document).ready(function () {
         // Update card
         const $card = $(`.ocr-item-card[data-item-index="${idx}"]`);
         $card.addClass('saved-ocr-card').removeClass('active-ocr-card');
-        $card.find('.btn-select-item').html('<i class="fas fa-check-double mr-1"></i> Tersimpan').removeClass('text-success text-primary').addClass('text-info font-weight-bold');
+        $card.find('.btn-select-item').html('<i class="fas fa-check-double mr-1"></i> ' + escapeHtml(i18n.saved)).removeClass('text-success text-primary').addClass('text-info font-weight-bold');
 
         // Update active banner
-        $('#ocrActiveItemBadge').html('<i class="fas fa-check-circle mr-1"></i> Tersimpan').removeClass('badge-indigo').addClass('badge-success');
+        $('#ocrActiveItemBadge').html(`<i class="fas fa-check-circle mr-1"></i> ${i18n.itemSavedTemplate.replace(':num', idx + 1)}`).removeClass('badge-indigo').addClass('badge-success');
     }
 
     function renderOcrMultiItemPanel(data) {
@@ -1139,7 +1176,7 @@ $(document).ready(function () {
         const items = data.items || [];
         
         // Document Numbers
-        $('#ocrMetaDo').text('No. SJ: ' + (data.delivery_order_number || 'Dokumen Surat Jalan'));
+        $('#ocrMetaDo').text(data.delivery_order_number ? (i18n.deliveryOrder + ': ' + data.delivery_order_number) : i18n.deliveryOrder);
         if (data.po_number) {
             $('#ocrMetaPo').text('PO: ' + data.po_number);
             $('#ocrMetaPoWrap').show();
@@ -1150,55 +1187,70 @@ $(document).ready(function () {
         // Metadata Chips
         let chipsHtml = '';
         if (data.date_received) {
-            chipsHtml += `<span class="ocr-meta-chip"><i class="far fa-calendar-alt text-accent"></i> <span>Tanggal: <strong>${escapeHtml(data.date_received)}</strong></span></span>`;
+            chipsHtml += `<span class="ocr-meta-chip"><i class="far fa-calendar-alt text-accent"></i> <span>${escapeHtml(i18n.date)} <strong>${escapeHtml(data.date_received)}</strong></span></span>`;
         }
         const cleanRecipient = (data.recipient || '').replace(/(?:Tanggal|Date)[.:\s].*/gi, '').trim();
         if (cleanRecipient) {
-            chipsHtml += `<span class="ocr-meta-chip"><i class="fas fa-user-check text-info"></i> <span>Penerima: <strong>${escapeHtml(cleanRecipient)}</strong></span></span>`;
+            chipsHtml += `<span class="ocr-meta-chip"><i class="fas fa-user-check text-info"></i> <span>${escapeHtml(i18n.recipient)} <strong>${escapeHtml(cleanRecipient)}</strong></span></span>`;
         }
         if (data.vendor) {
-            chipsHtml += `<span class="ocr-meta-chip"><i class="fas fa-store text-success"></i> <span>Vendor: <strong>${escapeHtml(data.vendor)}</strong></span></span>`;
+            chipsHtml += `<span class="ocr-meta-chip"><i class="fas fa-store text-success"></i> <span>${escapeHtml(i18n.vendor)} <strong>${escapeHtml(data.vendor)}</strong></span></span>`;
         }
-        $('#ocrMetaSummary').html(chipsHtml || '<span class="ocr-meta-chip"><i class="fas fa-check-circle text-success"></i> Dokumen Siap Diproses</span>');
+        $('#ocrMetaSummary').html(chipsHtml || `<span class="ocr-meta-chip"><i class="fas fa-check-circle text-success"></i> ${escapeHtml(i18n.docReady)}</span>`);
         
         $('#ocrItemCount').text(items.length);
+        $('#ocrItemCountLabel').text(items.length === 1 ? i18n.itemFoundSingular : i18n.itemsFound);
 
         const $grid = $('#ocrItemsGrid');
         $grid.empty();
 
         if (items.length === 0) {
-            $grid.append('<div class="text-muted py-4 px-2 col-12 text-center">Tidak ditemukan rincian item pada dokumen. Data dokumen utama telah diisikan ke formulir.</div>');
+            $grid.append(`<div class="text-muted py-4 px-2 col-12 text-center">${escapeHtml(i18n.noItems)}</div>`);
             populateFormWithItem(0);
         } else {
             items.forEach(function(item, idx) {
                 const cleanName = cleanOcrItemName(item.name || data.name || '');
                 const codeText = item.code ? escapeHtml(item.code) : '';
-                const codeBadgeCard = item.code ? `<span class="badge badge-secondary font-mono" style="font-size:0.68rem;">${codeText}</span>` : '';
+                const codeBadgeCard = item.code ? `<span class="badge badge-secondary font-mono text-truncate" style="font-size:0.68rem; max-width: 120px; padding: 2px 6px; border-radius: 6px;" title="${codeText}"><i class="fas fa-barcode mr-1 opacity-70"></i>${codeText}</span>` : '';
                 
-                const qtyText = `${item.quantity || 1} ${escapeHtml(item.uom || 'Unit')}`;
-                const qtyBadgeCard = `<span class="badge badge-info" style="font-size:0.7rem; font-weight: 600;">Qty: ${qtyText}</span>`;
+                // Format UOM cleanly (normalize Pieces -> Pcs or localized)
+                let rawUom = (item.uom || 'Pcs').trim();
+                if (/^pieces?$/i.test(rawUom)) {
+                    rawUom = 'Pcs';
+                }
+                const qtyVal = item.quantity || 1;
+                const qtyBadgeCard = `<span class="badge badge-info text-nowrap" style="font-size:0.69rem; font-weight: 600; padding: 2.5px 7px; border-radius: 6px;"><i class="fas fa-boxes mr-1 opacity-70"></i>Qty: ${qtyVal} ${escapeHtml(rawUom)}</span>`;
                 
-                const hasBrand = item.brand && item.brand !== 'Generic';
-                const brandBadgeCard = hasBrand ? `<span class="badge badge-cyan" style="font-size:0.68rem;">${escapeHtml(item.brand)}</span>` : `<span class="text-muted" style="font-size:0.72rem;"><i class="fas fa-box-open mr-1"></i> Non-Merk</span>`;
+                const hasBrand = item.brand && item.brand !== 'Generic' && item.brand.toLowerCase() !== 'non-merk';
+                const brandBadgeCard = hasBrand 
+                    ? `<span class="badge badge-cyan text-truncate" style="font-size:0.69rem; font-weight: 600; max-width: 130px; padding: 2.5px 7px; border-radius: 6px;" title="${escapeHtml(item.brand)}"><i class="fas fa-tag mr-1 opacity-70"></i>${escapeHtml(item.brand)}</span>` 
+                    : `<span class="text-muted text-truncate" style="font-size:0.72rem; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-box-open opacity-70"></i> ${escapeHtml(i18n.noBrand)}</span>`;
 
-                // Card View
+                const isFirst = idx === 0;
+                const selectBtnHtml = isFirst
+                    ? `<span class="font-weight-bold btn-select-item text-success" style="font-size: 0.76rem; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-check-circle"></i> ${escapeHtml(i18n.selected)}</span>`
+                    : `<span class="font-weight-bold btn-select-item text-primary" style="font-size: 0.76rem; display: inline-flex; align-items: center; gap: 4px;"><i class="far fa-circle"></i> ${escapeHtml(i18n.selectItem)}</span>`;
+
+                // Card View with flex-wrap header and Hallmark styling
                 const cardHtml = `
-                    <div class="ocr-item-card ${idx === 0 ? 'active-ocr-card' : ''}" data-item-index="${idx}">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <div class="d-flex align-items-center" style="gap: 6px;">
-                                <span class="badge badge-primary px-2 py-0.5" style="font-size: 0.68rem; font-weight: 700;">Item #${idx + 1}</span>
+                    <div class="ocr-item-card ${isFirst ? 'active-ocr-card' : ''}" data-item-index="${idx}">
+                        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap" style="gap: 6px 8px;">
+                            <div class="d-flex align-items-center flex-wrap" style="gap: 5px; min-width: 0;">
+                                <span class="badge badge-primary px-2 py-0.5" style="font-size: 0.68rem; font-weight: 700; border-radius: 6px; letter-spacing: 0.2px;">Item #${idx + 1}</span>
                                 ${codeBadgeCard}
                             </div>
-                            ${qtyBadgeCard}
+                            <div style="flex-shrink: 0;">
+                                ${qtyBadgeCard}
+                            </div>
                         </div>
                         <div class="ocr-item-title theme-text" title="${escapeHtml(cleanName)}">${escapeHtml(cleanName)}</div>
-                        <div class="d-flex align-items-center justify-content-between pt-2 mt-auto" style="border-top: 1px solid rgba(148, 163, 184, 0.12);">
-                            <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center justify-content-between pt-2.5 mt-auto" style="border-top: 1px solid rgba(148, 163, 184, 0.12); gap: 8px;">
+                            <div class="d-flex align-items-center" style="min-width: 0; flex: 1;">
                                 ${brandBadgeCard}
                             </div>
-                            <span class="font-weight-bold btn-select-item ${idx === 0 ? 'text-success' : 'text-primary'}" style="font-size: 0.75rem;">
-                                ${idx === 0 ? '<i class="fas fa-check-circle mr-1"></i> Terpilih' : '<i class="far fa-circle mr-1"></i> Pilih Item Ini'}
-                            </span>
+                            <div style="flex-shrink: 0;">
+                                ${selectBtnHtml}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1210,6 +1262,8 @@ $(document).ready(function () {
 
         $('#ocrMultiItemPanel').slideDown(300);
     }
+    window.renderOcrMultiItemPanel = renderOcrMultiItemPanel;
+    window.selectOcrItem = selectOcrItem;
 
     // Interactive Selection on Click
     $(document).on('click', '.ocr-item-card', function(e) {
@@ -1227,14 +1281,14 @@ $(document).ready(function () {
 
     $(document).on('click', '#btnCloseOcrPanel', function() {
         Swal.fire({
-            title: 'Tutup Dokumen Ini?',
-            text: 'Hasil pemindaian surat jalan ini akan ditutup dan data form dikosongkan.',
+            title: i18n.closeConfirmTitle,
+            text: i18n.closeConfirmText,
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
             cancelButtonColor: '#64748b',
-            confirmButtonText: 'Ya, Tutup Dokumen',
-            cancelButtonText: 'Batal',
+            confirmButtonText: i18n.closeConfirmBtn,
+            cancelButtonText: i18n.cancel,
             background: '#0f172a',
             color: '#f8fafc'
         }).then((result) => {
@@ -1256,7 +1310,7 @@ $(document).ready(function () {
                 $('#ocrFileInput').val('');
 
                 if (window.showHallmarkToast) {
-                    window.showHallmarkToast('info', 'Dokumen Ditutup', 'Formulir siap diisi secara manual.');
+                    window.showHallmarkToast('info', i18n.closedToastTitle, i18n.closedToastDesc);
                 }
             }
         });
@@ -1292,12 +1346,18 @@ $(document).ready(function () {
         const cleanItemName = cleanOcrItemName(rawName);
 
         if (cleanItemName) $('input[name="name"]').val(cleanItemName).trigger('input');
-        if (item.uom) $('input[name="uom"]').val(item.uom).trigger('input');
+        
+        let uomVal = item.uom ? item.uom.trim() : '';
+        if (/^pieces?$/i.test(uomVal)) {
+            uomVal = 'Pcs';
+        }
+        if (uomVal) $('input[name="uom"]').val(uomVal).trigger('input');
         if (item.quantity) $('input[name="quantity"]').val(item.quantity).trigger('input');
         if (d.delivery_order_number) $('input[name="delivery_order_number"]').val(d.delivery_order_number).trigger('input');
         if (d.date_received) $('input[name="date_received"]').val(d.date_received).trigger('input');
 
-        const notesText = (d.notes || '') + (item.quantity ? ` [Item #${index+1}: ${cleanItemName} - Qty: ${item.quantity} ${item.uom || 'Pieces'}]` : '');
+        const notesUom = uomVal || 'Pcs';
+        const notesText = (d.notes || '') + (item.quantity ? ` [Item #${index+1}: ${cleanItemName} - Qty: ${item.quantity} ${notesUom}]` : '');
         $('textarea[name="notes"]').val(notesText).trigger('input');
 
         const brandId = item.brand_id || d.brand_id;
@@ -1316,11 +1376,11 @@ $(document).ready(function () {
         if (item.os) $('input[name="os"]').val(item.os);
 
         if (window.showHallmarkToast) {
-            window.showHallmarkToast('success', 'Item #' + (index + 1) + ' Diisikan ke Form', cleanItemName);
+            window.showHallmarkToast('success', i18n.itemFilledToastTemplate.replace(':num', index + 1), cleanItemName);
         } else {
             Swal.fire({
                 icon: 'success',
-                title: 'Item #' + (index + 1) + ' Diisikan ke Form',
+                title: i18n.itemFilledToastTemplate.replace(':num', index + 1),
                 text: cleanItemName,
                 toast: true,
                 position: 'top-end',
@@ -1340,7 +1400,7 @@ $(document).ready(function () {
             var formData = new FormData(this);
             var $btn = $form.find('button[type="submit"], .btn-save');
             var originalText = $btn.html();
-            $btn.html('<i class="fas fa-spinner fa-spin"></i> Menyimpan...').prop('disabled', true);
+            $btn.html('<i class="fas fa-spinner fa-spin mr-2"></i> ' + escapeHtml(i18n.saving)).prop('disabled', true);
 
             $.ajax({
                 url: $form.attr('action') || '{{ route("assets.store") }}',
@@ -1355,12 +1415,12 @@ $(document).ready(function () {
                     $btn.html(originalText).prop('disabled', false);
                     
                     if (window.showHallmarkToast) {
-                        window.showHallmarkToast('success', 'Tersimpan!', response.message || 'Item berhasil disimpan.');
+                        window.showHallmarkToast('success', i18n.saved + '!', response.message || i18n.savedSuccess);
                     } else {
                         Swal.fire({
                             icon: 'success',
-                            title: 'Tersimpan!',
-                            text: response.message || 'Item berhasil disimpan.',
+                            title: i18n.saved + '!',
+                            text: response.message || i18n.savedSuccess,
                             toast: true,
                             position: 'top-end',
                             showConfirmButton: false,
@@ -1387,7 +1447,7 @@ $(document).ready(function () {
                 },
                 error: function(xhr) {
                     $btn.html(originalText).prop('disabled', false);
-                    var msg = 'Gagal menyimpan data.';
+                    var msg = i18n.saveFailedMsg;
                     if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
                         msg = Object.values(xhr.responseJSON.errors).map(e => e[0]).join('<br>');
                     } else if (xhr.responseJSON && xhr.responseJSON.message) {
@@ -1395,7 +1455,7 @@ $(document).ready(function () {
                     }
                     
                     if (window.showHallmarkToast) {
-                        window.showHallmarkToast('error', 'Gagal Menyimpan', msg);
+                        window.showHallmarkToast('error', i18n.saveFailed, msg);
                     } else {
                         Swal.fire({
                             icon: 'error',

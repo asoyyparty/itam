@@ -2,10 +2,13 @@
 
 use App\Http\Controllers\AssetAssignmentController;
 use App\Http\Controllers\AssetController;
+use App\Http\Controllers\BeritaAcaraController;
+use App\Http\Controllers\BeritaAcaraDisposalController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\IpAddressController;
 use App\Http\Controllers\LanguageController;
@@ -119,6 +122,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['permission:menu_assets'])->group(function () {
         Route::post('assets/import', [AssetController::class, 'importExcel'])->name('assets.import');
         Route::get('assets/export', [AssetController::class, 'exportExcel'])->name('assets.export');
+        Route::get('assets/print-barcodes', [AssetController::class, 'printBarcodes'])->name('assets.print-barcodes');
+        Route::post('assets/bulk-delete', [AssetController::class, 'bulkDestroy'])->name('assets.bulk-delete');
         Route::get('assets/generate-tag', [AssetController::class, 'generateTag'])->name('assets.generate-tag');
         Route::patch('assets/{asset}/status', [AssetController::class, 'updateStatus'])->name('assets.updateStatus');
         Route::resource('assets', AssetController::class)->except(['show']);
@@ -141,6 +146,29 @@ Route::middleware('auth')->group(function () {
         Route::get('tickets/export', [TicketController::class, 'exportExcel'])->name('tickets.export');
         Route::patch('tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('tickets.updateStatus');
         Route::resource('tickets', TicketController::class);
+    });
+
+    // Berita Acara OK & Disposal Routes
+    Route::middleware(['permission:menu_berita_acara'])->group(function () {
+        Route::post('berita-acara/scan-ocr', [BeritaAcaraController::class, 'scanOcr'])->name('berita-acara.scan-ocr');
+        Route::get('berita-acara/{beritaAcara}/print', [BeritaAcaraController::class, 'printView'])->name('berita-acara.print');
+        Route::resource('berita-acara', BeritaAcaraController::class);
+
+        Route::post('berita-acara-disposal/scan-ocr', [BeritaAcaraDisposalController::class, 'scanOcr'])->name('berita-acara-disposal.scan-ocr');
+        Route::get('berita-acara-disposal/{beritaAcaraDisposal}/print', [BeritaAcaraDisposalController::class, 'printView'])->name('berita-acara-disposal.print');
+        Route::resource('berita-acara-disposal', BeritaAcaraDisposalController::class);
+    });
+
+    // Scanned & Digital Document Repository Routes
+    Route::middleware(['permission:menu_documents'])->group(function () {
+        Route::post('documents/folders', [DocumentController::class, 'storeFolder'])->name('documents.folders.store');
+        Route::put('documents/folders/{folder}', [DocumentController::class, 'updateFolder'])->name('documents.folders.update');
+        Route::delete('documents/folders/{folder}', [DocumentController::class, 'destroyFolder'])->name('documents.folders.destroy');
+        Route::post('documents/categories', [DocumentController::class, 'storeCategory'])->name('documents.categories.store');
+        Route::put('documents/categories/{category}', [DocumentController::class, 'updateCategory'])->name('documents.categories.update');
+        Route::delete('documents/categories/{category}', [DocumentController::class, 'destroyCategory'])->name('documents.categories.destroy');
+        Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+        Route::resource('documents', DocumentController::class);
     });
 
     // AI Assistant & OCR Routes
@@ -183,6 +211,18 @@ Route::middleware('auth')->group(function () {
         Route::post('ips/{ip}/ping', [IpAddressController::class, 'ping'])->name('ips.ping');
         Route::patch('ips/{ip}/status', [IpAddressController::class, 'updateStatus'])->name('ips.updateStatus');
         Route::resource('ips', IpAddressController::class);
+    });
+
+    // Stock Opname & Audit QR Scanner Routes
+    Route::middleware(['permission:menu_stock_opname'])->group(function () {
+        Route::get('stock-opname', [\App\Http\Controllers\StockOpnameController::class, 'index'])->name('stock-opname.index');
+        Route::post('stock-opname', [\App\Http\Controllers\StockOpnameController::class, 'store'])->name('stock-opname.store');
+        Route::get('stock-opname/{id}', [\App\Http\Controllers\StockOpnameController::class, 'show'])->name('stock-opname.show');
+        Route::post('stock-opname/{id}/scan', [\App\Http\Controllers\StockOpnameController::class, 'scanAsset'])->name('stock-opname.scan');
+        Route::patch('stock-opname/{id}/items/{itemId}', [\App\Http\Controllers\StockOpnameController::class, 'updateItem'])->name('stock-opname.update-item');
+        Route::post('stock-opname/{id}/complete', [\App\Http\Controllers\StockOpnameController::class, 'complete'])->name('stock-opname.complete');
+        Route::get('stock-opname/{id}/export', [\App\Http\Controllers\StockOpnameController::class, 'exportExcel'])->name('stock-opname.export');
+        Route::delete('stock-opname/{id}', [\App\Http\Controllers\StockOpnameController::class, 'destroy'])->name('stock-opname.destroy');
     });
 });
 

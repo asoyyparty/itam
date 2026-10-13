@@ -14,11 +14,187 @@
         margin-top: 0 !important;
         margin-bottom: 22px !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
     body.light-mode .master-header-banner {
         background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(241, 245, 249, 0.85));
         border: 1px solid rgba(226, 232, 240, 0.9);
         box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+    }
+
+    .asset-header-flex {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .asset-show-identity {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        min-width: 0;
+        flex: 1 1 320px;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .asset-show-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(79, 70, 229, 0.08));
+        border: 1px solid rgba(99, 102, 241, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #818cf8;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        box-shadow: 0 0 14px rgba(99, 102, 241, 0.25);
+        margin-top: 2px;
+    }
+    body.light-mode .asset-show-icon {
+        background: rgba(99, 102, 241, 0.12);
+        border-color: rgba(99, 102, 241, 0.3);
+        color: #4f46e5;
+    }
+
+    .asset-show-meta {
+        flex: 1 1 0%;
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .asset-show-title-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px 10px;
+        width: 100%;
+        min-width: 0;
+        margin-bottom: 4px;
+    }
+
+    .asset-show-title {
+        font-size: 1.18rem;
+        font-weight: 700;
+        line-height: 1.3;
+        color: var(--color-ink-0);
+        margin: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        min-width: 0;
+    }
+
+    .asset-show-subline {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px 8px;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        color: #94a3b8;
+        margin-top: 4px;
+        width: 100%;
+        min-width: 0;
+    }
+    body.light-mode .asset-show-subline {
+        color: #64748b;
+    }
+
+    .asset-show-tag-code {
+        padding: 2px 7px;
+        background: rgba(99, 102, 241, 0.12);
+        color: #818cf8;
+        border: 1px solid rgba(99, 102, 241, 0.25);
+        border-radius: 6px;
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 0.78rem;
+        letter-spacing: 0.02em;
+    }
+    body.light-mode .asset-show-tag-code {
+        background: rgba(99, 102, 241, 0.08);
+        color: #4f46e5;
+        border-color: rgba(99, 102, 241, 0.2);
+    }
+
+    .asset-show-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        flex-shrink: 0;
+        margin-left: auto;
+    }
+
+    @media (max-width: 767.98px) {
+        .master-header-banner {
+            padding: 14px 16px !important;
+            border-radius: 16px !important;
+            margin-bottom: 16px !important;
+        }
+
+        .asset-header-flex {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 14px !important;
+        }
+
+        .asset-show-identity {
+            gap: 12px !important;
+            width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+
+        .asset-show-icon {
+            width: 38px !important;
+            height: 38px !important;
+            font-size: 1rem !important;
+            border-radius: 11px !important;
+            margin-top: 1px !important;
+        }
+
+        .asset-show-title {
+            font-size: 1.05rem !important;
+            line-height: 1.35 !important;
+        }
+
+        .asset-show-actions {
+            width: 100% !important;
+            margin-left: 0 !important;
+            gap: 8px !important;
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+        }
+
+        .master-header-banner .asset-show-actions .btn,
+        .master-header-banner .asset-show-actions .btn-action-primary,
+        .master-header-banner .asset-show-actions .btn-action-secondary {
+            flex: 1 1 130px !important;
+            width: auto !important;
+            height: 40px !important;
+            order: unset !important;
+            margin-top: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 0.82rem !important;
+            font-weight: 600 !important;
+            white-space: nowrap !important;
+            border-radius: 10px !important;
+            min-width: 0 !important;
+        }
     }
 
     .detail-card {
@@ -225,36 +401,39 @@
 
 <!-- Hallmark Master Header Banner -->
 <div class="master-header-banner">
-    <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 16px;">
-        <div class="d-flex align-items-center" style="gap: 14px; min-width: 0; flex: 1;">
-            <div style="width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(79, 70, 229, 0.08)); border: 1px solid rgba(99, 102, 241, 0.35); display: flex; align-items: center; justify-content: center; color: #818cf8; font-size: 1.2rem; flex-shrink: 0; box-shadow: 0 0 14px rgba(99, 102, 241, 0.25);">
+    <div class="asset-header-flex">
+        <div class="asset-show-identity">
+            <div class="asset-show-icon">
                 <i class="fas fa-laptop-house"></i>
             </div>
-            <div style="flex: 1; min-width: 0;">
-                <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
-                    <h5 class="mb-0 font-weight-bold theme-text text-truncate" style="font-size: 1.15rem; line-height: 1.2;">{{ $asset->name }}</h5>
-                    @php
-                        $statusClasses = [
-                            'Available'   => 'badge-status-available',
-                            'Assigned'    => 'badge-status-assigned',
-                            'Maintenance' => 'badge-status-maintenance',
-                            'Retired'     => 'badge-status-retired',
-                            'Missing'     => 'badge-status-missing',
-                        ];
-                        $currentClass = $statusClasses[$asset->status] ?? 'badge-status-available';
-                    @endphp
-                    <span class="hallmark-status-badge {{ $currentClass }}" style="font-size: 0.72rem; padding: 3px 10px;">
+            <div class="asset-show-meta">
+                <h5 class="asset-show-title">{{ $asset->name }}</h5>
+                @php
+                    $statusClasses = [
+                        'Available'   => 'badge-status-available',
+                        'Assigned'    => 'badge-status-assigned',
+                        'Maintenance' => 'badge-status-maintenance',
+                        'Retired'     => 'badge-status-retired',
+                        'Missing'     => 'badge-status-missing',
+                    ];
+                    $currentClass = $statusClasses[$asset->status] ?? 'badge-status-available';
+                @endphp
+                <div class="asset-show-subline">
+                    <span class="hallmark-status-badge {{ $currentClass }}" style="font-size: 0.72rem; padding: 3px 10px; flex-shrink: 0; white-space: nowrap;">
                         <span style="width: 5px; height: 5px; border-radius: 50%; background: currentColor; display: inline-block;"></span>
-                        {{ $asset->status }}
+                        {{ __('messages.' . strtolower($asset->status)) ?? $asset->status }}
                     </span>
+                    <span class="opacity-40">&bull;</span>
+                    <span>TAG: <code class="asset-show-tag-code">{{ $asset->asset_tag }}</code></span>
+                    <span class="opacity-40">&bull;</span>
+                    <span><i class="fas fa-folder text-info mr-1" style="font-size: 0.72rem;"></i> {{ $asset->category->name ?? __('messages.it_assets') }}</span>
+                    <span class="opacity-40">&bull;</span>
+                    <span><i class="fas fa-map-marker-alt text-success mr-1" style="font-size: 0.72rem;"></i> {{ $asset->location->name ?? '-' }}</span>
                 </div>
-                <small class="text-muted d-block" style="font-size: 0.8rem; margin-top: 3px; white-space: normal; line-height: 1.3;">
-                    TAG: <code style="padding: 2px 6px; background: rgba(99, 102, 241, 0.12); color: #818cf8; border-radius: 6px; font-family: var(--font-mono); font-weight: 600;">{{ $asset->asset_tag }}</code> &bull; {{ $asset->category->name ?? 'Aset IT' }} &bull; {{ $asset->location->name ?? '-' }}
-                </small>
             </div>
         </div>
 
-        <div class="d-flex align-items-center flex-wrap ml-auto" style="gap: 10px; flex-shrink: 0;">
+        <div class="asset-show-actions">
             <a href="{{ route('assets.index') }}" class="btn btn-sm btn-action-secondary text-nowrap">
                 <i class="fas fa-arrow-left mr-1"></i> {{ __('messages.back_to_catalog') }}
             </a>
@@ -286,7 +465,7 @@
                 </div>
 
                 <div class="text-muted small font-mono mb-3">
-                    <i class="fas fa-qrcode mr-1 text-primary"></i> Scan QR Code Aset
+                    <i class="fas fa-qrcode mr-1 text-primary"></i> {{ __('messages.scan_asset_qr') }}
                 </div>
 
                 <!-- Core Metadata List -->
@@ -504,20 +683,20 @@
                         <div class="row" style="gap: 8px 0;">
                             <div class="col-sm-6 mb-2">
                                 <div class="meta-param-row">
-                                    <span class="meta-param-label"><i class="fas fa-print text-info"></i> Type</span>
+                                    <span class="meta-param-label"><i class="fas fa-print text-info"></i> {{ __('messages.type') }}</span>
                                     <span class="meta-param-value">{{ $asset->printer->type }}</span>
                                 </div>
                             </div>
                             <div class="col-sm-6 mb-2">
                                 <div class="meta-param-row">
-                                    <span class="meta-param-label"><i class="fas fa-link text-info"></i> Connection</span>
+                                    <span class="meta-param-label"><i class="fas fa-link text-info"></i> {{ __('messages.connection') }}</span>
                                     <span class="meta-param-value">{{ $asset->printer->connection_type }}</span>
                                 </div>
                             </div>
                             <div class="col-sm-6 mb-2">
                                 <div class="meta-param-row">
-                                    <span class="meta-param-label"><i class="fas fa-calculator text-info"></i> Counter</span>
-                                    <span class="meta-param-value font-mono">{{ $asset->printer->counter_print }} prints</span>
+                                    <span class="meta-param-label"><i class="fas fa-calculator text-info"></i> {{ __('messages.initial_counter') }}</span>
+                                    <span class="meta-param-value font-mono">{{ $asset->printer->counter_print }} {{ __('messages.prints') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -594,7 +773,7 @@
                                             </td>
                                             <td>
                                                 <span class="badge badge-pill {{ $assign->status == 'Returned' ? 'badge-info' : 'badge-success' }}" style="padding: 4px 10px; font-size: 0.74rem;">
-                                                    {{ $assign->status }}
+                                                    {{ __('messages.' . strtolower($assign->status)) ?? $assign->status }}
                                                 </span>
                                             </td>
                                             <td class="theme-text pr-4 text-muted" style="font-size: 0.84rem;">{{ $assign->notes ?? '-' }}</td>
@@ -618,7 +797,7 @@
                                         <i class="fas fa-user-circle mr-1"></i> {{ $assign->employee->name }}
                                     </a>
                                     <span class="badge badge-pill {{ $assign->status == 'Returned' ? 'badge-info' : 'badge-success' }}" style="padding: 4px 10px; font-size: 0.74rem;">
-                                        {{ $assign->status }}
+                                        {{ __('messages.' . strtolower($assign->status)) ?? $assign->status }}
                                     </span>
                                 </div>
                                 <div class="mobile-card-row">
@@ -680,7 +859,7 @@
                                             </td>
                                             <td class="pr-4">
                                                 <span class="badge badge-pill {{ $maint->status == 'Completed' ? 'badge-success' : ($maint->status == 'Ongoing' ? 'badge-warning' : 'badge-secondary') }}" style="padding: 4px 10px; font-size: 0.74rem;">
-                                                    {{ $maint->status }}
+                                                    {{ __('messages.' . strtolower($maint->status)) ?? $maint->status }}
                                                 </span>
                                             </td>
                                         </tr>
@@ -703,7 +882,7 @@
                                         <i class="fas fa-tools mr-1"></i> {{ $maint->type }}
                                     </span>
                                     <span class="badge badge-pill {{ $maint->status == 'Completed' ? 'badge-success' : ($maint->status == 'Ongoing' ? 'badge-warning' : 'badge-secondary') }}" style="padding: 4px 10px; font-size: 0.74rem;">
-                                        {{ $maint->status }}
+                                        {{ __('messages.' . strtolower($maint->status)) ?? $maint->status }}
                                     </span>
                                 </div>
                                 <div class="mobile-card-row">

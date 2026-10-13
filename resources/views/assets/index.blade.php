@@ -4,7 +4,8 @@
 
 @section('content')
 <style>
-    /* â”€â”€ Hallmark Master Header Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* Hallmark · component: filter-bar · genre: modern-minimal · pre-emit critique: P5 H5 E5 S5 R5 V5 */
+    /* ── Hallmark Master Header Banner ─────────────────────────────────── */
     .master-header-banner {
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.75));
         border: 1px solid rgba(148, 163, 184, 0.15);
@@ -154,29 +155,35 @@
         width: 100%;
     }
     @media (max-width: 767.98px) {
+        .master-table-card .card-header {
+            padding: 12px 14px !important;
+        }
         .asset-filter-container {
             display: flex !important;
             flex-direction: column !important;
             width: 100% !important;
-            gap: 12px !important;
+            gap: 8px !important;
+            align-items: stretch !important;
         }
         .asset-filter-container > * {
             width: 100% !important;
             max-width: 100% !important;
-            margin-bottom: 12px !important;
-        }
-        .asset-filter-container > *:last-child {
+            margin: 0 !important;
             margin-bottom: 0 !important;
+            flex: 0 0 auto !important;
         }
         .custom-filter-select {
             width: 100% !important;
             max-width: 100% !important;
-            height: 44px !important;
+            height: 40px !important;
+            flex: 0 0 auto !important;
+            margin: 0 !important;
         }
         .asset-filter-container .sleek-search-wrapper {
             width: 100% !important;
             max-width: 100% !important;
-            margin-bottom: 0 !important;
+            flex: 0 0 auto !important;
+            margin: 0 !important;
         }
     }
     @media (min-width: 768px) {
@@ -240,6 +247,36 @@
     }
     .clear-search-btn:hover {
         color: var(--color-danger, #ef4444);
+    }
+
+    .table-sort-link {
+        color: inherit !important;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        transition: color 0.15s ease;
+        user-select: none;
+        cursor: pointer;
+    }
+    .table-sort-link:hover {
+        color: #6366f1 !important;
+    }
+    body.light-mode .table-sort-link:hover {
+        color: #4f46e5 !important;
+    }
+    .table-sort-link.active {
+        color: #38bdf8 !important;
+        font-weight: 700;
+    }
+    body.light-mode .table-sort-link.active {
+        color: #0284c7 !important;
+    }
+    .table-sort-link .sort-neutral {
+        opacity: 0.35;
+        font-size: 0.68rem;
+    }
+    .table-sort-link:hover .sort-neutral {
+        opacity: 0.8;
     }
 
     /* â”€â”€ High-Density Data Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -418,19 +455,476 @@
             text-align: center;
             justify-content: center;
         }
+        .itam-ms-wrap {
+            max-width: 100% !important;
+            flex: 0 0 auto !important;
+            width: 100% !important;
+            height: auto !important;
+            margin: 0 !important;
+        }
         .custom-filter-select {
             max-width: 100% !important;
             flex: 0 0 auto !important;
             width: 100% !important;
+            height: 40px !important;
+            margin: 0 !important;
         }
         .sleek-search-wrapper {
             width: 100% !important;
             flex: 0 0 auto !important;
+            margin: 0 !important;
+        }
+        .sleek-search-input {
+            height: 40px !important;
         }
     }
 
     .status-btn::after {
         display: none !important;
+    }
+
+    /* ── ITAM Custom Multi-Select ─────────────────────────────────────── */
+    .itam-ms-wrap {
+        position: relative;
+        flex: 1 1 130px;
+        min-width: 120px;
+        max-width: 180px;
+        user-select: none;
+    }
+    .itam-ms-trigger {
+        width: 100%;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 0 10px 0 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(15, 23, 42, 0.35);
+        color: var(--color-ink-0);
+        font-size: 0.84rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    body.light-mode .itam-ms-trigger {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        color: #0f172a;
+    }
+    .itam-ms-trigger:hover,
+    .itam-ms-trigger:focus,
+    .itam-ms-wrap.open .itam-ms-trigger {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        outline: none;
+    }
+    .itam-ms-wrap.has-value .itam-ms-trigger {
+        border-color: rgba(99, 102, 241, 0.55);
+        background: rgba(99, 102, 241, 0.1);
+    }
+    body.light-mode .itam-ms-wrap.has-value .itam-ms-trigger {
+        border-color: #4f46e5;
+        background: rgba(79, 70, 229, 0.06);
+    }
+    .itam-ms-label {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: left;
+        font-weight: 500;
+    }
+    .itam-ms-chevron {
+        font-size: 0.7rem;
+        flex-shrink: 0;
+        transition: transform 0.2s ease;
+        opacity: 0.6;
+    }
+    .itam-ms-wrap.open .itam-ms-chevron {
+        transform: rotate(180deg);
+        opacity: 1;
+    }
+    .itam-ms-count-badge {
+        background: #6366f1;
+        color: #fff;
+        font-size: 0.68rem;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 1px 6px;
+        margin-left: 2px;
+        flex-shrink: 0;
+    }
+    .itam-ms-panel {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        z-index: 1050;
+        min-width: 240px;
+        max-width: 300px;
+        background: rgba(15, 23, 42, 0.97);
+        border: 1px solid rgba(99, 102, 241, 0.35);
+        border-radius: 14px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+        overflow: hidden;
+        flex-direction: column;
+    }
+    body.light-mode .itam-ms-panel {
+        background: #ffffff;
+        border-color: #c7d2fe;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.1);
+    }
+    .itam-ms-wrap.open .itam-ms-panel {
+        display: flex;
+    }
+    .itam-ms-search-wrap {
+        position: relative;
+        padding: 10px 10px 6px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+    }
+    .itam-ms-search-icon {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-40%);
+        font-size: 0.76rem;
+        color: rgba(148, 163, 184, 0.7);
+    }
+    .itam-ms-search {
+        width: 100%;
+        height: 32px;
+        padding: 0 8px 0 28px;
+        border-radius: 8px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--color-ink-0);
+        font-size: 0.8rem;
+        outline: none;
+    }
+    body.light-mode .itam-ms-search {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #0f172a;
+    }
+    .itam-ms-search:focus {
+        border-color: #6366f1;
+    }
+    .itam-ms-select-all-row {
+        padding: 2px 4px 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    .itam-ms-list {
+        max-height: 220px;
+        overflow-y: auto;
+        padding: 4px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(99, 102, 241, 0.4) transparent;
+    }
+    .itam-ms-list::-webkit-scrollbar { width: 4px; }
+    .itam-ms-list::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 4px; }
+    .itam-ms-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.82rem;
+        color: var(--color-ink-1);
+        transition: background 0.15s ease;
+        margin: 1px 0;
+    }
+    .itam-ms-item:hover {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--color-ink-0);
+    }
+    body.light-mode .itam-ms-item:hover {
+        background: rgba(79, 70, 229, 0.08);
+    }
+    .itam-ms-item input[type="checkbox"] {
+        width: 15px;
+        height: 15px;
+        border-radius: 4px;
+        accent-color: #6366f1;
+        flex-shrink: 0;
+        cursor: pointer;
+    }
+    .itam-ms-item.itam-ms-selectall {
+        font-weight: 600;
+        color: var(--color-ink-0);
+        border-bottom: none;
+    }
+    .itam-ms-item[style*="display: none"] { display: none !important; }
+    .itam-ms-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px;
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+        gap: 8px;
+    }
+    .itam-ms-reset-btn {
+        background: transparent;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-radius: 8px;
+        color: var(--color-ink-2);
+        font-size: 0.78rem;
+        padding: 4px 12px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .itam-ms-reset-btn:hover {
+        border-color: #ef4444;
+        color: #ef4444;
+    }
+    .itam-ms-apply-btn {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        border: none;
+        border-radius: 8px;
+        color: #ffffff;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 4px 14px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .itam-ms-apply-btn:hover {
+        background: linear-gradient(135deg, #4338ca, #4f46e5);
+    }
+    @media (max-width: 767.98px) {
+        .itam-ms-wrap {
+            width: 100% !important;
+            max-width: 100% !important;
+            flex: 0 0 auto !important;
+            height: auto !important;
+            margin: 0 !important;
+        }
+        .itam-ms-trigger {
+            height: 40px !important;
+            padding: 0 12px !important;
+        }
+        .itam-ms-panel {
+            min-width: 100% !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            left: 0 !important;
+            right: 0 !important;
+            top: calc(100% + 4px) !important;
+        }
+    }
+
+    /* Hallmark · component: bulk-action-bar · genre: modern-minimal · pre-emit critique: P5 H5 E5 S5 R5 V5 */
+    /* ── Hallmark Top Floating Bulk Action Bar ────────────────────────── */
+    .asset-select-cb {
+        width: 17px;
+        height: 17px;
+        cursor: pointer;
+        accent-color: #6366f1;
+        border-radius: 4px;
+        vertical-align: middle;
+        transition: transform 0.15s ease;
+    }
+    .asset-select-cb:hover {
+        transform: scale(1.08);
+    }
+    .bulk-action-bar {
+        position: fixed;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1045;
+        animation: bulkSlideDown 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+        max-width: calc(100vw - 32px);
+        transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1), top 0.2s ease;
+    }
+    @media (min-width: 992px) {
+        body:not(.sidebar-collapse) .bulk-action-bar {
+            left: calc(50% + 125px);
+        }
+        body.sidebar-collapse .bulk-action-bar {
+            left: calc(50% + 36px);
+        }
+    }
+    @keyframes bulkSlideDown {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -18px) scale(0.96);
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, 0) scale(1);
+        }
+    }
+    .bulk-action-bar-content {
+        pointer-events: auto;
+        background: rgba(15, 23, 42, 0.94);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(99, 102, 241, 0.25), 0 4px 16px rgba(99, 102, 241, 0.15);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 999px;
+        padding: 7px 12px 7px 18px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition: all 0.2s ease;
+    }
+    body.light-mode .bulk-action-bar-content {
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid rgba(203, 213, 225, 0.9);
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(99, 102, 241, 0.2), 0 4px 12px rgba(99, 102, 241, 0.08);
+    }
+    .bulk-selection-summary {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        white-space: nowrap;
+        user-select: none;
+    }
+    .bulk-count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 22px;
+        height: 22px;
+        padding: 0 7px;
+        border-radius: 999px;
+        font-family: var(--font-mono, 'JetBrains Mono', monospace);
+        font-size: 0.74rem;
+        font-weight: 700;
+        color: #ffffff;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+    }
+    .bulk-selected-label {
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: var(--color-ink-0, #f8fafc);
+        letter-spacing: -0.01em;
+    }
+    body.light-mode .bulk-selected-label {
+        color: #0f172a;
+    }
+    .bulk-action-divider {
+        width: 1px;
+        height: 20px;
+        background: rgba(148, 163, 184, 0.2);
+        flex-shrink: 0;
+    }
+    .bulk-action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .bulk-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none !important;
+        border: 1px solid transparent;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        white-space: nowrap;
+    }
+    .bulk-btn:focus-visible {
+        outline: 2px solid #6366f1;
+        outline-offset: 2px;
+    }
+    .bulk-btn:active {
+        transform: translateY(1px) scale(0.98);
+    }
+    .bulk-btn-print {
+        background: rgba(30, 41, 59, 0.65);
+        border-color: rgba(148, 163, 184, 0.22);
+        color: var(--color-ink-0, #f8fafc);
+    }
+    body.light-mode .bulk-btn-print {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+        color: #0f172a;
+    }
+    .bulk-btn-print:hover {
+        background: rgba(56, 189, 248, 0.15);
+        border-color: rgba(56, 189, 248, 0.5);
+        color: #38bdf8;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+    }
+    .bulk-btn-delete {
+        background: rgba(239, 68, 68, 0.14);
+        border-color: rgba(239, 68, 68, 0.4);
+        color: #f87171;
+    }
+    body.light-mode .bulk-btn-delete {
+        background: #fef2f2;
+        border-color: #fecaca;
+        color: #dc2626;
+    }
+    .bulk-btn-delete:hover {
+        background: #ef4444;
+        border-color: #dc2626;
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+    }
+    .bulk-btn-close {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--color-ink-1, #94a3b8);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        font-size: 0.78rem;
+    }
+    body.light-mode .bulk-btn-close {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+        color: #64748b;
+    }
+    .bulk-btn-close:hover {
+        transform: rotate(90deg) scale(1.05);
+        background: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.4);
+        color: #ef4444;
+    }
+    tr.asset-row-selected {
+        background-color: rgba(99, 102, 241, 0.14) !important;
+    }
+    body.light-mode tr.asset-row-selected {
+        background-color: rgba(99, 102, 241, 0.08) !important;
+    }
+    @media (max-width: 767.98px) {
+        .bulk-action-bar {
+            top: 72px;
+            width: calc(100vw - 24px);
+        }
+        .bulk-action-bar-content {
+            padding: 6px 10px 6px 14px;
+            gap: 10px;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .bulk-btn span {
+            display: none;
+        }
+        .bulk-btn {
+            padding: 6px 10px;
+        }
+        .bulk-action-divider {
+            display: none;
+        }
     }
 </style>
 
@@ -450,15 +944,18 @@
         <div class="d-flex align-items-center flex-wrap flex-md-nowrap asset-action-buttons ml-auto" style="gap: 10px; flex-shrink: 0;">
             <span style="font-family: var(--font-mono); font-size: 0.72rem; padding: 7px 14px; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); color: #818cf8; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; white-space: nowrap;">
                 <span class="live-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #6366f1; box-shadow: 0 0 8px #6366f1; display: inline-block;"></span>
-                {{ number_format($totalAssetsCount ?? $assets->total()) }} RECORDED
+                {{ number_format($totalAssetsCount ?? $assets->total()) }} {{ __('messages.recorded') }}
             </span>
             @can('action_manage_assets')
             <button type="button" class="btn btn-sm btn-action-secondary text-nowrap" data-toggle="modal" data-target="#importModal" title="{{ __('messages.import') }}">
                 <i class="fas fa-file-import mr-1"></i> {{ __('messages.import') }}
             </button>
             @endcan
-            <a href="{{ route('assets.export', request()->query()) }}" class="btn btn-sm btn-action-secondary text-nowrap" title="{{ __('messages.export') }}">
+            <a href="{{ route('assets.export', request()->except('page')) }}" class="btn btn-sm btn-action-secondary text-nowrap" title="{{ __('messages.export') }}">
                 <i class="fas fa-file-export mr-1"></i> {{ __('messages.export') }}
+            </a>
+            <a href="{{ route('assets.print-barcodes', request()->except('page')) }}" class="btn btn-sm btn-action-secondary text-nowrap" title="{{ __('messages.bulk_print_barcode_title') }}">
+                <i class="fas fa-print mr-1 text-info"></i> {{ __('messages.bulk_print_barcode') }}
             </a>
             @can('action_manage_assets')
             <a href="{{ route('assets.create', request()->query()) }}" class="btn btn-sm btn-action-primary text-nowrap btn-add-main" title="{{ __('messages.add_new') }} {{ __('messages.asset') }}">
@@ -511,48 +1008,187 @@
 <!-- Main Table Card -->
 <div class="card theme-card master-table-card">
     <div class="card-header border-0">
-        <form action="{{ route('assets.index') }}" method="GET" style="width: 100%;">
+        <form action="{{ route('assets.index') }}" method="GET" style="width: 100%;" id="asset-filter-form">
             @if(request('status'))
                 <input type="hidden" name="status" value="{{ request('status') }}">
             @endif
+            @if(request('sort'))
+                <input type="hidden" name="sort" value="{{ request('sort') }}">
+            @endif
+            @if(request('direction'))
+                <input type="hidden" name="direction" value="{{ request('direction') }}">
+            @endif
+            @if(request('sort_order'))
+                <input type="hidden" name="sort_order" value="{{ request('sort_order') }}">
+            @endif
+
+            @php
+                $selYears    = (array) request('date_received', []);
+                $selCats     = (array) request('category_id', []);
+                $selBrands   = (array) request('brand_id', []);
+                $selLocs     = (array) request('location_id', []);
+            @endphp
+
             <div class="d-flex align-items-center flex-wrap gap-2 asset-filter-container">
-                <!-- Year Filter -->
-                <select name="date_received" class="form-control custom-filter-select" onchange="this.form.submit()" title="{{ __('messages.filter') }}">
-                    <option value="">{{ __('messages.all_year') ?? 'Semua Tahun' }}</option>
-                    @foreach($years as $yr)
-                        <option value="{{ $yr }}" {{ (request('date_received') == $yr || request('year') == $yr) ? 'selected' : '' }}>{{ $yr }}</option>
-                    @endforeach
+
+                {{-- ── Tahun Multi-Select ── --}}
+                <div class="itam-ms-wrap" data-name="date_received" data-placeholder="{{ __('messages.all_years') }}">
+                    <button type="button" class="itam-ms-trigger">
+                        <span class="itam-ms-label">{{ !empty($selYears) ? (count($selYears) === 1 ? $selYears[0] : __('messages.selected_count', ['count' => count($selYears)])) : __('messages.all_years') }}</span>
+                        <i class="fas fa-chevron-down itam-ms-chevron"></i>
+                    </button>
+                    <div class="itam-ms-panel">
+                        <div class="itam-ms-search-wrap">
+                            <i class="fas fa-search itam-ms-search-icon"></i>
+                            <input type="text" class="itam-ms-search" placeholder="{{ __('messages.search_year') }}">
+                        </div>
+                        <div class="itam-ms-select-all-row">
+                            <label class="itam-ms-item itam-ms-selectall">
+                                <input type="checkbox" class="itam-ms-selectall-cb"> {{ __('messages.select_all') }}
+                            </label>
+                        </div>
+                        <div class="itam-ms-list">
+                            @foreach($years as $yr)
+                            <label class="itam-ms-item" data-label="{{ $yr }}">
+                                <input type="checkbox" name="date_received[]" value="{{ $yr }}"
+                                    {{ in_array((string)$yr, $selYears) ? 'checked' : '' }}>
+                                {{ $yr }}
+                            </label>
+                            @endforeach
+                        </div>
+                        <div class="itam-ms-footer">
+                            <button type="button" class="itam-ms-reset-btn">{{ __('messages.reset') }}</button>
+                            <button type="button" class="itam-ms-apply-btn">{{ __('messages.apply') }}</button>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ── Kategori Multi-Select ── --}}
+                <div class="itam-ms-wrap" data-name="category_id" data-placeholder="{{ __('messages.all_categories') }}">
+                    <button type="button" class="itam-ms-trigger">
+                        <span class="itam-ms-label">{{ !empty($selCats) ? (count($selCats) === 1 ? ($categories->firstWhere('id', $selCats[0])->name ?? __('messages.all_categories')) : __('messages.selected_count', ['count' => count($selCats)])) : __('messages.all_categories') }}</span>
+                        <i class="fas fa-chevron-down itam-ms-chevron"></i>
+                    </button>
+                    <div class="itam-ms-panel">
+                        <div class="itam-ms-search-wrap">
+                            <i class="fas fa-search itam-ms-search-icon"></i>
+                            <input type="text" class="itam-ms-search" placeholder="{{ __('messages.search_category') }}">
+                        </div>
+                        <div class="itam-ms-select-all-row">
+                            <label class="itam-ms-item itam-ms-selectall">
+                                <input type="checkbox" class="itam-ms-selectall-cb"> {{ __('messages.select_all') }}
+                            </label>
+                        </div>
+                        <div class="itam-ms-list">
+                            @foreach($categories as $cat)
+                            <label class="itam-ms-item" data-label="{{ $cat->name }}">
+                                <input type="checkbox" name="category_id[]" value="{{ $cat->id }}"
+                                    {{ in_array((string)$cat->id, $selCats) ? 'checked' : '' }}>
+                                {{ $cat->name }}
+                            </label>
+                            @endforeach
+                        </div>
+                        <div class="itam-ms-footer">
+                            <button type="button" class="itam-ms-reset-btn">{{ __('messages.reset') }}</button>
+                            <button type="button" class="itam-ms-apply-btn">{{ __('messages.apply') }}</button>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ── Brand Multi-Select ── --}}
+                <div class="itam-ms-wrap" data-name="brand_id" data-placeholder="{{ __('messages.all_brands') }}">
+                    <button type="button" class="itam-ms-trigger">
+                        <span class="itam-ms-label">{{ !empty($selBrands) ? (count($selBrands) === 1 ? ($brands->firstWhere('id', $selBrands[0])->name ?? __('messages.all_brands')) : __('messages.selected_count', ['count' => count($selBrands)])) : __('messages.all_brands') }}</span>
+                        <i class="fas fa-chevron-down itam-ms-chevron"></i>
+                    </button>
+                    <div class="itam-ms-panel">
+                        <div class="itam-ms-search-wrap">
+                            <i class="fas fa-search itam-ms-search-icon"></i>
+                            <input type="text" class="itam-ms-search" placeholder="{{ __('messages.search_brand') }}">
+                        </div>
+                        <div class="itam-ms-select-all-row">
+                            <label class="itam-ms-item itam-ms-selectall">
+                                <input type="checkbox" class="itam-ms-selectall-cb"> {{ __('messages.select_all') }}
+                            </label>
+                        </div>
+                        <div class="itam-ms-list">
+                            @foreach($brands as $brand)
+                            <label class="itam-ms-item" data-label="{{ $brand->name }}">
+                                <input type="checkbox" name="brand_id[]" value="{{ $brand->id }}"
+                                    {{ in_array((string)$brand->id, $selBrands) ? 'checked' : '' }}>
+                                {{ $brand->name }}
+                            </label>
+                            @endforeach
+                        </div>
+                        <div class="itam-ms-footer">
+                            <button type="button" class="itam-ms-reset-btn">{{ __('messages.reset') }}</button>
+                            <button type="button" class="itam-ms-apply-btn">{{ __('messages.apply') }}</button>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ── Lokasi Multi-Select ── --}}
+                <div class="itam-ms-wrap" data-name="location_id" data-placeholder="{{ __('messages.all_locations') }}">
+                    <button type="button" class="itam-ms-trigger">
+                        <span class="itam-ms-label">{{ !empty($selLocs) ? (count($selLocs) === 1 ? ($locations->firstWhere('id', $selLocs[0])->name ?? __('messages.all_locations')) : __('messages.selected_count', ['count' => count($selLocs)])) : __('messages.all_locations') }}</span>
+                        <i class="fas fa-chevron-down itam-ms-chevron"></i>
+                    </button>
+                    <div class="itam-ms-panel">
+                        <div class="itam-ms-search-wrap">
+                            <i class="fas fa-search itam-ms-search-icon"></i>
+                            <input type="text" class="itam-ms-search" placeholder="{{ __('messages.search_location') }}">
+                        </div>
+                        <div class="itam-ms-select-all-row">
+                            <label class="itam-ms-item itam-ms-selectall">
+                                <input type="checkbox" class="itam-ms-selectall-cb"> {{ __('messages.select_all') }}
+                            </label>
+                        </div>
+                        <div class="itam-ms-list">
+                            @foreach($locations as $loc)
+                            <label class="itam-ms-item" data-label="{{ $loc->name }}">
+                                <input type="checkbox" name="location_id[]" value="{{ $loc->id }}"
+                                    {{ in_array((string)$loc->id, $selLocs) ? 'checked' : '' }}>
+                                {{ $loc->name }}
+                            </label>
+                            @endforeach
+                        </div>
+                        <div class="itam-ms-footer">
+                            <button type="button" class="itam-ms-reset-btn">{{ __('messages.reset') }}</button>
+                            <button type="button" class="itam-ms-apply-btn">{{ __('messages.apply') }}</button>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ── Sort Order ── --}}
+                <select name="sort_order" class="form-control custom-filter-select" onchange="this.form.submit()" title="{{ __('messages.sort_by') }}">
+                    <option value="date_desc" {{ (($sortBy === 'date_received' || $sortBy === 'date') && $sortDir === 'desc') ? 'selected' : '' }}>
+                        {{ __('messages.sort_date_desc') }}
+                    </option>
+                    <option value="date_asc" {{ (($sortBy === 'date_received' || $sortBy === 'date') && $sortDir === 'asc') ? 'selected' : '' }}>
+                        {{ __('messages.sort_date_asc') }}
+                    </option>
+                    <option value="tag_asc" {{ ($sortBy === 'asset_tag' && $sortDir === 'asc') ? 'selected' : '' }}>
+                        {{ __('messages.sort_tag_asc') }}
+                    </option>
+                    <option value="tag_desc" {{ ($sortBy === 'asset_tag' && $sortDir === 'desc') ? 'selected' : '' }}>
+                        {{ __('messages.sort_tag_desc') }}
+                    </option>
+                    <option value="name_asc" {{ ($sortBy === 'name' && $sortDir === 'asc') ? 'selected' : '' }}>
+                        {{ __('messages.sort_name_asc') }}
+                    </option>
+                    <option value="status" {{ ($sortBy === 'status') ? 'selected' : '' }}>
+                        {{ __('messages.sort_status') }}
+                    </option>
                 </select>
 
-                <!-- Category Filter -->
-                <select name="category_id" class="form-control custom-filter-select" onchange="this.form.submit()">
-                    <option value="">{{ __('messages.all_category') }}</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
-                    @endforeach
-                </select>
-
-                <!-- Brand Filter -->
-                <select name="brand_id" class="form-control custom-filter-select" onchange="this.form.submit()">
-                    <option value="">{{ __('messages.all_brand') }}</option>
-                    @foreach($brands as $brand)
-                        <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
-                    @endforeach
-                </select>
-
-                <!-- Location Filter -->
-                <select name="location_id" class="form-control custom-filter-select" onchange="this.form.submit()">
-                    <option value="">{{ __('messages.all_location') }}</option>
-                    @foreach($locations as $loc)
-                        <option value="{{ $loc->id }}" {{ request('location_id') == $loc->id ? 'selected' : '' }}>{{ $loc->name }}</option>
-                    @endforeach
-                </select>
-
-                <!-- Search Input -->
+                {{-- ── Search ── --}}
                 <div class="sleek-search-wrapper">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" name="search" class="form-control theme-input sleek-search-input" placeholder="{{ __('messages.search_asset') }} (Tag, Serial, Nama)..." value="{{ request('search') }}" autocomplete="off">
-                    @if(request('search') || request('category_id') || request('brand_id') || request('location_id') || request('date_received') || request('year'))
+                    <input type="text" name="search" id="asset-search-input"
+                        class="form-control theme-input sleek-search-input"
+                        placeholder="{{ __('messages.search_asset') }} ({{ __('messages.search_asset_hint') }})..."
+                        value="{{ request('search') }}" autocomplete="off">
+                    @if(request('search') || !empty($selCats) || !empty($selBrands) || !empty($selLocs) || !empty($selYears) || request('sort_order') || request('sort'))
                         <a href="{{ route('assets.index', request()->only('status')) }}" class="clear-search-btn" title="{{ __('messages.clear') }}">
                             <i class="fas fa-times"></i>
                         </a>
@@ -563,30 +1199,87 @@
     </div>
 
     <div class="card-body p-0">
+        @php
+            $currentSort = $sortBy ?? request('sort', 'date_received');
+            $currentDir = $sortDir ?? strtolower(request('direction', 'desc'));
+            
+            $makeSortUrl = function($field) use ($currentSort, $currentDir) {
+                $nextDir = ($currentSort === $field && $currentDir === 'desc') ? 'asc' : 'desc';
+                if ($currentSort !== $field && in_array($field, ['asset_tag', 'name'])) {
+                    $nextDir = 'asc';
+                }
+                $params = request()->except(['sort', 'direction', 'sort_order', 'page']);
+                $params['sort'] = $field;
+                $params['direction'] = $nextDir;
+                return route('assets.index', $params);
+            };
+        @endphp
         <div class="theme-scroll-container table-responsive">
             <table class="table table-striped table-hover m-0 theme-table division-table asset-table">
                 <thead>
                     <tr style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;">
-                        <th width="50" class="pl-4">{{ __('messages.no') }}</th>
-                        <th>{{ __('messages.asset_tag') }}</th>
-                        <th>{{ __('messages.name') }}</th>
+                        <th width="42" class="pl-4 text-center">
+                            <input type="checkbox" id="selectAllAssets" class="asset-select-cb" title="{{ __('messages.select_all_assets') }}">
+                        </th>
+                        <th width="50">{{ __('messages.no') }}</th>
+                        <th>
+                            <a href="{{ $makeSortUrl('asset_tag') }}" class="table-sort-link {{ $currentSort === 'asset_tag' ? 'active' : '' }}" title="{{ __('messages.sort_by') }} {{ __('messages.asset_tag') }}">
+                                {{ __('messages.asset_tag') }}
+                                @if($currentSort === 'asset_tag')
+                                    <i class="fas {{ $currentDir === 'asc' ? 'fa-sort-up' : 'fa-sort-down' }} ml-1"></i>
+                                @else
+                                    <i class="fas fa-sort ml-1 sort-neutral"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ $makeSortUrl('name') }}" class="table-sort-link {{ $currentSort === 'name' ? 'active' : '' }}" title="{{ __('messages.sort_by') }} {{ __('messages.name') }}">
+                                {{ __('messages.name') }}
+                                @if($currentSort === 'name')
+                                    <i class="fas {{ $currentDir === 'asc' ? 'fa-sort-up' : 'fa-sort-down' }} ml-1"></i>
+                                @else
+                                    <i class="fas fa-sort ml-1 sort-neutral"></i>
+                                @endif
+                            </a>
+                        </th>
                         <th>{{ __('messages.category') }}</th>
-                        <th>{{ __('messages.received') }}</th>
+                        <th>
+                            <a href="{{ $makeSortUrl('date_received') }}" class="table-sort-link {{ in_array($currentSort, ['date_received', 'date']) ? 'active' : '' }}" title="{{ __('messages.sort_by') }} {{ __('messages.received') }}">
+                                {{ __('messages.received') }}
+                                @if(in_array($currentSort, ['date_received', 'date']))
+                                    <i class="fas {{ $currentDir === 'asc' ? 'fa-sort-up' : 'fa-sort-down' }} ml-1"></i>
+                                @else
+                                    <i class="fas fa-sort ml-1 sort-neutral"></i>
+                                @endif
+                            </a>
+                        </th>
                         <th>{{ __('messages.location') }}</th>
                         <th>{{ __('messages.user') }}</th>
-                        <th>{{ __('messages.status') }}</th>
+                        <th>
+                            <a href="{{ $makeSortUrl('status') }}" class="table-sort-link {{ $currentSort === 'status' ? 'active' : '' }}" title="{{ __('messages.sort_by') }} {{ __('messages.status') }}">
+                                {{ __('messages.status') }}
+                                @if($currentSort === 'status')
+                                    <i class="fas {{ $currentDir === 'asc' ? 'fa-sort-up' : 'fa-sort-down' }} ml-1"></i>
+                                @else
+                                    <i class="fas fa-sort ml-1 sort-neutral"></i>
+                                @endif
+                            </a>
+                        </th>
                         <th>{{ __('messages.health') }}</th>
                         <th width="100" class="text-center pr-4">{{ __('messages.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($assets as $asset)
-                    <tr>
-                        <td class="theme-text pl-4 text-muted" style="font-family: var(--font-mono); font-size: 0.82rem;">
+                    <tr id="asset-row-{{ $asset->id }}">
+                        <td class="pl-4 text-center">
+                            <input type="checkbox" class="asset-row-checkbox asset-select-cb" value="{{ $asset->id }}" aria-label="Select asset {{ $asset->asset_tag }}">
+                        </td>
+                        <td class="theme-text text-muted" style="font-family: var(--font-mono); font-size: 0.82rem;">
                             {{ (method_exists($assets, 'firstItem') && $assets->firstItem() ? $assets->firstItem() + $loop->index : $loop->iteration) }}
                         </td>
                         <td>
-                            <a href="{{ route('assets.show', $asset) }}" class="asset-tag-pill" title="Lihat Detail Aset">
+                            <a href="{{ route('assets.show', $asset) }}" class="asset-tag-pill" title="{{ __('messages.view_asset_details') }}">
                                 {{ $asset->asset_tag }}
                             </a>
                         </td>
@@ -662,7 +1355,7 @@
                         </td>
                         <td>
                             @if(isset($asset->health_data))
-                                <a href="{{ route('predictive-health.index') }}" class="badge {{ $asset->health_data['badge_class'] }} px-2 py-1.5" style="border-radius: 8px; font-family: var(--font-mono); font-size: 0.74rem;" title="Skor Kesehatan Prediktif">
+                                <a href="{{ route('predictive-health.index') }}" class="badge {{ $asset->health_data['badge_class'] }} px-2 py-1.5" style="border-radius: 8px; font-family: var(--font-mono); font-size: 0.74rem;" title="{{ __('messages.predictive_health_score') }}">
                                     <i class="fas fa-heartbeat mr-1"></i> {{ $asset->health_data['health_score'] }}%
                                 </a>
                             @else
@@ -687,7 +1380,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="10" class="text-center py-5">
+                        <td colspan="11" class="text-center py-5">
                             <div class="d-flex flex-column align-items-center justify-content-center">
                                 <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(99, 102, 241, 0.1); display: flex; align-items: center; justify-content: center; color: #818cf8; font-size: 1.5rem; margin-bottom: 12px;">
                                     <i class="fas fa-box-open"></i>
@@ -709,6 +1402,40 @@
         @endif
     </div>
 </div>
+
+<!-- Floating Bulk Action Toolbar (Hallmark Anti-AI-Slop Top Bar) -->
+<div id="bulkActionBar" class="bulk-action-bar d-none" role="region" aria-label="Bulk actions toolbar">
+    <div class="bulk-action-bar-content">
+        <div class="bulk-selection-summary">
+            <span class="bulk-count-badge" id="bulkSelectedCountBadge">0</span>
+            <span class="bulk-selected-label" id="bulkSelectedText">0 {{ __('messages.selected_assets_count', ['count' => 0]) }}</span>
+        </div>
+        <div class="bulk-action-divider" aria-hidden="true"></div>
+        <div class="bulk-action-buttons">
+            <button type="button" class="bulk-btn bulk-btn-print" id="btnBulkPrint" title="{{ __('messages.bulk_print_selected') }}">
+                <i class="fas fa-print mr-1 text-info"></i> <span>{{ __('messages.bulk_print_selected') }}</span>
+            </button>
+            @can('action_manage_assets')
+            <button type="button" class="bulk-btn bulk-btn-delete" id="btnBulkDelete" title="{{ __('messages.bulk_delete') }}">
+                <i class="fas fa-trash-alt mr-1 text-danger"></i> <span>{{ __('messages.bulk_delete') }}</span>
+            </button>
+            @endcan
+            <button type="button" class="bulk-btn-close" id="btnCancelSelection" title="{{ __('messages.cancel') }}" aria-label="{{ __('messages.cancel') }}">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden Bulk Action Forms -->
+<form id="bulkDeleteForm" action="{{ route('assets.bulk-delete', request()->query()) }}" method="POST" style="display: none;">
+    @csrf
+    <div id="bulkDeleteInputs"></div>
+</form>
+
+<form id="bulkPrintForm" action="{{ route('assets.print-barcodes') }}" method="GET" target="_blank" style="display: none;">
+    <div id="bulkPrintInputs"></div>
+</form>
 
 <!-- Import Modal -->
 <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
@@ -740,7 +1467,7 @@
                             {{ __('messages.select_excel_csv') }}
                         </div>
                         <small class="text-muted d-block" id="dropzoneHint">
-                            {{ __('messages.select_file_hint') }} (Maks. 10MB)
+                            {{ __('messages.select_file_hint') }} ({{ App::getLocale() === 'en' ? 'Max 10MB' : 'Maks. 10MB' }})
                         </small>
                     </div>
                 </div>
@@ -760,11 +1487,146 @@
 function handleExcelFileName(input) {
     if (input.files && input.files[0]) {
         var fileName = input.files[0].name;
+        var readyText = @json(__('messages.ready_to_upload'));
         $('#dropzoneLabel').text(fileName);
-        $('#dropzoneHint').text((input.files[0].size / 1024 / 1024).toFixed(2) + ' MB â€” Siap diunggah');
+        $('#dropzoneHint').text((input.files[0].size / 1024 / 1024).toFixed(2) + ' MB — ' + readyText);
         $('#excelDropzone').css('border-color', '#10b981').css('background', 'rgba(16, 185, 129, 0.08)');
     }
 }
+
+// ── ITAM Custom Multi-Select ────────────────────────────────────────────────
+(function() {
+    var selectedCountTpl = @json(__('messages.selected_count'));
+    function itamUpdateLabel(wrap) {
+        var checked = wrap.querySelectorAll('.itam-ms-list input[type="checkbox"]:checked');
+        var label   = wrap.querySelector('.itam-ms-label');
+        var placeholder = wrap.dataset.placeholder || wrap.getAttribute('data-placeholder') || '...';
+        // remove old badge
+        var oldBadge = wrap.querySelector('.itam-ms-count-badge');
+        if (oldBadge) oldBadge.remove();
+
+        if (checked.length === 0) {
+            label.textContent = placeholder;
+            wrap.classList.remove('has-value');
+        } else if (checked.length === 1) {
+            var lbl = checked[0].closest('[data-label]');
+            label.textContent = lbl ? lbl.dataset.label : checked[0].value;
+            wrap.classList.add('has-value');
+        } else {
+            label.textContent = selectedCountTpl.replace(':count', checked.length);
+            wrap.classList.add('has-value');
+        }
+    }
+
+    function itamInitWrap(wrap) {
+        var trigger  = wrap.querySelector('.itam-ms-trigger');
+        var panel    = wrap.querySelector('.itam-ms-panel');
+        var search   = wrap.querySelector('.itam-ms-search');
+        var items    = wrap.querySelectorAll('.itam-ms-list .itam-ms-item');
+        var allCb    = wrap.querySelector('.itam-ms-selectall-cb');
+        var resetBtn = wrap.querySelector('.itam-ms-reset-btn');
+        var applyBtn = wrap.querySelector('.itam-ms-apply-btn');
+
+        // Initial label update
+        itamUpdateLabel(wrap);
+
+        // Toggle panel
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var isOpen = wrap.classList.contains('open');
+            // Close all other panels
+            document.querySelectorAll('.itam-ms-wrap.open').forEach(function(w) {
+                if (w !== wrap) w.classList.remove('open');
+            });
+            wrap.classList.toggle('open', !isOpen);
+            if (!isOpen && search) { setTimeout(function(){ search.focus(); }, 50); }
+        });
+
+        // Search filter
+        if (search) {
+            search.addEventListener('input', function() {
+                var q = this.value.toLowerCase().trim();
+                items.forEach(function(item) {
+                    var lbl = (item.dataset.label || item.textContent).toLowerCase();
+                    item.style.display = (q === '' || lbl.includes(q)) ? '' : 'none';
+                });
+                // Update select-all state
+                if (allCb) {
+                    var visible  = wrap.querySelectorAll('.itam-ms-list .itam-ms-item:not([style*="display: none"]) input[type="checkbox"]');
+                    var checked  = wrap.querySelectorAll('.itam-ms-list .itam-ms-item:not([style*="display: none"]) input[type="checkbox"]:checked');
+                    allCb.checked = visible.length > 0 && visible.length === checked.length;
+                    allCb.indeterminate = checked.length > 0 && checked.length < visible.length;
+                }
+            });
+        }
+
+        // Select all (only visible items)
+        if (allCb) {
+            allCb.addEventListener('change', function() {
+                var visible = wrap.querySelectorAll('.itam-ms-list .itam-ms-item:not([style*="display: none"]) input[type="checkbox"]');
+                visible.forEach(function(cb) { cb.checked = allCb.checked; });
+                itamUpdateLabel(wrap);
+            });
+        }
+
+        // Sync select-all state on individual check
+        items.forEach(function(item) {
+            var cb = item.querySelector('input[type="checkbox"]');
+            if (!cb) return;
+            cb.addEventListener('change', function() {
+                if (allCb) {
+                    var visible = wrap.querySelectorAll('.itam-ms-list .itam-ms-item:not([style*="display: none"]) input[type="checkbox"]');
+                    var checked = wrap.querySelectorAll('.itam-ms-list .itam-ms-item:not([style*="display: none"]) input[type="checkbox"]:checked');
+                    allCb.checked = visible.length > 0 && visible.length === checked.length;
+                    allCb.indeterminate = checked.length > 0 && checked.length < visible.length;
+                }
+                itamUpdateLabel(wrap);
+            });
+        });
+
+        // Reset
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                wrap.querySelectorAll('input[type="checkbox"]').forEach(function(cb){ cb.checked = false; });
+                if (allCb) { allCb.checked = false; allCb.indeterminate = false; }
+                itamUpdateLabel(wrap);
+            });
+        }
+
+        // Apply
+        if (applyBtn) {
+            applyBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                wrap.classList.remove('open');
+                document.getElementById('asset-filter-form').submit();
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.itam-ms-wrap').forEach(itamInitWrap);
+
+        // Close on outside click
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.itam-ms-wrap')) {
+                document.querySelectorAll('.itam-ms-wrap.open').forEach(function(w) {
+                    w.classList.remove('open');
+                });
+            }
+        });
+
+        // Search: submit on Enter
+        document.querySelectorAll('#asset-search-input').forEach(function(inp) {
+            inp.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('asset-filter-form').submit();
+                }
+            });
+        });
+    });
+})();
 
 $(document).ready(function() {
     // In-line Status Change via AJAX
@@ -812,16 +1674,16 @@ $(document).ready(function() {
                                ' <i class="fas fa-chevron-down ml-1" style="font-size: 0.65rem; opacity: 0.7;"></i>');
 
                     if (window.showHallmarkToast) {
-                        window.showHallmarkToast('success', 'Status Berhasil Diperbarui', 'Status aset telah diubah menjadi ' + (labelMap[newStatus] || newStatus));
+                        window.showHallmarkToast('success', '{{ __("messages.status_updated") }}', '{{ __("messages.status") }}: ' + (labelMap[newStatus] || newStatus));
                     }
                 }
             },
             error: function(xhr) {
                 badge.html(originalHtml);
                 if (window.showHallmarkToast) {
-                    window.showHallmarkToast('error', 'Gagal Memperbarui', 'Terjadi kesalahan saat memperbarui status aset.');
+                    window.showHallmarkToast('error', '{{ __("messages.update_failed") }}', '{{ __("messages.error_updating_status") }}');
                 } else {
-                    Swal.fire({ icon: 'error', text: 'Error updating status.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc' });
+                    Swal.fire({ icon: 'error', text: '{{ __("messages.error_updating_status") }}', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#0f172a', color: '#f8fafc' });
                 }
             }
         });
@@ -855,6 +1717,145 @@ $(document).ready(function() {
                 form.submit();
             }
         }
+    });
+
+    // Bulk Selection & Actions Logic
+    function updateBulkActionBar() {
+        var checkedBoxes = $('.asset-row-checkbox:checked');
+        var count = checkedBoxes.length;
+        var totalBoxes = $('.asset-row-checkbox').length;
+
+        if (count > 0) {
+            $('#bulkSelectedCountBadge').text(count);
+            var template = '{{ __("messages.selected_assets_count", ["count" => ":count"]) }}';
+            var label = template.replace(':count', count);
+            $('#bulkSelectedText').text(label);
+            $('#bulkActionBar').removeClass('d-none');
+        } else {
+            $('#bulkActionBar').addClass('d-none');
+        }
+
+        var selectAll = $('#selectAllAssets');
+        if (count === 0) {
+            selectAll.prop('checked', false);
+            selectAll.prop('indeterminate', false);
+        } else if (count === totalBoxes && totalBoxes > 0) {
+            selectAll.prop('checked', true);
+            selectAll.prop('indeterminate', false);
+        } else {
+            selectAll.prop('checked', false);
+            selectAll.prop('indeterminate', true);
+        }
+    }
+
+    // Select All Checkbox change
+    $('#selectAllAssets').on('change', function() {
+        var isChecked = $(this).is(':checked');
+        $('.asset-row-checkbox').each(function() {
+            $(this).prop('checked', isChecked);
+            var row = $(this).closest('tr');
+            if (isChecked) {
+                row.addClass('asset-row-selected');
+            } else {
+                row.removeClass('asset-row-selected');
+            }
+        });
+        updateBulkActionBar();
+    });
+
+    // Individual Row Checkbox change
+    $(document).on('change', '.asset-row-checkbox', function() {
+        var row = $(this).closest('tr');
+        if ($(this).is(':checked')) {
+            row.addClass('asset-row-selected');
+        } else {
+            row.removeClass('asset-row-selected');
+        }
+        updateBulkActionBar();
+    });
+
+    // Cancel Selection button
+    $('#btnCancelSelection').on('click', function() {
+        $('.asset-row-checkbox').prop('checked', false);
+        $('#selectAllAssets').prop('checked', false).prop('indeterminate', false);
+        $('.asset-table tbody tr').removeClass('asset-row-selected');
+        updateBulkActionBar();
+    });
+
+    // Dismiss selection with Escape key
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Escape' && !$('#bulkActionBar').hasClass('d-none')) {
+            $('#btnCancelSelection').trigger('click');
+        }
+    });
+
+    // Bulk Delete Action
+    $('#btnBulkDelete').on('click', function(e) {
+        e.preventDefault();
+        var selectedIds = [];
+        $('.asset-row-checkbox:checked').each(function() {
+            selectedIds.push($(this).val());
+        });
+
+        if (selectedIds.length === 0) {
+            return;
+        }
+
+        var confirmTemplate = '{{ __("messages.confirm_bulk_delete", ["count" => ":count"]) }}';
+        var confirmMsg = confirmTemplate.replace(':count', selectedIds.length);
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: '{{ __("messages.bulk_delete_title") }}',
+                text: confirmMsg,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '{{ __("messages.yes_delete") }}',
+                cancelButtonText: '{{ __("messages.cancel") }}',
+                background: '#0f172a',
+                color: '#f8fafc'
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    var container = $('#bulkDeleteInputs');
+                    container.empty();
+                    selectedIds.forEach(function(id) {
+                        container.append('<input type="hidden" name="ids[]" value="' + id + '">');
+                    });
+                    $('#bulkDeleteForm').submit();
+                }
+            });
+        } else {
+            if (confirm(confirmMsg)) {
+                var container = $('#bulkDeleteInputs');
+                container.empty();
+                selectedIds.forEach(function(id) {
+                    container.append('<input type="hidden" name="ids[]" value="' + id + '">');
+                });
+                $('#bulkDeleteForm').submit();
+            }
+        }
+    });
+
+    // Bulk Print Barcode Action
+    $('#btnBulkPrint').on('click', function(e) {
+        e.preventDefault();
+        var selectedIds = [];
+        $('.asset-row-checkbox:checked').each(function() {
+            selectedIds.push($(this).val());
+        });
+
+        if (selectedIds.length === 0) {
+            return;
+        }
+
+        var container = $('#bulkPrintInputs');
+        container.empty();
+        selectedIds.forEach(function(id) {
+            container.append('<input type="hidden" name="ids[]" value="' + id + '">');
+        });
+        $('#bulkPrintForm').submit();
     });
 });
 </script>

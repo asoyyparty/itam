@@ -5395,8 +5395,9 @@ body.dark-mode .btn-floating-ai:hover .chatbot-icon {
 
 @media (max-width: 991.98px) {
   .floating-quick-actions {
-    bottom: 20px !important;
-    right: 20px !important;
+    bottom: 75px !important;
+    right: 14px !important;
+    z-index: 1030 !important;
   }
 
   .btn-floating-ai {

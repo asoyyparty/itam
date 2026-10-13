@@ -26,7 +26,7 @@
                     @endphp
                     <span class="hallmark-status-badge {{ $currentClass }}" style="font-size: 0.72rem; padding: 2px 8px;">
                         <span style="width: 5px; height: 5px; border-radius: 50%; background: currentColor; display: inline-block;"></span>
-                        {{ $asset->status }}
+                        {{ __('messages.' . strtolower($asset->status)) ?? $asset->status }}
                     </span>
                 </div>
                 <small class="text-muted d-block" style="font-size: 0.8rem; font-family: var(--font-mono); margin-top: 2px; white-space: normal; line-height: 1.3;">
@@ -49,7 +49,7 @@
 
         @if($errors->any())
             <div class="alert alert-danger mx-4 mt-4 mb-0" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; border-radius: 14px; backdrop-filter: blur(10px);">
-                <i class="fas fa-exclamation-triangle mr-1"></i> Terjadi kesalahan input:
+                <i class="fas fa-exclamation-triangle mr-1"></i> {{ __('messages.input_error_occurred') }}
                 <ul class="mb-0 mt-1 pl-4">
                     @foreach($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -92,7 +92,7 @@
                 </div>
 
                 <div class="col-md-2 form-group mb-3">
-                    <label class="field-label">UoM / Satuan</label>
+                    <label class="field-label">{{ __('messages.uom') }}</label>
                     <div class="input-wrap">
                         <span class="input-icon"><i class="fas fa-box"></i></span>
                         <input type="text" name="uom"
@@ -116,7 +116,7 @@
 
                 <div class="col-md-12 form-group mt-2 mb-2">
                     <label class="field-label" style="font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-ink-1); margin-bottom: 8px;">
-                        Foto / Gambar Aset <small class="text-muted font-weight-normal">(Optional)</small>
+                        {{ __('messages.asset_image') }} <small class="text-muted font-weight-normal">({{ __('messages.optional') }})</small>
                     </label>
                     <div class="custom-file-upload-card rounded-lg" style="padding: 16px 20px !important; background: rgba(15, 23, 42, 0.35); border: 1px dashed rgba(148, 163, 184, 0.25); border-radius: 12px; transition: all 0.2s ease;">
                         <div class="d-flex align-items-center flex-nowrap" style="gap: 16px;">
@@ -135,19 +135,19 @@
                                     <div class="position-relative">
                                         <input type="file" name="image" id="edit-asset-camera-input" class="custom-file-input-field @error('image') is-invalid @enderror" accept="image/*" capture="environment" style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2;" onchange="previewSelectedImage(this, 'edit-asset-img-preview', 'edit-asset-img-icon')">
                                         <label for="edit-asset-camera-input" class="btn btn-sm btn-indigo mb-0 px-3 py-1.5 text-nowrap" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: #ffffff; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 3px 10px rgba(99, 102, 241, 0.35);">
-                                            <i class="fas fa-camera"></i> Kamera
+                                            <i class="fas fa-camera"></i> {{ __('messages.camera') }}
                                         </label>
                                     </div>
                                     <!-- File / Gallery Input -->
                                     <div class="position-relative">
                                         <input type="file" name="image" id="edit-asset-file-input" class="custom-file-input-field @error('image') is-invalid @enderror" accept="image/jpeg,image/png,image/jpg,image/webp" style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2;" onchange="previewSelectedImage(this, 'edit-asset-img-preview', 'edit-asset-img-icon')">
                                         <label for="edit-asset-file-input" class="btn btn-sm btn-outline-secondary mb-0 px-3 py-1.5 text-nowrap" style="border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(148, 163, 184, 0.1); color: var(--color-ink-1); border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                                            <i class="fas fa-folder-open"></i> Berkas
+                                            <i class="fas fa-folder-open"></i> {{ __('messages.file') }}
                                         </label>
                                     </div>
                                 </div>
                                 <div class="field-hint text-muted text-truncate" style="font-size: 0.72rem; margin-top: 4px;">
-                                    <i class="fas fa-info-circle mr-1"></i> Kamera / berkas (Max 4MB)
+                                    <i class="fas fa-info-circle mr-1"></i> {{ __('messages.camera') }} / {{ strtolower(__('messages.file')) }} ({{ App::getLocale() === 'en' ? 'Max 4MB' : 'Maks. 4MB' }})
                                 </div>
                                 @error('image')<div class="field-error text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
@@ -232,7 +232,7 @@
                 </div>
 
                 <div class="col-md-3 form-group mb-3">
-                    <label class="field-label">{{ __('messages.warranty_months') }} <small class="text-muted">(Bulan)</small></label>
+                    <label class="field-label">{{ __('messages.warranty_months') }} <small class="text-muted">({{ __('messages.months') }})</small></label>
                     <div class="input-wrap">
                         <span class="input-icon"><i class="fas fa-shield-alt"></i></span>
                         <input type="number" name="warranty_months"
@@ -317,17 +317,17 @@
                         <div class="col-md-4 form-group mb-3">
                             <label class="field-label">{{ __('messages.printer_type') }}</label>
                             <select name="printer_type" class="field-select custom-filter-select">
-                                <option value="Laser" {{ old('printer_type', $asset->printer->printer_type ?? '') == 'Laser' ? 'selected' : '' }}>Laser</option>
-                                <option value="Inkjet" {{ old('printer_type', $asset->printer->printer_type ?? '') == 'Inkjet' ? 'selected' : '' }}>Inkjet</option>
-                                <option value="Thermal" {{ old('printer_type', $asset->printer->printer_type ?? '') == 'Thermal' ? 'selected' : '' }}>Thermal</option>
-                                <option value="DotMatrix" {{ old('printer_type', $asset->printer->printer_type ?? '') == 'DotMatrix' ? 'selected' : '' }}>Dot Matrix</option>
+                                <option value="Laser" {{ old('printer_type', $asset->printer->printer_type ?? '') == 'Laser' ? 'selected' : '' }}>{{ __('messages.printer_type_laser') }}</option>
+                                <option value="Inkjet" {{ old('printer_type', $asset->printer->printer_type ?? '') == 'Inkjet' ? 'selected' : '' }}>{{ __('messages.printer_type_inkjet') }}</option>
+                                <option value="Thermal" {{ old('printer_type', $asset->printer->printer_type ?? '') == 'Thermal' ? 'selected' : '' }}>{{ __('messages.printer_type_thermal') }}</option>
+                                <option value="DotMatrix" {{ old('printer_type', $asset->printer->printer_type ?? '') == 'DotMatrix' ? 'selected' : '' }}>{{ __('messages.printer_type_dotmatrix') }}</option>
                             </select>
                         </div>
                         <div class="col-md-4 form-group mb-3">
                             <label class="field-label">{{ __('messages.connection') }}</label>
                             <select name="connection_type" class="field-select custom-filter-select">
-                                <option value="USB" {{ old('connection_type', $asset->printer->connection_type ?? '') == 'USB' ? 'selected' : '' }}>USB Only</option>
-                                <option value="Network" {{ old('connection_type', $asset->printer->connection_type ?? '') == 'Network' ? 'selected' : '' }}>Network (Ethernet/WiFi)</option>
+                                <option value="USB" {{ old('connection_type', $asset->printer->connection_type ?? '') == 'USB' ? 'selected' : '' }}>{{ __('messages.printer_conn_usb') }}</option>
+                                <option value="Network" {{ old('connection_type', $asset->printer->connection_type ?? '') == 'Network' ? 'selected' : '' }}>{{ __('messages.printer_conn_network') }}</option>
                             </select>
                         </div>
                         <div class="col-md-4 form-group mb-3 d-flex align-items-end pb-2">
@@ -342,11 +342,11 @@
                         </div>
                         <div class="col-md-4 form-group mb-3">
                             <label class="field-label">{{ __('messages.toner_status') }}</label>
-                            <input type="text" name="toner_status" class="field-input font-mono" value="{{ old('toner_status', $asset->printer->toner_status ?? '') }}" placeholder="e.g., 80% / Baru">
+                            <input type="text" name="toner_status" class="field-input font-mono" value="{{ old('toner_status', $asset->printer->toner_status ?? '') }}" placeholder="{{ __('messages.toner_status_placeholder') }}">
                         </div>
                         <div class="col-md-4 form-group mb-3">
                             <label class="field-label">{{ __('messages.drum_status') }}</label>
-                            <input type="text" name="drum_status" class="field-input font-mono" value="{{ old('drum_status', $asset->printer->drum_status ?? '') }}" placeholder="e.g., Bagus / OK">
+                            <input type="text" name="drum_status" class="field-input font-mono" value="{{ old('drum_status', $asset->printer->drum_status ?? '') }}" placeholder="{{ __('messages.drum_status_placeholder') }}">
                         </div>
                     </div>
                 </div>

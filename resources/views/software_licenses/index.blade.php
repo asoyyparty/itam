@@ -1209,7 +1209,7 @@
     </div>
 
     <!-- MOBILE TACTILE FEED CARDS (d-block d-md-none) -->
-    <div class="d-block d-md-none">
+    <div class="d-block d-md-none lic-mobile-feed">
         @php $today = now()->startOfDay(); @endphp
         @forelse($software_licenses as $lic)
             @php

@@ -60,7 +60,68 @@ class AssetsExport implements FromCollection, ShouldAutoSize, WithHeadings, With
             }
         }
 
-        return $query->latest()->get();
+        $sortOrder = $this->request?->input('sort_order');
+        $sortBy = $this->request?->input('sort');
+        $sortDir = $this->request?->input('direction');
+
+        if ($sortOrder) {
+            switch ($sortOrder) {
+                case 'date_asc':
+                    $sortBy = 'date_received';
+                    $sortDir = 'asc';
+                    break;
+                case 'tag_asc':
+                    $sortBy = 'asset_tag';
+                    $sortDir = 'asc';
+                    break;
+                case 'tag_desc':
+                    $sortBy = 'asset_tag';
+                    $sortDir = 'desc';
+                    break;
+                case 'name_asc':
+                    $sortBy = 'name';
+                    $sortDir = 'asc';
+                    break;
+                case 'name_desc':
+                    $sortBy = 'name';
+                    $sortDir = 'desc';
+                    break;
+                case 'status':
+                    $sortBy = 'status';
+                    $sortDir = 'asc';
+                    break;
+                case 'date_desc':
+                default:
+                    $sortBy = 'date_received';
+                    $sortDir = 'desc';
+                    break;
+            }
+        } else {
+            $sortBy = $sortBy ?: 'date_received';
+            $sortDir = strtolower($sortDir ?: 'desc');
+        }
+
+        if (!in_array($sortDir, ['asc', 'desc'])) {
+            $sortDir = 'desc';
+        }
+
+        if ($sortBy === 'date_received' || $sortBy === 'date') {
+            $query->orderByRaw("COALESCE(date_received, created_at) {$sortDir}")
+                  ->orderBy('id', $sortDir);
+        } elseif ($sortBy === 'asset_tag') {
+            $query->orderBy('asset_tag', $sortDir)->orderBy('id', $sortDir);
+        } elseif ($sortBy === 'name') {
+            $query->orderBy('name', $sortDir)->orderBy('id', $sortDir);
+        } elseif ($sortBy === 'status') {
+            $query->orderBy('status', $sortDir)->orderBy('id', $sortDir);
+        } elseif ($sortBy === 'created_at') {
+            $query->orderBy('created_at', $sortDir)->orderBy('id', $sortDir);
+        } else {
+            $query->orderByRaw("COALESCE(date_received, created_at) desc")
+                  ->orderBy('id', 'desc');
+        }
+
+        return $query->get();
     }
 
     public function headings(): array

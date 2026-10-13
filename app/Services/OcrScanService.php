@@ -354,10 +354,11 @@ PROMPT;
             $combined = implode(' ', $row['rest']);
 
             $qty = 1;
-            $uom = 'Pieces';
+            $uom = 'Pcs';
 
             if (preg_match('/(Pieces|Pcs|Unit|Box|Set)\s+(\d+)\s*[✓✔•*,.\s]*/iu', $combined, $qm)) {
-                $uom = $qm[1];
+                $matchedUom = $qm[1];
+                $uom = preg_match('/^pieces?$/i', $matchedUom) ? 'Pcs' : $matchedUom;
                 $qty = (int)$qm[2];
                 $combined = preg_replace('/' . preg_quote($qm[0], '/') . '/', '', $combined, 1);
             } elseif (preg_match('/\b(\d+)\s*[✓✔•*,.\s]*$/u', $combined, $qm)) {
@@ -407,7 +408,7 @@ PROMPT;
                             'code' => $code,
                             'name' => $clean,
                             'quantity' => 1,
-                            'uom' => 'Pieces',
+                            'uom' => 'Pcs',
                             'category' => null,
                             'category_id' => null,
                             'brand' => $this->detectBrandFromName($clean),
@@ -457,7 +458,7 @@ PROMPT;
                     'code' => 'EXP-00000006',
                     'name' => 'BROCO STOPKONTAK COLOKAN ON OFF SAKLAR SWITCH 4 LUBANG',
                     'quantity' => 5,
-                    'uom' => 'Pieces',
+                    'uom' => 'Pcs',
                     'category' => null,
                     'category_id' => null,
                     'brand' => 'Broco',
@@ -468,7 +469,7 @@ PROMPT;
                     'code' => 'EXP-00000012',
                     'name' => 'CABLE FLEXIBLE HEAD EPSON LX310 / LX300',
                     'quantity' => 2,
-                    'uom' => 'Pieces',
+                    'uom' => 'Pcs',
                     'category' => null,
                     'category_id' => null,
                     'brand' => 'Epson',
@@ -479,7 +480,7 @@ PROMPT;
                     'code' => 'EXP-00000012',
                     'name' => 'HEAD PRINTER EPSON DOT MATRIX LX-300 - COMPATIBLE',
                     'quantity' => 1,
-                    'uom' => 'Pieces',
+                    'uom' => 'Pcs',
                     'category' => null,
                     'category_id' => null,
                     'brand' => 'Epson',
@@ -490,7 +491,7 @@ PROMPT;
                     'code' => 'EXP-00000012',
                     'name' => 'HEAD PRINTER EPSON DOT MATRIX LX-310 - COMPATIBLE',
                     'quantity' => 2,
-                    'uom' => 'Pieces',
+                    'uom' => 'Pcs',
                     'category' => null,
                     'category_id' => null,
                     'brand' => 'Epson',
@@ -501,7 +502,7 @@ PROMPT;
                     'code' => 'EXP-00000012',
                     'name' => 'TRACTOR LQ2190 ORIGINAL EPSON BARU',
                     'quantity' => 2,
-                    'uom' => 'Pieces',
+                    'uom' => 'Pcs',
                     'category' => null,
                     'category_id' => null,
                     'brand' => 'Epson',
@@ -512,7 +513,7 @@ PROMPT;
                     'code' => 'EXP-00000012',
                     'name' => 'TRAKTOR PRINTER LX300',
                     'quantity' => 1,
-                    'uom' => 'Pieces',
+                    'uom' => 'Pcs',
                     'category' => null,
                     'category_id' => null,
                     'brand' => 'Epson',
@@ -523,7 +524,7 @@ PROMPT;
                     'code' => 'EXP-00000012',
                     'name' => 'TRAKTOR PRINTER LX310',
                     'quantity' => 2,
-                    'uom' => 'Pieces',
+                    'uom' => 'Pcs',
                     'category' => null,
                     'category_id' => null,
                     'brand' => 'Epson',
@@ -534,7 +535,7 @@ PROMPT;
                     'code' => 'EXP-00000004',
                     'name' => 'STAMVICK GUNTING KABEL LISTRIK / TANG KUPAS KABEL 8" INCH POTONG KABEL',
                     'quantity' => 2,
-                    'uom' => 'Pieces',
+                    'uom' => 'Pcs',
                     'category' => null,
                     'category_id' => null,
                     'brand' => 'Stamvick',

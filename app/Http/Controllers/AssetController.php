@@ -19,7 +19,7 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
     public static function middleware(): array
     {
         return [
-            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_assets', only: ['create', 'store', 'edit', 'update', 'destroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
+            new \Illuminate\Routing\Controllers\Middleware('permission:action_manage_assets', only: ['create', 'store', 'edit', 'update', 'destroy', 'bulkDestroy', 'importExcel', 'updateStatus', 'complete', 'generateTag', 'returnAsset', 'pingBatch', 'ping', 'updateAll']),
         ];
     }
 
@@ -40,9 +40,9 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
             \Illuminate\Support\Facades\Cache::forget('master_asset_years');
             \Illuminate\Support\Facades\Cache::forget('asset_status_counts');
 
-            return back()->with('success', 'Assets successfully imported and replaced!');
+            return back()->with('success', __('messages.import_success'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Error importing assets: '.$e->getMessage());
+            return back()->with('error', __('messages.import_failed') . ': ' . $e->getMessage());
         }
     }
 
@@ -55,12 +55,177 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
         $asset->update(['status' => $request->status]);
         \Illuminate\Support\Facades\Cache::forget('asset_status_counts');
 
-        return response()->json(['success' => true, 'message' => 'Status updated successfully.', 'status' => $asset->status]);
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.status_updated'),
+            'status' => $asset->status,
+            'localized_status' => __('messages.' . strtolower($asset->status)) ?? $asset->status
+        ]);
     }
 
     public function exportExcel(Request $request)
     {
         return Excel::download(new AssetsExport($request), 'assets_'.date('Ymd_His').'.xlsx');
+    }
+
+    public function printBarcodes(Request $request)
+    {
+        $query = Asset::with(['category', 'brand', 'location', 'currentAssignment.employee']);
+
+        if ($request->filled('ids')) {
+            $ids = is_array($request->ids) ? $request->ids : explode(',', $request->ids);
+            $query->whereIn('id', $ids);
+        } else {
+            if ($request->has('category') && $request->category != '') {
+                $category = Category::where('name', $request->category)->first();
+                if ($category) {
+                    $request->merge(['category_id' => [$category->id]]);
+                }
+            }
+
+            if ($request->has('search') && $request->search != '') {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%$search%")
+                        ->orWhere('asset_tag', 'like', "%$search%")
+                        ->orWhere('serial_number', 'like', "%$search%")
+                        ->orWhere('delivery_order_number', 'like', "%$search%");
+                });
+            }
+
+            // Multi-value category filter
+            $categoryIds = array_filter((array) $request->input('category_id', []));
+            if (!empty($categoryIds)) {
+                $query->whereIn('category_id', $categoryIds);
+            }
+
+            // Multi-value brand filter
+            $brandIds = array_filter((array) $request->input('brand_id', []));
+            if (!empty($brandIds)) {
+                $query->whereIn('brand_id', $brandIds);
+            }
+
+            // Multi-value location filter
+            $locationIds = array_filter((array) $request->input('location_id', []));
+            if (!empty($locationIds)) {
+                $query->whereIn('location_id', $locationIds);
+            }
+
+            if ($request->has('status') && $request->status != '') {
+                $statuses = is_array($request->status)
+                    ? array_filter($request->status)
+                    : array_filter(explode(',', $request->status));
+                if (!empty($statuses)) {
+                    $query->whereIn('status', $statuses);
+                }
+            }
+
+            // Multi-value year filter
+            $yearFilters = array_filter((array) $request->input('date_received', []));
+            if (empty($yearFilters) && $request->input('year')) {
+                $yearFilters = (array) $request->input('year');
+            }
+            if (!empty($yearFilters)) {
+                $yearFilters = array_map('intval', $yearFilters);
+                $query->where(function ($q) use ($yearFilters) {
+                    $q->whereIn(\DB::raw('YEAR(date_received)'), $yearFilters)
+                      ->orWhere(function ($q2) use ($yearFilters) {
+                          $q2->whereNull('date_received')
+                             ->whereIn(\DB::raw('YEAR(created_at)'), $yearFilters);
+                      });
+                });
+            }
+        }
+
+        $sortOrder = $request->input('sort_order');
+        $sortBy = $request->input('sort');
+        $sortDir = $request->input('direction');
+
+        if ($sortOrder) {
+            switch ($sortOrder) {
+                case 'date_asc':
+                    $sortBy = 'date_received';
+                    $sortDir = 'asc';
+                    break;
+                case 'tag_asc':
+                    $sortBy = 'asset_tag';
+                    $sortDir = 'asc';
+                    break;
+                case 'tag_desc':
+                    $sortBy = 'asset_tag';
+                    $sortDir = 'desc';
+                    break;
+                case 'name_asc':
+                    $sortBy = 'name';
+                    $sortDir = 'asc';
+                    break;
+                case 'name_desc':
+                    $sortBy = 'name';
+                    $sortDir = 'desc';
+                    break;
+                case 'status':
+                    $sortBy = 'status';
+                    $sortDir = 'asc';
+                    break;
+                case 'date_desc':
+                default:
+                    $sortBy = 'date_received';
+                    $sortDir = 'desc';
+                    break;
+            }
+        } else {
+            $sortBy = $sortBy ?: 'asset_tag';
+            $sortDir = strtolower($sortDir ?: 'asc');
+        }
+
+        if (!in_array($sortDir, ['asc', 'desc'])) {
+            $sortDir = 'asc';
+        }
+
+        if ($sortBy === 'date_received' || $sortBy === 'date') {
+            $query->orderByRaw("COALESCE(date_received, created_at) {$sortDir}")
+                  ->orderBy('id', $sortDir);
+        } elseif ($sortBy === 'asset_tag') {
+            $query->orderBy('asset_tag', $sortDir)->orderBy('id', $sortDir);
+        } elseif ($sortBy === 'name') {
+            $query->orderBy('name', $sortDir)->orderBy('id', $sortDir);
+        } elseif ($sortBy === 'status') {
+            $query->orderBy('status', $sortDir)->orderBy('id', $sortDir);
+        } elseif ($sortBy === 'created_at') {
+            $query->orderBy('created_at', $sortDir)->orderBy('id', $sortDir);
+        } else {
+            $query->orderBy('asset_tag', 'asc')
+                  ->orderBy('id', 'asc');
+        }
+
+        $assets = $query->get();
+
+        $categories = \Illuminate\Support\Facades\Cache::remember('master_categories_all', 3600, fn() => Category::orderBy('name')->get());
+        $brands = \Illuminate\Support\Facades\Cache::remember('master_brands_all', 3600, fn() => Brand::orderBy('name')->get());
+        $locations = \Illuminate\Support\Facades\Cache::remember('master_locations_all', 3600, fn() => Location::orderBy('name')->get());
+
+        $years = \Illuminate\Support\Facades\Cache::remember('master_asset_years', 3600, function () {
+            $dbYears = Asset::whereNotNull('date_received')
+                ->selectRaw('YEAR(date_received) as yr')
+                ->distinct()
+                ->pluck('yr')
+                ->filter()
+                ->map(fn($y) => (int)$y)
+                ->toArray();
+
+            $createdYears = Asset::selectRaw('YEAR(created_at) as yr')
+                ->distinct()
+                ->pluck('yr')
+                ->filter()
+                ->map(fn($y) => (int)$y)
+                ->toArray();
+
+            $allYears = array_unique(array_merge($dbYears, $createdYears, [(int)date('Y')]));
+            rsort($allYears);
+            return array_values($allYears);
+        });
+
+        return view('assets.print_barcodes', compact('assets', 'categories', 'locations', 'brands', 'years'));
     }
 
     public function generateTag(Request $request)
@@ -113,7 +278,7 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
         if ($request->has('category') && $request->category != '') {
             $category = Category::where('name', $request->category)->first();
             if ($category) {
-                $request->merge(['category_id' => $category->id]);
+                $request->merge(['category_id' => [$category->id]]);
             }
         }
 
@@ -126,29 +291,46 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
                     ->orWhere('delivery_order_number', 'like', "%$search%");
             });
         }
-        if ($request->has('category_id') && $request->category_id != '') {
-            $query->where('category_id', $request->category_id);
+
+        // Multi-value category filter
+        $categoryIds = array_filter((array) $request->input('category_id', []));
+        if (!empty($categoryIds)) {
+            $query->whereIn('category_id', $categoryIds);
         }
-        if ($request->has('brand_id') && $request->brand_id != '') {
-            $query->where('brand_id', $request->brand_id);
+
+        // Multi-value brand filter
+        $brandIds = array_filter((array) $request->input('brand_id', []));
+        if (!empty($brandIds)) {
+            $query->whereIn('brand_id', $brandIds);
         }
-        if ($request->has('location_id') && $request->location_id != '') {
-            $query->where('location_id', $request->location_id);
+
+        // Multi-value location filter
+        $locationIds = array_filter((array) $request->input('location_id', []));
+        if (!empty($locationIds)) {
+            $query->whereIn('location_id', $locationIds);
         }
+
         if ($request->has('status') && $request->status != '') {
-            $statuses = explode(',', $request->status);
-            if (count($statuses) > 1) {
+            $statuses = is_array($request->status)
+                ? array_filter($request->status)
+                : array_filter(explode(',', $request->status));
+            if (!empty($statuses)) {
                 $query->whereIn('status', $statuses);
-            } else {
-                $query->where('status', $request->status);
             }
         }
-        $yearFilter = $request->input('date_received') ?: $request->input('year');
-        if ($yearFilter != '') {
-            $query->where(function ($q) use ($yearFilter) {
-                $q->whereYear('date_received', $yearFilter)
-                  ->orWhere(function ($q2) use ($yearFilter) {
-                      $q2->whereNull('date_received')->whereYear('created_at', $yearFilter);
+
+        // Multi-value year filter
+        $yearFilters = array_filter((array) $request->input('date_received', []));
+        if (empty($yearFilters) && $request->input('year')) {
+            $yearFilters = (array) $request->input('year');
+        }
+        if (!empty($yearFilters)) {
+            $yearFilters = array_map('intval', $yearFilters);
+            $query->where(function ($q) use ($yearFilters) {
+                $q->whereIn(\DB::raw('YEAR(date_received)'), $yearFilters)
+                  ->orWhere(function ($q2) use ($yearFilters) {
+                      $q2->whereNull('date_received')
+                         ->whereIn(\DB::raw('YEAR(created_at)'), $yearFilters);
                   });
             });
         }
@@ -178,7 +360,68 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
             return array_values($allYears);
         });
 
-        $assets = $query->orderBy('asset_tag', 'asc')->paginate(25)->withQueryString();
+        $sortOrder = $request->input('sort_order');
+        $sortBy = $request->input('sort');
+        $sortDir = $request->input('direction');
+
+        if ($sortOrder) {
+            switch ($sortOrder) {
+                case 'date_asc':
+                    $sortBy = 'date_received';
+                    $sortDir = 'asc';
+                    break;
+                case 'tag_asc':
+                    $sortBy = 'asset_tag';
+                    $sortDir = 'asc';
+                    break;
+                case 'tag_desc':
+                    $sortBy = 'asset_tag';
+                    $sortDir = 'desc';
+                    break;
+                case 'name_asc':
+                    $sortBy = 'name';
+                    $sortDir = 'asc';
+                    break;
+                case 'name_desc':
+                    $sortBy = 'name';
+                    $sortDir = 'desc';
+                    break;
+                case 'status':
+                    $sortBy = 'status';
+                    $sortDir = 'asc';
+                    break;
+                case 'date_desc':
+                default:
+                    $sortBy = 'date_received';
+                    $sortDir = 'desc';
+                    break;
+            }
+        } else {
+            $sortBy = $sortBy ?: 'date_received';
+            $sortDir = strtolower($sortDir ?: 'desc');
+        }
+
+        if (!in_array($sortDir, ['asc', 'desc'])) {
+            $sortDir = 'desc';
+        }
+
+        if ($sortBy === 'date_received' || $sortBy === 'date') {
+            $query->orderByRaw("COALESCE(date_received, created_at) {$sortDir}")
+                  ->orderBy('id', $sortDir);
+        } elseif ($sortBy === 'asset_tag') {
+            $query->orderBy('asset_tag', $sortDir)->orderBy('id', $sortDir);
+        } elseif ($sortBy === 'name') {
+            $query->orderBy('name', $sortDir)->orderBy('id', $sortDir);
+        } elseif ($sortBy === 'status') {
+            $query->orderBy('status', $sortDir)->orderBy('id', $sortDir);
+        } elseif ($sortBy === 'created_at') {
+            $query->orderBy('created_at', $sortDir)->orderBy('id', $sortDir);
+        } else {
+            $query->orderByRaw("COALESCE(date_received, created_at) desc")
+                  ->orderBy('id', 'desc');
+        }
+
+        $assets = $query->paginate(25)->withQueryString();
 
         $healthService = app(\App\Services\PredictiveHealthService::class);
         $assets->getCollection()->transform(function ($asset) use ($healthService) {
@@ -194,7 +437,7 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
         });
         $totalAssetsCount = array_sum($statusCounts);
 
-        return view('assets.index', compact('assets', 'categories', 'brands', 'locations', 'years', 'statusCounts', 'totalAssetsCount'));
+        return view('assets.index', compact('assets', 'categories', 'brands', 'locations', 'years', 'statusCounts', 'totalAssetsCount', 'sortBy', 'sortDir'));
     }
 
     public function create(Request $request)
@@ -287,19 +530,19 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => $quantity > 1 ? $quantity.' Assets successfully created.' : __('messages.created_success')
+                    'message' => $quantity > 1 ? __('messages.multi_assets_created', ['count' => $quantity]) : __('messages.created_success')
                 ]);
             }
 
-            return redirect()->route('assets.index', $request->query())->with('success', $quantity > 1 ? $quantity.' Assets successfully created.' : __('messages.created_success'));
+            return redirect()->route('assets.index', $request->query())->with('success', $quantity > 1 ? __('messages.multi_assets_created', ['count' => $quantity]) : __('messages.created_success'));
         } catch (\Exception $e) {
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to create asset: '.$e->getMessage()
+                    'message' => __('messages.create_failed') . ': ' . $e->getMessage()
                 ], 500);
             }
-            return back()->withInput()->with('error', 'Failed to create asset: '.$e->getMessage());
+            return back()->withInput()->with('error', __('messages.create_failed') . ': ' . $e->getMessage());
         }
     }
 
@@ -341,7 +584,7 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
 
             return redirect()->route('assets.index', $request->query())->with('success', __('messages.updated_success'));
         } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'Failed to update asset: '.$e->getMessage());
+            return back()->withInput()->with('error', __('messages.update_failed') . ': ' . $e->getMessage());
         }
     }
 
@@ -353,6 +596,46 @@ class AssetController extends Controller implements \Illuminate\Routing\Controll
         \Illuminate\Support\Facades\Cache::forget('asset_status_counts');
 
         return redirect()->route('assets.index', $request->query())->with('success', __('messages.deleted_success'));
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer|exists:assets,id',
+        ]);
+
+        $ids = $request->input('ids', []);
+        $assets = Asset::whereIn('id', $ids)->get();
+        $count = 0;
+
+        DB::transaction(function () use ($assets, &$count) {
+            foreach ($assets as $asset) {
+                if ($asset->image && \Illuminate\Support\Facades\Storage::disk('public')->exists($asset->image)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($asset->image);
+                }
+                $asset->delete();
+                $count++;
+            }
+        });
+
+        \Illuminate\Support\Facades\Cache::forget('master_asset_years');
+        \Illuminate\Support\Facades\Cache::forget('asset_status_counts');
+
+        $message = __('messages.bulk_deleted_success', ['count' => $count]);
+        if ($message === 'messages.bulk_deleted_success') {
+            $message = "Berhasil menghapus {$count} aset.";
+        }
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'count' => $count
+            ]);
+        }
+
+        return redirect()->route('assets.index', $request->query())->with('success', $message);
     }
 
     private function saveSpecifications(Asset $asset, Request $request)

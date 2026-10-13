@@ -354,6 +354,36 @@
             </a>
           </li>
           @endcan
+          @can('menu_berita_acara')
+          <li class="nav-item">
+            <a href="{{ route('berita-acara.index') }}" class="nav-link {{ request()->routeIs('berita-acara.*') && !request()->routeIs('berita-acara-disposal.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-file-signature text-warning"></i>
+              <p>{{ __('messages.berita_acara_ok') }}</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ route('berita-acara-disposal.index') }}" class="nav-link {{ request()->routeIs('berita-acara-disposal.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-dumpster text-danger"></i>
+              <p>BA Disposal Asset</p>
+            </a>
+          </li>
+          @endcan
+          @can('menu_documents')
+          <li class="nav-item">
+            <a href="{{ route('documents.index') }}" class="nav-link {{ request()->routeIs('documents.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-folder-open text-primary"></i>
+              <p>{{ __('messages.document_vault') ?? 'Arsip Dokumen' }}</p>
+            </a>
+          </li>
+          @endcan
+          @can('menu_stock_opname')
+          <li class="nav-item">
+            <a href="{{ route('stock-opname.index') }}" class="nav-link {{ request()->routeIs('stock-opname.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-qrcode text-indigo"></i>
+              <p>{{ __('messages.stock_opname') ?? 'Stock Opname' }}</p>
+            </a>
+          </li>
+          @endcan
 
           <!-- Network -->
           @canany(['menu_ips', 'menu_vlans', 'menu_network_anomalies'])
@@ -619,10 +649,15 @@
     dropzone.addClass('active');
   });
 
-  // Seamless AJAX search and pagination
+  // Seamless AJAX search and pagination (Supporting both Desktop & Mobile Feeds)
   function loadTableData(url, btn) {
     let originalIcon = btn ? btn.html() : null;
     if (btn) btn.html('<i class="fas fa-spinner fa-spin"></i>');
+
+    let currentPagination = $('.pagination');
+    if (!btn && currentPagination.length) {
+      currentPagination.css('opacity', '0.5').css('pointer-events', 'none');
+    }
 
     $.ajax({
       url: url,
@@ -631,24 +666,93 @@
         let parser = new DOMParser();
         let doc = parser.parseFromString(response, 'text/html');
         
-        let newTable = $(doc).find('.table-responsive');
-        let newPagination = $(doc).find('.card-footer');
-        
+        let newTable = $(doc).find('.table-responsive, .iam-table-desktop');
+        let newPagination = $(doc).find('.card-footer, .pagination-footer');
+        let contentUpdated = false;
+
+        // 1. Update Desktop Table if present
         if (newTable.length) {
-          $('.table-responsive').replaceWith(newTable);
-          
-          let currentFooter = $('.card-footer');
-          if (currentFooter.length && newPagination.length) {
-            currentFooter.replaceWith(newPagination);
-          } else if (currentFooter.length) {
-            currentFooter.remove(); // No pagination on new result
-          } else if (newPagination.length) {
-            $('.table-responsive').closest('.card').append(newPagination);
+          let curTable = $('.table-responsive, .iam-table-desktop');
+          if (curTable.length) {
+            curTable.replaceWith(newTable);
+            contentUpdated = true;
           }
-          
-          window.history.pushState({}, '', url);
         }
+
+        // 2. Update Mobile Feeds / Lists (Fixes mobile pagination & search)
+        const mobileSelectors = [
+          '.ip-mobile-feed',
+          '.ticket-mobile-feed',
+          '.master-mobile-feed',
+          '.pic-mobile-feed',
+          '.maintenance-mobile-list',
+          '.noc-mobile-incident-feed',
+          '.iam-mobile-list',
+          '#mobile-roles-list',
+          '.lic-mobile-feed',
+          '.health-mobile-feed',
+          '[class*="-mobile-feed"]',
+          '[class*="-mobile-list"]'
+        ];
+
+        mobileSelectors.forEach(function(sel) {
+          let newMobile = $(doc).find(sel);
+          let curMobile = $(sel);
+          if (newMobile.length && curMobile.length) {
+            curMobile.replaceWith(newMobile);
+            contentUpdated = true;
+          }
+        });
+
+        // Generic fallback for any direct mobile cards container
+        let genericNewMobile = $(doc).find('.master-table-card > .d-block.d-md-none, .card > .d-block.d-md-none, .card-body > .d-block.d-md-none');
+        let genericCurMobile = $('.master-table-card > .d-block.d-md-none, .card > .d-block.d-md-none, .card-body > .d-block.d-md-none');
+        if (genericNewMobile.length && genericCurMobile.length) {
+          genericCurMobile.replaceWith(genericNewMobile);
+          contentUpdated = true;
+        }
+
+        // 3. Update Pagination Footer
+        let currentFooter = $('.card-footer, .pagination-footer').first();
+        if (currentFooter.length && newPagination.length) {
+          currentFooter.replaceWith(newPagination.first());
+          contentUpdated = true;
+        } else if (currentFooter.length && !newPagination.length) {
+          currentFooter.remove(); // No pagination on new result
+        } else if (!currentFooter.length && newPagination.length) {
+          let targetCard = $('.table-responsive, .ip-mobile-feed, .ticket-mobile-feed, .master-mobile-feed, .iam-table-card, .card').first().closest('.card, .iam-table-card');
+          if (targetCard.length) {
+            targetCard.append(newPagination.first());
+            contentUpdated = true;
+          }
+        }
+
+        // 4. Update Quick Status Ribbons (counters and active state) if present
+        let newRibbon = $(doc).find('.quick-status-ribbon, .ip-status-ribbon, .ticket-status-ribbon, .hallmark-status-ribbon');
+        let curRibbon = $('.quick-status-ribbon, .ip-status-ribbon, .ticket-status-ribbon, .hallmark-status-ribbon');
+        if (newRibbon.length && curRibbon.length) {
+          curRibbon.replaceWith(newRibbon);
+        }
+
+        if (contentUpdated) {
+          window.history.pushState({}, '', url);
+
+          // Smooth scroll to top of table or mobile feed on mobile viewport
+          if (window.innerWidth < 768) {
+            let scrollTarget = $('.master-table-card, .card:has(.table-responsive), .iam-workbench, .ip-mobile-feed, .ticket-mobile-feed').first();
+            if (scrollTarget.length) {
+              $('html, body').animate({
+                scrollTop: scrollTarget.offset().top - 70
+              }, 200);
+            }
+          }
+        } else {
+          // Fallback to native page load if no target containers were matched
+          window.location.href = url;
+        }
+
         if (btn) btn.html(originalIcon);
+        $('.pagination').css('opacity', '').css('pointer-events', '');
       },
       error: function() {
         if (btn) btn.closest('form').submit(); // Fallback
@@ -681,7 +785,7 @@
     }
   });
 
-  $(document).on('click', '.card-footer .pagination a', function(e) {
+  $(document).on('click', '.card-footer .pagination a, .pagination-footer .pagination a, .pagination a', function(e) {
     e.preventDefault();
     loadTableData($(this).attr('href'), null);
   });

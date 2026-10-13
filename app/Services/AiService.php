@@ -4,12 +4,19 @@ namespace App\Services;
 
 use App\Models\ActivityLog;
 use App\Models\Asset;
+use App\Models\BeritaAcara;
+use App\Models\BeritaAcaraDisposal;
+use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Department;
+use App\Models\Document;
 use App\Models\Employee;
 use App\Models\IpAddress;
+use App\Models\Location;
 use App\Models\Maintenance;
 use App\Models\PasswordVault;
 use App\Models\SoftwareLicense;
+use App\Models\StockOpnameSession;
 use App\Models\Ticket;
 use App\Models\Vendor;
 use App\Models\Vlan;
@@ -107,14 +114,40 @@ class AiService
             ];
         }
 
+        // 0.5. Answer capability & module search coverage questions
+        if (preg_match('/\b(bisa|dapat)\s+(baca|cari|menampilkan|akses)\b.*\b(data|menu|apa|semua)\b/i', $promptLower)
+            || preg_match('/\b(data|menu)\s+apa\s+saja\b/i', $promptLower)
+            || preg_match('/\bapa\s+saja\s+yang\s+bisa\s+(dicari|dibaca)\b/i', $promptLower)) {
+            return [
+                'summary' => 'ITAM AI dapat membaca dan mencari seluruh data dari semua modul di aplikasi ITAM.',
+                'type' => 'capabilities',
+                'answer' => "Anda dapat mencari informasi dari seluruh menu aplikasi ITAM:\n\n"
+                    . "1. 🖥️ **Aset IT**: Komputer, Laptop, Printer, Server, CCTV, Switch, Router, Monitor\n"
+                    . "2. 🌐 **Alamat IP & Jaringan**: IP Address, MAC Address, Gateway, Status Online/Offline\n"
+                    . "3. 👥 **Karyawan / Staf**: Nama, NIK, Divisi, AnyDesk ID, No. Telepon, Aset yang dipegang\n"
+                    . "4. 🎫 **Tiket Support**: No. Tiket, Kendala, Prioritas, Status Solusi\n"
+                    . "5. 🔧 **Maintenance & Perawatan**: Riwayat Servis, Biaya, Vendor, Status Ongoing/Completed\n"
+                    . "6. 🔐 **Brankas Sandi (Vault)**: Akun & Kredensial Perangkat/Server\n"
+                    . "7. 📜 **Lisensi Software**: Nama Software, Lisensi Key, Seats, Masa Berlaku\n"
+                    . "8. 📄 **Berita Acara**: BA Serah Terima & BA Disposal Pemusnahan\n"
+                    . "9. 📁 **Arsip Dokumen IT**: Dokumen Digital, Manual, SOP, Lampiran\n"
+                    . "10. 📦 **Stock Opname**: Sesi Audit Fisik Aset & Inventarisasi\n"
+                    . "11. 🏢 **Vendor & Rekanan**: Pemasok, Kontak Sales, Supplier\n"
+                    . "12. 📍 **Master Data**: Lokasi/Ruangan, Departemen, Merk, Kategori\n\n"
+                    . "Ketikkan kata kunci apapun (misal: 'server mtc 1', '192.168.1.143', 'reza', 'epson', 'tiket printer', 'brankas proxmox') untuk mulai mencari!",
+                'items' => [],
+                'sources' => [],
+            ];
+        }
+
         // 0.5. Answer identity and capability questions before entity searches.
         if (preg_match('/\b(ini|aplikasi ini|sistem ini|kamu|anda)\b.*\b(apa|siapa|untuk apa|fungsinya|kegunaannya)\b/i', $promptLower)
             || preg_match('/\b(jelaskan|jelaskanlah|terangkan)\b.*\b(fungsi|kegunaan|cara kerja)\b.*\b(aplikasi|sistem|itam)\b/i', $promptLower)
             || preg_match('/^\s*(aplikasi|sistem)\s+(apa|ini)\s*[?!.]*\s*$/i', $promptLower)) {
             return [
-                'summary' => 'Ini adalah ITAM AI, asisten untuk pengelolaan aset dan layanan IT.',
+                'summary' => 'Ini adalah ITAM AI, asisten untuk pengelolaan seluruh aset dan operasional IT.',
                 'type' => 'identity',
-                'answer' => 'ITAM adalah aplikasi IT Asset Management. ITAM AI membantu Anda mencari informasi aset, assignment, tiket support, alamat IP, maintenance, lisensi software, dan data operasional IT perusahaan. Untuk pertanyaan teknis umum, saya juga dapat menggunakan referensi internet dan menampilkan sumbernya.',
+                'answer' => 'ITAM AI membantu Anda mencari dan melacak data dari seluruh menu aplikasi ITAM: Aset IT, Karyawan, Alamat IP & Jaringan, Tiket Support, Maintenance, Brankas Sandi, Lisensi Software, Berita Acara, Dokumen, Stock Opname, serta Vendor dan Master Data.',
                 'items' => [],
                 'sources' => [],
             ];
@@ -127,18 +160,23 @@ class AiService
 
         // 1. Direct IP Address Detection (e.g. "192.168.1.186")
         if (preg_match('/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/', $promptTrimmed)) {
-            return $this->queryIpsNL($promptTrimmed);
+            $ipRes = $this->queryIpsNL($promptTrimmed);
+            if (!empty($ipRes['items'])) {
+                return $ipRes;
+            }
         }
 
         $normalizedPrompt = preg_replace('/\b(snydesk|anydes[kc]|anydek|anydesk)\b/i', 'anydesk', $promptLower);
         if (Str::contains($normalizedPrompt, 'anydesk')
             && Str::contains($normalizedPrompt, ['tidak punya', 'tanpa', 'tidak memiliki', 'belum punya', 'belum memiliki', 'tidak ada', 'belum ada'])) {
-            return $this->queryEmployeesNL($normalizedPrompt);
+            $res = $this->queryEmployeesNL($normalizedPrompt);
+            if (!empty($res['items'])) return $res;
         }
 
         if (Str::contains($promptLower, ['printer', 'cetak'])
             && Str::contains($promptLower, ['punya', 'memiliki', 'diberi', 'memakai', 'digunakan'])) {
-            return $this->queryEmployeePrinterNL($promptLower);
+            $res = $this->queryEmployeePrinterNL($promptLower);
+            if (!empty($res['items'])) return $res;
         }
 
         if ($this->containsAnyKeyword($promptLower, ['divisi', 'departemen', 'department'])
@@ -149,37 +187,34 @@ class AiService
 
         if (Str::contains($promptLower, ['asset', 'aset', 'perangkat'])
             && Str::contains($promptLower, ['terkait', 'punya', 'memiliki', 'diberi', 'memakai', 'digunakan', 'milik'])) {
-            return $this->queryEmployeeAssetsNL($promptLower);
+            $res = $this->queryEmployeeAssetsNL($promptLower);
+            if (!empty($res['items'])) return $res;
         }
 
         $matchingEmployee = Employee::where('name', 'like', '%' . $promptTrimmed . '%')
             ->orWhere('employee_id', 'like', '%' . $promptTrimmed . '%')
             ->exists();
         if ($matchingEmployee) {
-            return $this->queryEmployeesNL($promptLower);
+            $empRes = $this->queryEmployeesNL($promptLower);
+            if (!empty($empRes['items'])) {
+                return $empRes;
+            }
         }
 
+        // 2. Specialized Single-Domain Intent (Only returns if matching items found)
         $internalResult = $this->queryInternalIntentNL($promptLower);
-        if ($internalResult !== null) {
+        if ($internalResult !== null && !empty($internalResult['items'])) {
             return $internalResult;
         }
 
-        // 1.5. Coba cari di General DB dulu sebelum fallback ke AI
-        $generalResult = $this->queryGeneralNL($promptLower, true);
-        if ($generalResult !== null) {
+        // 3. Universal Multi-Module Search Engine Across ALL Modules
+        $generalResult = $this->queryGeneralNL($promptTrimmed, true);
+        if ($generalResult !== null && !empty($generalResult['items'])) {
             return $generalResult;
         }
 
-        if (env('AI_CHAT_MODE', 'internal') === 'internal') {
-            return $this->queryGeneralNL($promptLower, false) ?? [
-                'summary' => "Pencarian tidak ditemukan.",
-                'type' => 'general',
-                'items' => []
-            ];
-        }
-
-        // 1.8. If API Key is configured and no internal DB matched, attempt Live AI API Call
-        if ($this->apiKey && $this->provider !== 'none') {
+        // 4. Live AI Fallback if configured
+        if ($this->apiKey && $this->provider !== 'none' && env('AI_CHAT_MODE', 'internal') !== 'internal') {
             try {
                 $liveResult = $this->callAiApiForQuery($promptTrimmed, $history);
                 if (!empty($liveResult)) {
@@ -190,58 +225,14 @@ class AiService
             }
         }
 
-        // 2. Search Maintenance / Servis / Perawatan / Biaya
-        if (Str::contains($promptLower, ['maintenance', 'perawatan', 'servis', 'service', 'reparasi', 'biaya', 'cost', 'repair', 'upgrade', 'pengeluaran', 'nota', 'ganti sparepart', 'perbaikan', 'ongoing maintenance', 'servis berjalan'])) {
-            return $this->queryMaintenancesNL($promptLower);
-        }
-
-        // 3. Search Password Vault / Brankas Sandi / Kredensial
-        if (Str::contains($promptLower, ['vault', 'password', 'sandi', 'brankas', 'kredensial', 'akun', 'login', 'pass', 'username', 'akses perangkat', 'cctv pass', 'router pass', 'switch pass'])) {
-            return $this->queryVaultsNL($promptLower);
-        }
-
-        // 4. Search VLAN & Subnets
-        if (Str::contains($promptLower, ['vlan', 'subnet', 'segmentasi', 'netmask', 'gateway', 'vlan id', 'vlan number', 'vlan server', 'vlan wifi'])) {
-            return $this->queryVlansNL($promptLower);
-        }
-
-        // 5. Search Vendor / Pemasok / Supplier
-        if (Str::contains($promptLower, ['vendor', 'pemasok', 'supplier', 'toko', 'distributor', 'mitra', 'sales', 'pembelian'])) {
-            return $this->queryVendorsNL($promptLower);
-        }
-
-        // 6. Search Activity Log / Audit Trail
-        if (Str::contains($promptLower, ['log', 'aktivitas', 'activity', 'riwayat', 'history', 'audit', 'operator', 'siapa yang', 'kejadian', 'perubahan', 'tambah aset', 'hapus aset', 'edit aset'])) {
-            return $this->queryActivityLogsNL($promptLower);
-        }
-
-        // 7. Search Assets & Hardware Specs
-        if (Str::contains($promptLower, ['asset', 'aset', 'komputer', 'laptop', 'printer', 'cctv', 'switch', 'access point', 'ap', 'router', 'perangkat', 'garansi', 'warranty', 'expired', 'pc', 'desktop', 'notebook', 'server', 'monitor', 'layar', 'display', 'storage', 'harddisk', 'hdd', 'ssd', 'ram', 'memory', 'cpu', 'processor', 'intel', 'amd', 'core i3', 'core i5', 'core i7', 'ryzen', 'vga', 'gpu', 'os', 'windows', 'linux', 'macbook', 'macos', 'tag', 'kode aset', 'sn', 'serial number', 'surat jalan', 'do', 'lenovo', 'dell', 'hp', 'epson', 'canon', 'asus', 'acer', 'mikrotik', 'unifi', 'hikvision', 'logitech', 'brother', 'oumax', 'toshiba', 'solution', 'cooca', 'yamaha'])) {
-            return $this->queryAssetsNL($promptLower);
-        }
-
-        // 8. Search IP / Network
-        if (Str::contains($promptLower, ['ip', 'ip address', 'alamat ip', 'jaringan', 'network', 'online', 'offline', 'mac', 'mac address', 'ping', 'rto', 'eth', 'lan', 'wifi', 'ssid', 'pass wifi'])) {
-            return $this->queryIpsNL($promptLower);
-        }
-
-        // 9. Search Tickets
-        if (Str::contains($promptLower, ['tiket', 'ticket', 'kendala', 'laporan', 'masalah', 'trouble', 'lapor', 'komplain', 'issue', 'open', 'progress', 'proses', 'closed', 'resolved', 'selesai', 'prioritas', 'low', 'medium', 'high', 'critical', 'kritis', 'bantuan', 'support'])) {
-            return $this->queryTicketsNL($promptLower);
-        }
-
-        // 10. Search Employees / Users / AnyDesk / Extension
-        if (Str::contains($promptLower, ['user', 'pengguna', 'karyawan', 'pegawai', 'staf', 'staff', 'divisi', 'department', 'dept', 'jabatan', 'position', 'nik', 'nomor induk', 'orang', 'supervisor', 'atasan', 'anydesk', 'anydesk id', 'pass anydesk', 'password anydesk', 'remote', 'remote desktop', 'telepon', 'ext', 'ekstensi', 'extension', 'email', 'surel', 'phone', 'hp', 'lokasi', 'gedung', 'ruangan', 'lantai'])) {
-            return $this->queryEmployeesNL($promptLower);
-        }
-
-        // 11. Search Software / Licenses
-        if (Str::contains($promptLower, ['lisensi', 'license', 'software', 'perangkat lunak', 'aplikasi', 'kunci', 'key', 'license key', 'pic', 'seats', 'lifetime', 'expired license'])) {
-            return $this->queryLicensesNL($promptLower);
-        }
-
-        // General multi-entity fallback search
-        return $this->queryGeneralNL($promptLower);
+        // 5. Final Fallback (Returns search guide or web knowledge if configured)
+        return $this->queryGeneralNL($promptTrimmed, false) ?? [
+            'summary' => "Pencarian \"{$promptTrimmed}\" tidak ditemukan di seluruh data modul aplikasi ITAM.",
+            'type' => 'general',
+            'answer' => "Tidak ditemukan data yang cocok di modul Aset, Alamat IP, Karyawan, Tiket, Maintenance, Brankas Sandi, Lisensi Software, Berita Acara, Dokumen, VLAN, Stock Opname, maupun Master Data. Coba periksa ejaan atau gunakan kata kunci lain (seperti nama staf, tag aset, alamat IP, atau merk).",
+            'items' => [],
+            'sources' => [],
+        ];
     }
 
     /**
@@ -871,38 +862,54 @@ Tiket:
      */
     protected function queryInternalIntentNL(string $prompt): ?array
     {
+        $checkAndReturn = function (?array $res) {
+            if ($res !== null && !empty($res['items'])) {
+                return $res;
+            }
+            return null;
+        };
+
         if ($this->containsAnyKeyword($prompt, ['maintenance', 'perawatan', 'servis', 'service', 'reparasi', 'biaya', 'repair', 'upgrade', 'pengeluaran', 'perbaikan'])) {
-            return $this->queryMaintenancesNL($prompt);
+            if ($res = $checkAndReturn($this->queryMaintenancesNL($prompt))) return $res;
         }
         if ($this->containsAnyKeyword($prompt, ['vault', 'password', 'sandi', 'brankas', 'kredensial', 'akun', 'login'])) {
-            return $this->queryVaultsNL($prompt);
+            if ($res = $checkAndReturn($this->queryVaultsNL($prompt))) return $res;
         }
         if ($this->containsAnyKeyword($prompt, ['vlan', 'subnet', 'segmentasi', 'netmask', 'gateway'])) {
             if ($this->containsAnyKeyword($prompt, ['ip', 'alamat ip', 'kosong', 'available', 'terpakai', 'used', 'online', 'offline', 'bebas'])) {
-                return $this->queryIpsNL($prompt);
+                if ($res = $checkAndReturn($this->queryIpsNL($prompt))) return $res;
             }
-            return $this->queryVlansNL($prompt);
+            if ($res = $checkAndReturn($this->queryVlansNL($prompt))) return $res;
         }
         if ($this->containsAnyKeyword($prompt, ['vendor', 'pemasok', 'supplier', 'distributor', 'mitra', 'sales', 'pembelian'])) {
-            return $this->queryVendorsNL($prompt);
+            if ($res = $checkAndReturn($this->queryVendorsNL($prompt))) return $res;
+        }
+        if ($this->containsAnyKeyword($prompt, ['berita acara', 'ba', 'disposal', 'bast', 'serah terima', 'surat ba'])) {
+            if ($res = $checkAndReturn($this->queryBeritaAcaraNL($prompt))) return $res;
+        }
+        if ($this->containsAnyKeyword($prompt, ['dokumen', 'arsip', 'document', 'arsip dokumen', 'berkas', 'file'])) {
+            if ($res = $checkAndReturn($this->queryDocumentsNL($prompt))) return $res;
+        }
+        if ($this->containsAnyKeyword($prompt, ['stock opname', 'opname', 'audit fisik', 'audit aset', 'so', 'cek fisik'])) {
+            if ($res = $checkAndReturn($this->queryStockOpnameNL($prompt))) return $res;
         }
         if ($this->containsAnyKeyword($prompt, ['log', 'aktivitas', 'activity', 'riwayat', 'history', 'audit', 'operator', 'kejadian', 'perubahan'])) {
-            return $this->queryActivityLogsNL($prompt);
+            if ($res = $checkAndReturn($this->queryActivityLogsNL($prompt))) return $res;
         }
         if ($this->containsAnyKeyword($prompt, ['asset', 'aset', 'komputer', 'laptop', 'printer', 'cctv', 'switch', 'router', 'perangkat', 'garansi', 'warranty', 'expired', 'pc', 'desktop', 'notebook', 'server', 'monitor', 'ssd', 'ram', 'cpu', 'processor'])) {
-            return $this->queryAssetsNL($prompt);
+            if ($res = $checkAndReturn($this->queryAssetsNL($prompt))) return $res;
         }
         if ($this->containsAnyKeyword($prompt, ['ip', 'ip address', 'alamat ip', 'jaringan', 'network', 'online', 'offline', 'mac', 'ping', 'wifi', 'ssid'])) {
-            return $this->queryIpsNL($prompt);
+            if ($res = $checkAndReturn($this->queryIpsNL($prompt))) return $res;
         }
         if ($this->containsAnyKeyword($prompt, ['tiket', 'ticket', 'kendala', 'laporan', 'masalah', 'trouble', 'komplain', 'issue', 'open', 'progress', 'closed', 'resolved', 'prioritas', 'support'])) {
-            return $this->queryTicketsNL($prompt);
+            if ($res = $checkAndReturn($this->queryTicketsNL($prompt))) return $res;
         }
         if ($this->containsAnyKeyword($prompt, ['lisensi', 'license', 'software', 'perangkat lunak', 'license key', 'seats'])) {
-            return $this->queryLicensesNL($prompt);
+            if ($res = $checkAndReturn($this->queryLicensesNL($prompt))) return $res;
         }
         if ($this->containsAnyKeyword($prompt, ['user', 'pengguna', 'karyawan', 'pegawai', 'staf', 'staff', 'divisi', 'department', 'jabatan', 'position', 'nik', 'anydesk', 'remote', 'telepon', 'extension', 'email', 'lokasi'])) {
-            return $this->queryEmployeesNL($prompt);
+            if ($res = $checkAndReturn($this->queryEmployeesNL($prompt))) return $res;
         }
 
         return null;
@@ -1348,286 +1355,863 @@ Tiket:
     }
 
     /**
+     * Query Berita Acara (BA Serah Terima & BA Disposal) via Natural Language
+     */
+    protected function queryBeritaAcaraNL(string $prompt): array
+    {
+        $promptLower = mb_strtolower(trim($prompt));
+        $cleanPrompt = preg_replace('/\b(berita acara|berita-acara|surat ba|bast|serah terima|disposal|tampilkan|daftar|cari|data|tolong)\b/i', '', $promptLower);
+        $cleanPrompt = trim(preg_replace('/\s+/', ' ', $cleanPrompt));
+
+        $baQuery = BeritaAcara::query();
+        $disposalQuery = BeritaAcaraDisposal::query();
+
+        if (!empty($cleanPrompt) && strlen($cleanPrompt) >= 2) {
+            $baQuery->where(function($q) use ($cleanPrompt) {
+                $q->where('nomor_ba', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('hal', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('lokasi', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('nama_perusahaan', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('nama_penerima', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('nomor_surat', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('nomor_po', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('items', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('catatan', 'like', "%{$cleanPrompt}%");
+            });
+
+            $disposalQuery->where(function($q) use ($cleanPrompt) {
+                $q->where('nomor_ba', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('hal', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('lokasi', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('nama_pembuat', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('divisi', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('narasi_pembuka', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('items', 'like', "%{$cleanPrompt}%");
+            });
+        }
+
+        $bas = $baQuery->latest()->take(6)->get();
+        $disposals = $disposalQuery->latest()->take(6)->get();
+
+        $items = [];
+        foreach ($bas as $ba) {
+            $items[] = [
+                'title' => '[BA SERAH TERIMA] ' . $ba->nomor_ba . ($ba->hal ? ' - ' . Str::limit($ba->hal, 35) : ''),
+                'subtitle' => 'Penerima: ' . ($ba->nama_penerima ?? '-') . ' • Lokasi: ' . ($ba->lokasi ?? '-') . ' • PT: ' . ($ba->nama_perusahaan ?? '-'),
+                'badge' => 'badge-info',
+                'badge_text' => 'BA OK',
+                'url' => route('berita-acara.index', ['search' => $ba->nomor_ba]),
+            ];
+        }
+
+        foreach ($disposals as $d) {
+            $items[] = [
+                'title' => '[BA DISPOSAL] ' . $d->nomor_ba . ($d->hal ? ' - ' . Str::limit($d->hal, 35) : ''),
+                'subtitle' => 'Pembuat: ' . ($d->nama_pembuat ?? '-') . ' • Divisi: ' . ($d->divisi ?? '-') . ' • Lokasi: ' . ($d->lokasi ?? '-'),
+                'badge' => 'badge-danger',
+                'badge_text' => 'BA Disposal',
+                'url' => route('berita-acara-disposal.index', ['search' => $d->nomor_ba]),
+            ];
+        }
+
+        $totalCount = count($items);
+        return [
+            'summary' => $totalCount > 0 
+                ? "Ditemukan {$totalCount} Berita Acara & BA Disposal di sistem ITAM."
+                : "Tidak ditemukan dokumen Berita Acara yang cocok dengan kata kunci.",
+            'type' => 'berita_acara',
+            'items' => $items,
+        ];
+    }
+
+    /**
+     * Query Arsip Dokumen Digital via Natural Language
+     */
+    protected function queryDocumentsNL(string $prompt): array
+    {
+        $promptLower = mb_strtolower(trim($prompt));
+        $cleanPrompt = preg_replace('/\b(dokumen|arsip|arsip dokumen|document|berkas|file|tampilkan|daftar|cari|data|tolong)\b/i', '', $promptLower);
+        $cleanPrompt = trim(preg_replace('/\s+/', ' ', $cleanPrompt));
+
+        $query = Document::query();
+        if (!empty($cleanPrompt) && strlen($cleanPrompt) >= 2) {
+            $query->where(function($q) use ($cleanPrompt) {
+                $q->where('title', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('document_number', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('description', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('file_name', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('tags', 'like', "%{$cleanPrompt}%");
+            });
+        }
+
+        $totalCount = (clone $query)->count();
+        $docs = $query->latest()->take(10)->get();
+
+        $items = $docs->map(fn($d) => [
+            'title' => '[DOKUMEN] ' . $d->title . ($d->document_number ? " [{$d->document_number}]" : ''),
+            'subtitle' => 'Kategori: ' . ($d->category ?? 'Umum') . ' • File: ' . ($d->file_name ?? '-') . ' • Tgl: ' . ($d->document_date ?? '-'),
+            'badge' => 'badge-secondary',
+            'badge_text' => 'Dokumen',
+            'url' => route('documents.index', ['search' => $d->title]),
+        ])->toArray();
+
+        return [
+            'summary' => $totalCount > 0
+                ? "Ditemukan {$totalCount} arsip berkas/dokumen digital."
+                : "Tidak ditemukan arsip dokumen digital yang cocok.",
+            'type' => 'documents',
+            'items' => $items,
+        ];
+    }
+
+    /**
+     * Query Stock Opname Sessions via Natural Language
+     */
+    protected function queryStockOpnameNL(string $prompt): array
+    {
+        $promptLower = mb_strtolower(trim($prompt));
+        $cleanPrompt = preg_replace('/\b(stock opname|stock-opname|opname|audit fisik|audit aset|cek fisik|tampilkan|daftar|cari|data|tolong)\b/i', '', $promptLower);
+        $cleanPrompt = trim(preg_replace('/\s+/', ' ', $cleanPrompt));
+
+        $query = StockOpnameSession::query();
+        if (!empty($cleanPrompt) && strlen($cleanPrompt) >= 2) {
+            $query->where(function($q) use ($cleanPrompt) {
+                $q->where('title', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('session_code', 'like', "%{$cleanPrompt}%")
+                  ->orWhere('notes', 'like', "%{$cleanPrompt}%");
+            });
+        }
+
+        $totalCount = (clone $query)->count();
+        $sessions = $query->latest()->take(10)->get();
+
+        $items = $sessions->map(fn($st) => [
+            'title' => '[STOCK OPNAME] ' . $st->title . " [{$st->session_code}]",
+            'subtitle' => 'Status: ' . $st->status . ' • Sesuai: ' . $st->total_matched . ' • Selisih/Hilang: ' . $st->total_missing,
+            'badge' => $st->status === 'Completed' ? 'badge-success' : 'badge-warning',
+            'badge_text' => 'SO: ' . $st->status,
+            'url' => route('stock-opname.index'),
+        ])->toArray();
+
+        return [
+            'summary' => $totalCount > 0
+                ? "Ditemukan {$totalCount} sesi Stock Opname & audit fisik aset."
+                : "Tidak ditemukan sesi Stock Opname yang cocok.",
+            'type' => 'stock_opname',
+            'items' => $items,
+        ];
+    }
+
+    /**
      * Comprehensive App-Wide Multi-Entity Search & Deep Connected Data Resolver
      */
     protected function queryGeneralNL(string $prompt, bool $returnNullIfEmpty = false): ?array
     {
         $promptTrimmed = trim($prompt);
+        if (mb_strlen($promptTrimmed) < 2) {
+            return $returnNullIfEmpty ? null : [
+                'summary' => 'Masukkan kata kunci pencarian minimal 2 karakter.',
+                'type' => 'general',
+                'items' => []
+            ];
+        }
+
         $promptLower = mb_strtolower($promptTrimmed);
+        $terms = array_values(array_filter(preg_split('/[\s,\-\/]+/', $promptLower), fn($t) => mb_strlen($t) >= 1));
 
-        // 1. Search across all primary models
-        $assets = Asset::with(['category', 'brand', 'location', 'currentAssignment.employee'])
-            ->where('name', 'like', "%{$promptTrimmed}%")
-            ->orWhere('asset_tag', 'like', "%{$promptTrimmed}%")
-            ->orWhere('serial_number', 'like', "%{$promptTrimmed}%")
-            ->take(5)->get();
+        $allResults = [];
+        $moduleCounts = [];
 
-        $employees = Employee::with(['department', 'location', 'assignments.asset'])
-            ->where('name', 'like', "%{$promptTrimmed}%")
-            ->orWhere('employee_id', 'like', "%{$promptTrimmed}%")
-            ->orWhere('anydesk_id', 'like', "%{$promptTrimmed}%")
-            ->orWhere('login_username', 'like', "%{$promptTrimmed}%")
-            ->orWhere('email', 'like', "%{$promptTrimmed}%")
-            ->take(5)->get();
-
-        $tickets = Ticket::with(['employee', 'asset'])
-            ->where('title', 'like', "%{$promptTrimmed}%")
-            ->orWhere('ticket_number', 'like', "%{$promptTrimmed}%")
-            ->take(5)->get();
-
-        $ips = IpAddress::with(['asset', 'employee', 'vlan'])
-            ->where('ip_address', 'like', "%{$promptTrimmed}%")
-            ->orWhere('mac_address', 'like', "%{$promptTrimmed}%")
-            ->take(5)->get();
-
-        $maintenances = Maintenance::with(['asset', 'vendor'])
-            ->where('description', 'like', "%{$promptTrimmed}%")
-            ->take(3)->get();
-
-        $licenses = SoftwareLicense::with('pic')
-            ->where('name', 'like', "%{$promptTrimmed}%")
-            ->orWhere('license_key', 'like', "%{$promptTrimmed}%")
-            ->take(3)->get();
-
-        $vaults = PasswordVault::where('device_name', 'like', "%{$promptTrimmed}%")
-            ->orWhere('username', 'like', "%{$promptTrimmed}%")
-            ->take(3)->get();
-
-        $vendors = Vendor::where('name', 'like', "%{$promptTrimmed}%")
-            ->take(3)->get();
-
-        // 2. Single Exact Match Deep Expansion (If query matches 1 specific Employee or 1 specific Asset)
-        if ($employees->count() === 1 && $assets->count() === 0 && $tickets->count() === 0) {
-            $emp = $employees->first();
-            $empAssets = Asset::whereHas('assignments', fn($q) => $q->where('employee_id', $emp->id)->where('status', 'Assigned'))->get();
-            $empIps = IpAddress::where('employee_id', $emp->id)->get();
-            $empTickets = Ticket::where('employee_id', $emp->id)->latest()->take(3)->get();
-
-            $summary = "Data Detail Pengguna: {$emp->name} (NIK: {$emp->employee_id})";
-            
-            $details = [];
-            $details[] = "Divisi: " . ($emp->department->name ?? '-');
-            $details[] = "Lokasi: " . ($emp->location->name ?? '-');
-            if ($emp->email) $details[] = "Email: " . $emp->email;
-            if ($emp->phone) $details[] = "Telp: " . $emp->phone;
-            if ($emp->anydesk_id) $details[] = "AnyDesk: " . $emp->anydesk_id . ($emp->anydesk_password ? " (Pass: {$emp->anydesk_password})" : "");
-            if ($emp->telephone_extension) $details[] = "Ext: " . $emp->telephone_extension;
-            $details[] = "Total Aset Dipegang: " . $empAssets->count() . " unit";
-
-            $answer = implode(' • ', $details);
-
-            $items = [];
-            $items[] = [
-                'title' => '[PENGGUNA] ' . $emp->name . ' (NIK: ' . $emp->employee_id . ')',
-                'subtitle' => 'Divisi: ' . ($emp->department->name ?? '-') . ($emp->anydesk_id ? ' • AnyDesk: ' . $emp->anydesk_id : '') . ($emp->telephone_extension ? ' • Ext: ' . $emp->telephone_extension : ''),
-                'badge' => 'badge-success',
-                'badge_text' => 'User',
-                'url' => route('employees.show', $emp->id),
-            ];
-
-            foreach ($empAssets as $a) {
-                $items[] = [
-                    'title' => '[ASET DIPEGANG] ' . $a->name . ' [' . $a->asset_tag . ']',
-                    'subtitle' => 'Merk: ' . ($a->brand->name ?? '-') . ' • Cat: ' . ($a->category->name ?? 'Aset') . ' • S/N: ' . ($a->serial_number ?? '-'),
-                    'badge' => 'badge-primary',
-                    'badge_text' => $a->status,
-                    'url' => route('assets.show', $a->id),
-                ];
-            }
-
-            foreach ($empIps as $ip) {
-                $items[] = [
-                    'title' => '[ALAMAT IP] ' . $ip->ip_address,
-                    'subtitle' => 'Status: ' . $ip->status . ' • Gateway: ' . ($ip->gateway ?? '-'),
-                    'badge' => $ip->is_online ? 'badge-success' : 'badge-secondary',
-                    'badge_text' => $ip->is_online ? 'Online' : $ip->status,
-                    'url' => route('ips.index', ['search' => $ip->ip_address]),
-                ];
-            }
-
-            foreach ($empTickets as $t) {
-                $items[] = [
-                    'title' => '[TIKET KHUSUS] #' . $t->ticket_number . ' - ' . $t->title,
-                    'subtitle' => 'Prioritas: ' . $t->priority . ' • Status: ' . $t->status,
-                    'badge' => 'badge-warning',
-                    'badge_text' => $t->status,
-                    'url' => route('tickets.edit', $t->id),
-                ];
-            }
-
-            return ['summary' => $summary, 'answer' => $answer, 'type' => 'employees', 'items' => $items];
-        }
-
-        if ($assets->count() === 1 && $employees->count() === 0 && $tickets->count() === 0) {
-            $ast = $assets->first();
-            $assignedEmp = $ast->currentAssignment->employee ?? null;
-            $astIps = IpAddress::where('asset_id', $ast->id)->get();
-            $astTickets = Ticket::where('asset_id', $ast->id)->latest()->take(3)->get();
-            $astMaintenances = Maintenance::where('asset_id', $ast->id)->latest()->take(3)->get();
-
-            $summary = "Data Detail Aset: {$ast->name} [{$ast->asset_tag}]";
-
-            $details = [];
-            $details[] = "Merk: " . ($ast->brand->name ?? '-');
-            $details[] = "Kategori: " . ($ast->category->name ?? '-');
-            $details[] = "Status: " . $ast->status;
-            if ($ast->serial_number) $details[] = "S/N: " . $ast->serial_number;
-            if ($assignedEmp) $details[] = "Dipegang Oleh: " . $assignedEmp->name . ' (' . ($assignedEmp->department->name ?? 'Divisi') . ')';
-
-            $answer = implode(' • ', $details);
-
-            $items = [];
-            $items[] = [
-                'title' => '[ASET] ' . $ast->name . ' [' . $ast->asset_tag . ']',
-                'subtitle' => 'Merk: ' . ($ast->brand->name ?? '-') . ' • Status: ' . $ast->status . ' • S/N: ' . ($ast->serial_number ?? '-'),
-                'badge' => 'badge-primary',
-                'badge_text' => $ast->status,
-                'url' => route('assets.show', $ast->id),
-            ];
-
-            if ($assignedEmp) {
-                $items[] = [
-                    'title' => '[PENGGUNA SAAT INI] ' . $assignedEmp->name . ' (NIK: ' . $assignedEmp->employee_id . ')',
-                    'subtitle' => 'Divisi: ' . ($assignedEmp->department->name ?? '-') . ($assignedEmp->anydesk_id ? ' • AnyDesk: ' . $assignedEmp->anydesk_id : ''),
-                    'badge' => 'badge-info',
-                    'badge_text' => 'User',
-                    'url' => route('employees.show', $assignedEmp->id),
-                ];
-            }
-
-            foreach ($astIps as $ip) {
-                $items[] = [
-                    'title' => '[ALAMAT IP] ' . $ip->ip_address,
-                    'subtitle' => 'Status: ' . $ip->status . ' • Gateway: ' . ($ip->gateway ?? '-'),
-                    'badge' => $ip->is_online ? 'badge-success' : 'badge-secondary',
-                    'badge_text' => $ip->is_online ? 'Online' : $ip->status,
-                    'url' => route('ips.index', ['search' => $ip->ip_address]),
-                ];
-            }
-
-            foreach ($astMaintenances as $m) {
-                $items[] = [
-                    'title' => '[RIWAYAT SERVIS] ' . Str::limit($m->description, 35),
-                    'subtitle' => 'Tipe: ' . $m->type . ' • Biaya: Rp ' . number_format($m->cost, 0, ',', '.'),
-                    'badge' => 'badge-secondary',
-                    'badge_text' => $m->status,
-                    'url' => route('maintenances.index', ['search' => $ast->name]),
-                ];
-            }
-
-            return ['summary' => $summary, 'answer' => $answer, 'type' => 'assets', 'items' => $items];
-        }
-
-        // 3. Multi-Entity General Search Output
-        $items = [];
-        foreach ($assets as $a) {
-            $items[] = [
-                'title' => '[ASET] ' . $a->name . ' [' . $a->asset_tag . ']',
-                'subtitle' => 'Merk: ' . ($a->brand->name ?? '-') . ' • Cat: ' . ($a->category->name ?? '-') . ' • Status: ' . $a->status . ($a->currentAssignment ? ' • User: ' . $a->currentAssignment->employee->name : ''),
-                'badge' => 'badge-primary',
-                'badge_text' => $a->status,
-                'url' => route('assets.show', $a->id),
-            ];
-        }
-
-        foreach ($employees as $e) {
-            $empSub = 'Divisi: ' . ($e->department->name ?? '-') . ' • NIK: ' . $e->employee_id;
-            if ($e->anydesk_id) $empSub .= ' • AnyDesk: ' . $e->anydesk_id;
-            $items[] = [
-                'title' => '[USER] ' . $e->name . ' (NIK: ' . $e->employee_id . ')',
-                'subtitle' => $empSub,
-                'badge' => 'badge-success',
-                'badge_text' => 'User',
-                'url' => route('employees.show', $e->id),
-            ];
-        }
-
-        foreach ($tickets as $t) {
-            $items[] = [
-                'title' => '[TIKET] #' . $t->ticket_number . ' - ' . $t->title,
-                'subtitle' => 'Status: ' . $t->status . ' • Prioritas: ' . $t->priority . ' • Pelapor: ' . ($t->employee->name ?? '-'),
-                'badge' => 'badge-warning',
-                'badge_text' => $t->status,
-                'url' => route('tickets.edit', $t->id),
-            ];
-        }
+        // 1. IP Addresses (IpAddress)
+        $ips = IpAddress::with(['asset', 'employee.department', 'vlan'])
+            ->where(function($q) use ($promptTrimmed, $terms) {
+                $q->where('ip_address', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('notes', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('mac_address', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('gateway', 'like', "%{$promptTrimmed}%");
+                if (count($terms) > 1) {
+                    $q->orWhere(function($sub) use ($terms) {
+                        foreach ($terms as $t) {
+                            $sub->where(function($inner) use ($t) {
+                                $inner->where('notes', 'like', "%{$t}%")
+                                      ->orWhere('ip_address', 'like', "%{$t}%");
+                            });
+                        }
+                    });
+                }
+            })->take(10)->get();
 
         foreach ($ips as $ip) {
-            $items[] = [
-                'title' => '[IP] ' . $ip->ip_address,
-                'subtitle' => 'Status: ' . $ip->status . ' • ' . ($ip->employee ? 'User: ' . $ip->employee->name : ($ip->asset ? 'Perangkat: ' . $ip->asset->name : 'Unmapped')),
-                'badge' => 'badge-info',
-                'badge_text' => $ip->status,
+            $score = 20;
+            if (stripos($ip->notes ?? '', $promptTrimmed) !== false || stripos($ip->ip_address, $promptTrimmed) !== false) {
+                $score += 80;
+            }
+            $sub = 'IP: ' . $ip->ip_address . ' • Status: ' . $ip->status;
+            if ($ip->notes) $sub .= ' • ' . Str::limit($ip->notes, 40);
+            if ($ip->employee) $sub .= ' • User: ' . $ip->employee->name;
+
+            $allResults[] = [
+                'score' => $score,
+                'title' => '[ALAMAT IP] ' . ($ip->notes ? Str::limit($ip->notes, 45) . ' (' . $ip->ip_address . ')' : $ip->ip_address),
+                'subtitle' => $sub,
+                'badge' => $ip->is_online ? 'badge-success' : ($ip->status === 'Used' ? 'badge-info' : 'badge-secondary'),
+                'badge_text' => $ip->is_online ? 'IP Online' : 'IP ' . $ip->status,
                 'url' => route('ips.index', ['search' => $ip->ip_address]),
+                'module' => 'Alamat IP',
+                'raw_type' => 'ip',
+                'raw' => $ip,
             ];
+            $moduleCounts['Alamat IP'] = ($moduleCounts['Alamat IP'] ?? 0) + 1;
         }
 
-        foreach ($maintenances as $m) {
-            $items[] = [
-                'title' => '[SERVIS] ' . ($m->asset->name ?? 'Perangkat') . ' - ' . Str::limit($m->description, 30),
-                'subtitle' => 'Biaya: Rp ' . number_format($m->cost, 0, ',', '.') . ' • Status: ' . $m->status,
-                'badge' => 'badge-secondary',
-                'badge_text' => $m->status,
-                'url' => route('maintenances.index', ['search' => $m->description]),
+        // 2. Aset IT (Asset)
+        $assets = Asset::with(['category', 'brand', 'location', 'currentAssignment.employee'])
+            ->where(function($q) use ($promptTrimmed, $terms) {
+                $q->where('name', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('asset_tag', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('serial_number', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('notes', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('delivery_order_number', 'like', "%{$promptTrimmed}%");
+                if (count($terms) > 1) {
+                    $q->orWhere(function($sub) use ($terms) {
+                        foreach ($terms as $t) {
+                            $sub->where(function($inner) use ($t) {
+                                $inner->where('name', 'like', "%{$t}%")
+                                      ->orWhere('asset_tag', 'like', "%{$t}%")
+                                      ->orWhere('notes', 'like', "%{$t}%")
+                                      ->orWhereHas('location', fn($l) => $l->where('name', 'like', "%{$t}%"))
+                                      ->orWhereHas('brand', fn($b) => $b->where('name', 'like', "%{$t}%"))
+                                      ->orWhereHas('category', fn($c) => $c->where('name', 'like', "%{$t}%"));
+                            });
+                        }
+                    });
+                }
+            })->take(10)->get();
+
+        foreach ($assets as $a) {
+            $score = 20;
+            if (stripos($a->name, $promptTrimmed) !== false || stripos($a->asset_tag, $promptTrimmed) !== false) {
+                $score += 80;
+            }
+            $sub = 'Merk: ' . ($a->brand->name ?? '-') . ' • Cat: ' . ($a->category->name ?? '-') . ' • Lok: ' . ($a->location->name ?? '-');
+            if ($a->currentAssignment?->employee) $sub .= ' • User: ' . $a->currentAssignment->employee->name;
+
+            $allResults[] = [
+                'score' => $score,
+                'title' => '[ASET] ' . $a->name . ' [' . $a->asset_tag . ']',
+                'subtitle' => $sub,
+                'badge' => $a->status === 'Available' ? 'badge-success' : ($a->status === 'Assigned' ? 'badge-primary' : 'badge-warning'),
+                'badge_text' => 'Aset: ' . $a->status,
+                'url' => route('assets.show', $a->id),
+                'module' => 'Aset',
+                'raw_type' => 'asset',
+                'raw' => $a,
             ];
+            $moduleCounts['Aset'] = ($moduleCounts['Aset'] ?? 0) + 1;
         }
 
-        foreach ($licenses as $l) {
-            $items[] = [
-                'title' => '[LISENSI] ' . $l->name,
-                'subtitle' => 'Seats: ' . $l->total_seats . ' • PIC: ' . ($l->pic->name ?? '-'),
-                'badge' => 'badge-dark',
-                'badge_text' => 'Lisensi',
-                'url' => route('software_licenses.index', ['search' => $l->name]),
+        // 3. Karyawan / Pegawai (Employee)
+        $employees = Employee::with(['department', 'location'])
+            ->where(function($q) use ($promptTrimmed, $terms) {
+                $q->where('name', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('employee_id', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('email', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('phone', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('anydesk_id', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('login_username', 'like', "%{$promptTrimmed}%");
+                if (count($terms) > 1) {
+                    $q->orWhere(function($sub) use ($terms) {
+                        foreach ($terms as $t) {
+                            $sub->where(function($inner) use ($t) {
+                                $inner->where('name', 'like', "%{$t}%")
+                                      ->orWhere('employee_id', 'like', "%{$t}%")
+                                      ->orWhereHas('department', fn($d) => $d->where('name', 'like', "%{$t}%"));
+                            });
+                        }
+                    });
+                }
+            })->take(5)->get();
+
+        foreach ($employees as $e) {
+            $score = 20;
+            if (stripos($e->name, $promptTrimmed) !== false || stripos($e->employee_id, $promptTrimmed) !== false) {
+                $score += 80;
+            }
+            $sub = 'Divisi: ' . ($e->department->name ?? '-') . ' • Lokasi: ' . ($e->location->name ?? '-');
+            if ($e->anydesk_id) $sub .= ' • AnyDesk: ' . $e->anydesk_id;
+            if ($e->phone) $sub .= ' • Telp: ' . $e->phone;
+
+            $allResults[] = [
+                'score' => $score,
+                'title' => '[KARYAWAN] ' . $e->name . ' (NIK: ' . $e->employee_id . ')',
+                'subtitle' => $sub,
+                'badge' => 'badge-success',
+                'badge_text' => 'Karyawan',
+                'url' => route('employees.show', $e->id),
+                'module' => 'Karyawan',
+                'raw_type' => 'employee',
+                'raw' => $e,
             ];
+            $moduleCounts['Karyawan'] = ($moduleCounts['Karyawan'] ?? 0) + 1;
         }
+
+        // 4. Tiket Support (Ticket)
+        $tickets = Ticket::with(['employee', 'asset'])
+            ->where(function($q) use ($promptTrimmed, $terms) {
+                $q->where('ticket_number', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('title', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('description', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('category', 'like', "%{$promptTrimmed}%");
+                if (count($terms) > 1) {
+                    $q->orWhere(function($sub) use ($terms) {
+                        foreach ($terms as $t) {
+                            $sub->where(function($inner) use ($t) {
+                                $inner->where('title', 'like', "%{$t}%")
+                                      ->orWhere('description', 'like', "%{$t}%")
+                                      ->orWhere('ticket_number', 'like', "%{$t}%");
+                            });
+                        }
+                    });
+                }
+            })->take(5)->get();
+
+        foreach ($tickets as $t) {
+            $score = 20;
+            if (stripos($t->title, $promptTrimmed) !== false || stripos($t->ticket_number, $promptTrimmed) !== false) {
+                $score += 80;
+            }
+            $sub = 'Status: ' . $t->status . ' • Prioritas: ' . $t->priority . ' • Pelapor: ' . ($t->employee->name ?? '-');
+
+            $allResults[] = [
+                'score' => $score,
+                'title' => '[TIKET] #' . $t->ticket_number . ' - ' . Str::limit($t->title, 40),
+                'subtitle' => $sub,
+                'badge' => $t->status === 'Open' ? 'badge-danger' : ($t->status === 'In Progress' ? 'badge-warning' : 'badge-success'),
+                'badge_text' => 'Tiket: ' . $t->status,
+                'url' => route('tickets.edit', $t->id),
+                'module' => 'Tiket',
+                'raw_type' => 'ticket',
+                'raw' => $t,
+            ];
+            $moduleCounts['Tiket'] = ($moduleCounts['Tiket'] ?? 0) + 1;
+        }
+
+        // 5. Maintenance / Servis (Maintenance)
+        $maints = Maintenance::with(['asset'])
+            ->where(function($q) use ($promptTrimmed, $terms) {
+                $q->where('description', 'like', "%{$promptTrimmed}%")
+                  ->orWhere('type', 'like', "%{$promptTrimmed}%")
+                  ->orWhereHas('asset', fn($aq) => $aq->where('name', 'like', "%{$promptTrimmed}%")->orWhere('asset_tag', 'like', "%{$promptTrimmed}%"));
+            })->take(5)->get();
+
+        foreach ($maints as $m) {
+            $score = 20;
+            if (stripos($m->description, $promptTrimmed) !== false) {
+                $score += 80;
+            }
+            $sub = 'Tipe: ' . $m->type . ' • Biaya: Rp ' . number_format($m->cost, 0, ',', '.') . ' • Status: ' . $m->status;
+
+            $allResults[] = [
+                'score' => $score,
+                'title' => '[MAINTENANCE] ' . ($m->asset ? $m->asset->name . ' - ' : '') . Str::limit($m->description, 35),
+                'subtitle' => $sub,
+                'badge' => $m->status === 'Ongoing' ? 'badge-warning' : 'badge-secondary',
+                'badge_text' => 'Servis: ' . $m->status,
+                'url' => route('maintenances.index', ['search' => $m->description ?? ($m->asset?->name ?? '')]),
+                'module' => 'Maintenance',
+                'raw_type' => 'maintenance',
+                'raw' => $m,
+            ];
+            $moduleCounts['Maintenance'] = ($moduleCounts['Maintenance'] ?? 0) + 1;
+        }
+
+        // 6. Brankas Sandi (PasswordVault)
+        $vaults = PasswordVault::where(function($q) use ($promptTrimmed, $terms) {
+            $q->where('device_name', 'like', "%{$promptTrimmed}%")
+              ->orWhere('username', 'like', "%{$promptTrimmed}%")
+              ->orWhere('category', 'like', "%{$promptTrimmed}%")
+              ->orWhere('notes', 'like', "%{$promptTrimmed}%");
+        })->take(5)->get();
 
         foreach ($vaults as $v) {
-            $items[] = [
-                'title' => '[VAULT] ' . $v->device_name,
-                'subtitle' => 'Username: ' . $v->username . ' • Kategori: ' . ($v->category ?? 'Umum'),
+            $score = 20;
+            if (stripos($v->device_name, $promptTrimmed) !== false || stripos($v->username, $promptTrimmed) !== false) {
+                $score += 80;
+            }
+            $sub = 'Username: ' . $v->username . ' • Kategori: ' . ($v->category ?? 'Umum') . ($v->notes ? ' • ' . Str::limit($v->notes, 30) : '');
+
+            $allResults[] = [
+                'score' => $score,
+                'title' => '[BRANKAS SANDI] ' . $v->device_name,
+                'subtitle' => $sub,
                 'badge' => 'badge-dark',
                 'badge_text' => 'Brankas Sandi',
                 'url' => route('password_vaults.index', ['search' => $v->device_name]),
+                'module' => 'Brankas Sandi',
+                'raw_type' => 'vault',
+                'raw' => $v,
             ];
+            $moduleCounts['Brankas Sandi'] = ($moduleCounts['Brankas Sandi'] ?? 0) + 1;
         }
 
+        // 7. Lisensi Software (SoftwareLicense)
+        $licenses = SoftwareLicense::where(function($q) use ($promptTrimmed, $terms) {
+            $q->where('name', 'like', "%{$promptTrimmed}%")
+              ->orWhere('license_key', 'like', "%{$promptTrimmed}%")
+              ->orWhere('notes', 'like', "%{$promptTrimmed}%");
+        })->take(5)->get();
+
+        foreach ($licenses as $l) {
+            $score = 20;
+            if (stripos($l->name, $promptTrimmed) !== false) {
+                $score += 80;
+            }
+            $sub = 'Seats: ' . $l->total_seats . ' • Key: ' . Str::limit($l->license_key, 18);
+
+            $allResults[] = [
+                'score' => $score,
+                'title' => '[LISENSI] ' . $l->name,
+                'subtitle' => $sub,
+                'badge' => 'badge-dark',
+                'badge_text' => 'Lisensi Software',
+                'url' => route('software_licenses.index', ['search' => $l->name]),
+                'module' => 'Lisensi Software',
+                'raw_type' => 'license',
+                'raw' => $l,
+            ];
+            $moduleCounts['Lisensi Software'] = ($moduleCounts['Lisensi Software'] ?? 0) + 1;
+        }
+
+        // 8. VLAN & Subnets (Vlan)
+        $vlans = Vlan::where(function($q) use ($promptTrimmed, $terms) {
+            $q->where('name', 'like', "%{$promptTrimmed}%")
+              ->orWhere('vlan_number', 'like', "%{$promptTrimmed}%")
+              ->orWhere('subnet', 'like', "%{$promptTrimmed}%")
+              ->orWhere('gateway', 'like', "%{$promptTrimmed}%")
+              ->orWhere('notes', 'like', "%{$promptTrimmed}%");
+        })->take(5)->get();
+
+        foreach ($vlans as $vl) {
+            $score = 20;
+            if (stripos($vl->name, $promptTrimmed) !== false || (string)$vl->vlan_number === $promptTrimmed) {
+                $score += 80;
+            }
+            $sub = 'Subnet: ' . $vl->subnet . ' • Gateway: ' . ($vl->gateway ?? '-') . ' • Status: ' . $vl->status;
+
+            $allResults[] = [
+                'score' => $score,
+                'title' => '[VLAN] VLAN ' . $vl->vlan_number . ' - ' . $vl->name,
+                'subtitle' => $sub,
+                'badge' => 'badge-primary',
+                'badge_text' => 'VLAN',
+                'url' => route('vlans.index', ['search' => $vl->name]),
+                'module' => 'VLAN',
+                'raw_type' => 'vlan',
+                'raw' => $vl,
+            ];
+            $moduleCounts['VLAN'] = ($moduleCounts['VLAN'] ?? 0) + 1;
+        }
+
+        // 9. Berita Acara Serah Terima (BeritaAcara) & Disposal (BeritaAcaraDisposal)
+        $isBaKeyword = Str::contains($promptLower, ['berita acara', 'berita-acara', 'surat ba', 'ba', 'bast', 'serah terima']);
+        $bas = BeritaAcara::where(function($q) use ($promptTrimmed, $terms, $isBaKeyword) {
+            if ($isBaKeyword) {
+                return;
+            }
+            $q->where('nomor_ba', 'like', "%{$promptTrimmed}%")
+              ->orWhere('hal', 'like', "%{$promptTrimmed}%")
+              ->orWhere('lokasi', 'like', "%{$promptTrimmed}%")
+              ->orWhere('nama_perusahaan', 'like', "%{$promptTrimmed}%")
+              ->orWhere('nama_penerima', 'like', "%{$promptTrimmed}%")
+              ->orWhere('nomor_surat', 'like', "%{$promptTrimmed}%")
+              ->orWhere('nomor_po', 'like', "%{$promptTrimmed}%")
+              ->orWhere('items', 'like', "%{$promptTrimmed}%")
+              ->orWhere('catatan', 'like', "%{$promptTrimmed}%");
+            if (count($terms) > 1) {
+                $q->orWhere(function($sub) use ($terms) {
+                    foreach ($terms as $t) {
+                        $sub->where(function($inner) use ($t) {
+                            $inner->where('nomor_ba', 'like', "%{$t}%")
+                                  ->orWhere('hal', 'like', "%{$t}%")
+                                  ->orWhere('items', 'like', "%{$t}%");
+                        });
+                    }
+                });
+            }
+        })->take(5)->get();
+
+        foreach ($bas as $ba) {
+            $score = 25;
+            if ($isBaKeyword || stripos($ba->nomor_ba, $promptTrimmed) !== false || stripos($ba->hal ?? '', $promptTrimmed) !== false) {
+                $score += 75;
+            }
+            $sub = 'Penerima: ' . ($ba->nama_penerima ?? '-') . ' • Lokasi: ' . ($ba->lokasi ?? '-') . ' • PT: ' . ($ba->nama_perusahaan ?? '-');
+
+            $allResults[] = [
+                'score' => $score,
+                'title' => '[BA SERAH TERIMA] ' . $ba->nomor_ba . ($ba->hal ? ' - ' . Str::limit($ba->hal, 35) : ''),
+                'subtitle' => $sub,
+                'badge' => 'badge-info',
+                'badge_text' => 'BA OK',
+                'url' => route('berita-acara.index', ['search' => $ba->nomor_ba]),
+                'module' => 'Berita Acara',
+                'raw_type' => 'ba',
+                'raw' => $ba,
+            ];
+            $moduleCounts['Berita Acara'] = ($moduleCounts['Berita Acara'] ?? 0) + 1;
+        }
+
+        // 9b. BA Disposal Asset (BeritaAcaraDisposal)
+        $isDisposalKeyword = Str::contains($promptLower, ['disposal', 'ba disposal', 'afkir', 'jual berat', 'penghapusan', 'berita acara']);
+        $disposals = BeritaAcaraDisposal::where(function($q) use ($promptTrimmed, $terms, $isDisposalKeyword) {
+            if ($isDisposalKeyword) {
+                return;
+            }
+            $q->where('nomor_ba', 'like', "%{$promptTrimmed}%")
+              ->orWhere('hal', 'like', "%{$promptTrimmed}%")
+              ->orWhere('lokasi', 'like', "%{$promptTrimmed}%")
+              ->orWhere('nama_pembuat', 'like', "%{$promptTrimmed}%")
+              ->orWhere('divisi', 'like', "%{$promptTrimmed}%")
+              ->orWhere('narasi_pembuka', 'like', "%{$promptTrimmed}%")
+              ->orWhere('items', 'like', "%{$promptTrimmed}%");
+            if (count($terms) > 1) {
+                $q->orWhere(function($sub) use ($terms) {
+                    foreach ($terms as $t) {
+                        $sub->where(function($inner) use ($t) {
+                            $inner->where('nomor_ba', 'like', "%{$t}%")
+                                  ->orWhere('hal', 'like', "%{$t}%")
+                                  ->orWhere('items', 'like', "%{$t}%");
+                        });
+                    }
+                });
+            }
+        })->take(5)->get();
+
+        foreach ($disposals as $d) {
+            $score = 25;
+            if ($isDisposalKeyword || stripos($d->nomor_ba, $promptTrimmed) !== false || stripos($d->hal ?? '', $promptTrimmed) !== false) {
+                $score += 75;
+            }
+            $sub = 'Pembuat: ' . ($d->nama_pembuat ?? '-') . ' • Divisi: ' . ($d->divisi ?? '-') . ' • Lokasi: ' . ($d->lokasi ?? '-');
+
+            $allResults[] = [
+                'score' => $score,
+                'title' => '[BA DISPOSAL] ' . $d->nomor_ba . ($d->hal ? ' - ' . Str::limit($d->hal, 35) : ''),
+                'subtitle' => $sub,
+                'badge' => 'badge-danger',
+                'badge_text' => 'BA Disposal',
+                'url' => route('berita-acara-disposal.index', ['search' => $d->nomor_ba]),
+                'module' => 'Berita Acara',
+                'raw_type' => 'ba_disposal',
+                'raw' => $d,
+            ];
+            $moduleCounts['Berita Acara'] = ($moduleCounts['Berita Acara'] ?? 0) + 1;
+        }
+
+        // 10. Arsip Dokumen Digital (Document)
+        $isDocKeyword = Str::contains($promptLower, ['dokumen', 'arsip', 'document', 'file', 'berkas']);
+        $docs = Document::where(function($q) use ($promptTrimmed, $terms, $isDocKeyword) {
+            if ($isDocKeyword) {
+                return;
+            }
+            $q->where('title', 'like', "%{$promptTrimmed}%")
+              ->orWhere('document_number', 'like', "%{$promptTrimmed}%")
+              ->orWhere('description', 'like', "%{$promptTrimmed}%")
+              ->orWhere('file_name', 'like', "%{$promptTrimmed}%")
+              ->orWhere('category', 'like', "%{$promptTrimmed}%")
+              ->orWhere('tags', 'like', "%{$promptTrimmed}%");
+            if (count($terms) > 1) {
+                $q->orWhere(function($sub) use ($terms) {
+                    foreach ($terms as $t) {
+                        $sub->where(function($inner) use ($t) {
+                            $inner->where('title', 'like', "%{$t}%")
+                                  ->orWhere('document_number', 'like', "%{$t}%")
+                                  ->orWhere('description', 'like', "%{$t}%");
+                        });
+                    }
+                });
+            }
+        })->take(5)->get();
+
+        foreach ($docs as $doc) {
+            $score = 25;
+            if ($isDocKeyword || stripos($doc->title, $promptTrimmed) !== false || stripos($doc->document_number ?? '', $promptTrimmed) !== false) {
+                $score += 75;
+            }
+            $sub = 'Kategori: ' . ($doc->category ?? 'Umum') . ' • File: ' . ($doc->file_name ?? '-') . ' • Tgl: ' . ($doc->document_date ?? '-');
+
+            $allResults[] = [
+                'score' => $score,
+                'title' => '[DOKUMEN] ' . $doc->title . ($doc->document_number ? " [{$doc->document_number}]" : ''),
+                'subtitle' => $sub,
+                'badge' => 'badge-secondary',
+                'badge_text' => 'Dokumen',
+                'url' => route('documents.index', ['search' => $doc->title]),
+                'module' => 'Dokumen',
+                'raw_type' => 'document',
+                'raw' => $doc,
+            ];
+            $moduleCounts['Dokumen'] = ($moduleCounts['Dokumen'] ?? 0) + 1;
+        }
+
+        // 11. Stock Opname (StockOpnameSession)
+        $isSoKeyword = Str::contains($promptLower, ['stock opname', 'stock-opname', 'opname', 'audit fisik', 'audit aset']);
+        $stocks = StockOpnameSession::where(function($q) use ($promptTrimmed, $terms, $isSoKeyword) {
+            if ($isSoKeyword) {
+                return;
+            }
+            $q->where('title', 'like', "%{$promptTrimmed}%")
+              ->orWhere('session_code', 'like', "%{$promptTrimmed}%")
+              ->orWhere('notes', 'like', "%{$promptTrimmed}%");
+        })->take(5)->get();
+
+        foreach ($stocks as $st) {
+            $score = 25;
+            if ($isSoKeyword || stripos($st->title, $promptTrimmed) !== false || stripos($st->session_code, $promptTrimmed) !== false) {
+                $score += 75;
+            }
+            $sub = 'Status: ' . $st->status . ' • Sesuai: ' . $st->total_matched . ' • Hilang: ' . $st->total_missing;
+
+            $allResults[] = [
+                'score' => $score,
+                'title' => '[STOCK OPNAME] ' . $st->title . " [{$st->session_code}]",
+                'subtitle' => $sub,
+                'badge' => $st->status === 'Completed' ? 'badge-success' : 'badge-warning',
+                'badge_text' => 'SO: ' . $st->status,
+                'url' => route('stock-opname.index'),
+                'module' => 'Stock Opname',
+                'raw_type' => 'stock_opname',
+                'raw' => $st,
+            ];
+            $moduleCounts['Stock Opname'] = ($moduleCounts['Stock Opname'] ?? 0) + 1;
+        }
+
+        // 12. Vendor / Supplier (Vendor)
+        $vendors = Vendor::where(function($q) use ($promptTrimmed, $terms) {
+            $q->where('name', 'like', "%{$promptTrimmed}%")
+              ->orWhere('contact_person', 'like', "%{$promptTrimmed}%")
+              ->orWhere('email', 'like', "%{$promptTrimmed}%")
+              ->orWhere('phone', 'like', "%{$promptTrimmed}%")
+              ->orWhere('address', 'like', "%{$promptTrimmed}%");
+        })->take(5)->get();
+
         foreach ($vendors as $vd) {
-            $items[] = [
+            $score = 20;
+            if (stripos($vd->name, $promptTrimmed) !== false) {
+                $score += 80;
+            }
+            $sub = 'Kontak: ' . ($vd->contact_person ?? '-') . ' • Telp: ' . ($vd->phone ?? '-') . ' • Email: ' . ($vd->email ?? '-');
+
+            $allResults[] = [
+                'score' => $score,
                 'title' => '[VENDOR] ' . $vd->name,
-                'subtitle' => 'Kontak: ' . ($vd->contact_person ?? '-') . ' • Telp: ' . ($vd->phone ?? '-'),
+                'subtitle' => $sub,
                 'badge' => 'badge-secondary',
                 'badge_text' => 'Vendor',
                 'url' => route('vendors.index', ['search' => $vd->name]),
+                'module' => 'Vendor',
+                'raw_type' => 'vendor',
+                'raw' => $vd,
             ];
+            $moduleCounts['Vendor'] = ($moduleCounts['Vendor'] ?? 0) + 1;
         }
 
-        if (count($items) > 0) {
-            $summary = 'Menampilkan ' . count($items) . ' hasil data terkait untuk pencarian "' . $promptTrimmed . '".';
-            $answer = null;
-        } else {
+        // 13. Master Data (Lokasi)
+        $locs = Location::where(function($q) use ($promptTrimmed, $terms) {
+            $q->where('name', 'like', "%{$promptTrimmed}%")
+              ->orWhere('address', 'like', "%{$promptTrimmed}%")
+              ->orWhere('description', 'like', "%{$promptTrimmed}%");
+        })->take(3)->get();
+
+        foreach ($locs as $loc) {
+            $score = 20;
+            if (stripos($loc->name, $promptTrimmed) !== false) {
+                $score += 80;
+            }
+            $sub = 'Alamat/Gedung: ' . ($loc->address ?? ($loc->description ?? '-'));
+
+            $allResults[] = [
+                'score' => $score,
+                'title' => '[LOKASI] ' . $loc->name,
+                'subtitle' => $sub,
+                'badge' => 'badge-info',
+                'badge_text' => 'Lokasi',
+                'url' => route('locations.index', ['search' => $loc->name]),
+                'module' => 'Lokasi',
+                'raw_type' => 'location',
+                'raw' => $loc,
+            ];
+            $moduleCounts['Lokasi'] = ($moduleCounts['Lokasi'] ?? 0) + 1;
+        }
+
+        // Single Exact Match Deep Expansion (If query matches exactly 1 Employee or 1 Asset)
+        if (count($allResults) === 1) {
+            $single = $allResults[0];
+            if ($single['raw_type'] === 'employee') {
+                $emp = $single['raw'];
+                $empAssets = Asset::whereHas('assignments', fn($q) => $q->where('employee_id', $emp->id)->where('status', 'Assigned'))->get();
+                $empIps = IpAddress::where('employee_id', $emp->id)->get();
+                $empTickets = Ticket::where('employee_id', $emp->id)->latest()->take(3)->get();
+
+                $details = [];
+                $details[] = "Divisi: " . ($emp->department->name ?? '-');
+                $details[] = "Lokasi: " . ($emp->location->name ?? '-');
+                if ($emp->email) $details[] = "Email: " . $emp->email;
+                if ($emp->phone) $details[] = "Telp: " . $emp->phone;
+                if ($emp->anydesk_id) $details[] = "AnyDesk: " . $emp->anydesk_id;
+                $details[] = "Aset Dipegang: " . $empAssets->count() . " unit";
+
+                $expandedItems = [$single];
+                foreach ($empAssets as $ea) {
+                    $expandedItems[] = [
+                        'title' => '[ASET TERKAIT] ' . $ea->name . ' [' . $ea->asset_tag . ']',
+                        'subtitle' => 'Merk: ' . ($ea->brand->name ?? '-') . ' • Status: ' . $ea->status,
+                        'badge' => 'badge-primary',
+                        'badge_text' => $ea->status,
+                        'url' => route('assets.show', $ea->id),
+                    ];
+                }
+                foreach ($empIps as $eip) {
+                    $expandedItems[] = [
+                        'title' => '[IP TERKAIT] ' . $eip->ip_address,
+                        'subtitle' => 'Status: ' . $eip->status . ' • Gateway: ' . ($eip->gateway ?? '-'),
+                        'badge' => $eip->is_online ? 'badge-success' : 'badge-secondary',
+                        'badge_text' => $eip->is_online ? 'Online' : $eip->status,
+                        'url' => route('ips.index', ['search' => $eip->ip_address]),
+                    ];
+                }
+                foreach ($empTickets as $et) {
+                    $expandedItems[] = [
+                        'title' => '[TIKET TERKAIT] #' . $et->ticket_number . ' - ' . Str::limit($et->title, 35),
+                        'subtitle' => 'Status: ' . $et->status . ' • Prioritas: ' . $et->priority,
+                        'badge' => 'badge-warning',
+                        'badge_text' => $et->status,
+                        'url' => route('tickets.edit', $et->id),
+                    ];
+                }
+
+                return [
+                    'summary' => "Data Detail Karyawan: {$emp->name} (NIK: {$emp->employee_id})",
+                    'answer' => implode(' • ', $details),
+                    'type' => 'employees',
+                    'items' => array_map(function($item) {
+                        unset($item['raw'], $item['raw_type'], $item['score'], $item['module']);
+                        return $item;
+                    }, $expandedItems),
+                ];
+            } elseif ($single['raw_type'] === 'asset') {
+                $ast = $single['raw'];
+                $assignedEmp = $ast->currentAssignment->employee ?? null;
+                $astIps = IpAddress::where('asset_id', $ast->id)->get();
+                $astTickets = Ticket::where('asset_id', $ast->id)->latest()->take(3)->get();
+                $astMaints = Maintenance::where('asset_id', $ast->id)->latest()->take(3)->get();
+
+                $details = [];
+                $details[] = "Merk: " . ($ast->brand->name ?? '-');
+                $details[] = "Kategori: " . ($ast->category->name ?? '-');
+                $details[] = "Status: " . $ast->status;
+                if ($ast->serial_number) $details[] = "S/N: " . $ast->serial_number;
+                if ($assignedEmp) $details[] = "Dipegang: " . $assignedEmp->name . ' (' . ($assignedEmp->department->name ?? '-') . ')';
+
+                $expandedItems = [$single];
+                if ($assignedEmp) {
+                    $expandedItems[] = [
+                        'title' => '[PENGGUNA SAAT INI] ' . $assignedEmp->name . ' (NIK: ' . $assignedEmp->employee_id . ')',
+                        'subtitle' => 'Divisi: ' . ($assignedEmp->department->name ?? '-') . ($assignedEmp->anydesk_id ? ' • AnyDesk: ' . $assignedEmp->anydesk_id : ''),
+                        'badge' => 'badge-info',
+                        'badge_text' => 'User',
+                        'url' => route('employees.show', $assignedEmp->id),
+                    ];
+                }
+                foreach ($astIps as $aip) {
+                    $expandedItems[] = [
+                        'title' => '[IP PERANGKAT] ' . $aip->ip_address,
+                        'subtitle' => 'Status: ' . $aip->status . ' • Gateway: ' . ($aip->gateway ?? '-'),
+                        'badge' => $aip->is_online ? 'badge-success' : 'badge-secondary',
+                        'badge_text' => $aip->is_online ? 'Online' : $aip->status,
+                        'url' => route('ips.index', ['search' => $aip->ip_address]),
+                    ];
+                }
+                foreach ($astMaints as $am) {
+                    $expandedItems[] = [
+                        'title' => '[RIWAYAT SERVIS] ' . Str::limit($am->description, 35),
+                        'subtitle' => 'Tipe: ' . $am->type . ' • Biaya: Rp ' . number_format($am->cost, 0, ',', '.'),
+                        'badge' => 'badge-secondary',
+                        'badge_text' => $am->status,
+                        'url' => route('maintenances.index', ['search' => $ast->name]),
+                    ];
+                }
+
+                return [
+                    'summary' => "Data Detail Aset: {$ast->name} [{$ast->asset_tag}]",
+                    'answer' => implode(' • ', $details),
+                    'type' => 'assets',
+                    'items' => array_map(function($item) {
+                        unset($item['raw'], $item['raw_type'], $item['score'], $item['module']);
+                        return $item;
+                    }, $expandedItems),
+                ];
+            }
+        }
+
+        // Sort all results by score DESC
+        usort($allResults, fn($a, $b) => $b['score'] <=> $a['score']);
+
+        $totalFound = count($allResults);
+        if ($totalFound === 0) {
             if ($returnNullIfEmpty) {
                 return null;
             }
 
-            // Live Web Search Fallback for broader internet knowledge
+            // Live Web Search Fallback for broader technical questions if configured
             $webSources = $this->fetchWebKnowledgeSources($promptTrimmed);
             $webResult = collect($webSources)->pluck('snippet')->filter()->implode("\n\n");
             if (!empty($webResult)) {
-                $summary = 'Hasil Pencarian & Pengetahuan Internet untuk "' . $promptTrimmed . '":';
+                $summary = 'Hasil Pencarian & Referensi untuk "' . $promptTrimmed . '":';
                 $answer = $webResult;
             } else {
-                $summary = 'Pencarian untuk "' . $promptTrimmed . '" tidak menemukan data yang cocok di database maupun internet.';
-                $answer = 'Cobalah kata kunci seperti nama karyawan, tag aset (AST-xxx), merk (Lenovo, Dell), IP address, atau tiket.';
+                $summary = "Pencarian untuk \"{$promptTrimmed}\" tidak ditemukan di seluruh modul aplikasi ITAM.";
+                $answer = 'Tidak ditemukan kecocokan di data Aset, Alamat IP, Karyawan, Tiket, Maintenance, Brankas Sandi, Lisensi Software, Berita Acara, Dokumen, VLAN, Stock Opname, maupun Master Data. Cobalah kata kunci seperti nama karyawan, tag aset, alamat IP, merk, atau tiket.';
             }
+
+            return [
+                'summary' => $summary,
+                'answer' => $answer,
+                'type' => 'general',
+                'items' => [],
+                'sources' => $webSources ?? [],
+            ];
         }
+
+        $breakdowns = [];
+        foreach ($moduleCounts as $mod => $cnt) {
+            $breakdowns[] = "{$mod} ({$cnt})";
+        }
+
+        if (count($moduleCounts) === 1) {
+            $singleMod = array_key_first($moduleCounts);
+            $summary = "Ditemukan {$totalFound} data {$singleMod} untuk pencarian \"{$promptTrimmed}\".";
+        } else {
+            $summary = "Ditemukan {$totalFound} data terkait untuk pencarian \"{$promptTrimmed}\" di modul: " . implode(', ', $breakdowns) . ".";
+        }
+
+        $top = $allResults[0];
+        $answer = null;
+        if ($top['score'] >= 100) {
+            $answer = "Kecocokan utama ditemukan pada {$top['title']} ({$top['subtitle']}). Silakan klik kartu di bawah untuk membuka data terkait.";
+        }
+
+        // Limit to top 20 items to keep UI fast and clean
+        $items = array_map(function($r) {
+            unset($r['raw'], $r['raw_type'], $r['score'], $r['module']);
+            return $r;
+        }, array_slice($allResults, 0, 20));
 
         return [
             'summary' => $summary,
             'answer' => $answer,
             'type' => 'general',
             'items' => $items,
-            'sources' => $webSources ?? [],
         ];
     }
 
