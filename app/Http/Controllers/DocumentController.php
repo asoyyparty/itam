@@ -48,13 +48,50 @@ class DocumentController extends Controller
         }
         $folders = $foldersQuery->orderBy('name')->get();
 
+        // Pre-compute recursive document counts for displayed folders & current folder
+        $allFolderRows = DocumentFolder::all(['id', 'parent_id']);
+        $docCountsByFolder = Document::groupBy('folder_id')
+            ->selectRaw('folder_id, count(*) as cnt')
+            ->pluck('cnt', 'folder_id')
+            ->toArray();
+
+        $childrenMap = [];
+        foreach ($allFolderRows as $fRow) {
+            $childrenMap[$fRow->parent_id ?? 0][] = $fRow->id;
+        }
+
+        $calcTotalDocs = function ($fid) use (&$calcTotalDocs, $childrenMap, $docCountsByFolder) {
+            $tot = $docCountsByFolder[$fid] ?? 0;
+            if (isset($childrenMap[$fid])) {
+                foreach ($childrenMap[$fid] as $cid) {
+                    $tot += $calcTotalDocs($cid);
+                }
+            }
+            return $tot;
+        };
+
+        foreach ($folders as $folder) {
+            $folder->total_documents_count = $calcTotalDocs($folder->id);
+        }
+
+        if ($currentFolder) {
+            $currentFolder->total_documents_count = $calcTotalDocs($currentFolder->id);
+        }
+
         // Documents query
         $documentsQuery = Document::with(['uploadedBy', 'categoryModel', 'folder'])->latest();
+        $includeSubfolders = $request->boolean('all_subfolders');
 
         // If not searching, filter documents by current folder_id
         if (!$request->filled('search')) {
             if ($folderId) {
-                $documentsQuery->where('folder_id', $folderId);
+                if ($includeSubfolders && $currentFolder) {
+                    $descendantIds = $currentFolder->getAllDescendantFolderIds();
+                    $descendantIds[] = (int) $folderId;
+                    $documentsQuery->whereIn('folder_id', $descendantIds);
+                } else {
+                    $documentsQuery->where('folder_id', $folderId);
+                }
             } else {
                 $documentsQuery->whereNull('folder_id');
             }
@@ -119,7 +156,8 @@ class DocumentController extends Controller
             'totalDocuments',
             'totalPdf',
             'totalExcel',
-            'formattedTotalStorage'
+            'formattedTotalStorage',
+            'includeSubfolders'
         ));
     }
 

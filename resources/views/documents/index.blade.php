@@ -634,7 +634,7 @@
                                 {{ $folder->name }}
                             </div>
                             <div class="text-muted small" style="font-size: 0.74rem;">
-                                {{ $folder->documents_count }} dokumen • {{ $folder->children_count }} subfolder
+                                {{ $folder->total_documents_count ?? $folder->documents_count }} dokumen • {{ $folder->children_count }} subfolder
                             </div>
                         </div>
                     </div>
@@ -661,6 +661,19 @@
             </div>
             @endforeach
         </div>
+    </div>
+    @endif
+
+    @if($currentFolder && $currentFolder->children_count > 0 && ($currentFolder->total_documents_count ?? 0) > 0)
+    <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between mb-3 px-3 py-2 rounded" style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(148, 163, 184, 0.16); gap: 10px;">
+        <span class="small text-muted d-flex align-items-center">
+            <i class="fas fa-layer-group text-info mr-2"></i>
+            <span>Folder <strong>{{ $currentFolder->name }}</strong> memuat <strong>{{ $currentFolder->total_documents_count }} dokumen</strong> (tersebar di {{ $currentFolder->children_count }} subfolder).</span>
+        </span>
+        <a href="{{ route('documents.index', array_merge(request()->query(), ['folder_id' => $currentFolder->id, 'all_subfolders' => $includeSubfolders ? 0 : 1])) }}" class="btn btn-sm {{ $includeSubfolders ? 'btn-primary' : 'btn-outline-primary' }} rounded-pill px-3 py-1 text-nowrap" style="font-size: 0.76rem; font-weight: 600;">
+            <i class="fas {{ $includeSubfolders ? 'fa-folder' : 'fa-folder-open' }} mr-1"></i>
+            {{ $includeSubfolders ? 'Tampilkan Dokumen Langsung Saja' : 'Lihat Semua ' . $currentFolder->total_documents_count . ' Dokumen Subfolder' }}
+        </a>
     </div>
     @endif
 

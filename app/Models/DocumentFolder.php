@@ -57,4 +57,28 @@ class DocumentFolder extends Model
     {
         return $this->children()->count() + $this->documents()->count();
     }
+
+    /**
+     * Get all descendant folder IDs recursively
+     */
+    public function getAllDescendantFolderIds(): array
+    {
+        $ids = [];
+        $children = $this->children()->get(['id']);
+        foreach ($children as $child) {
+            $ids[] = $child->id;
+            $ids = array_merge($ids, $child->getAllDescendantFolderIds());
+        }
+        return $ids;
+    }
+
+    /**
+     * Total documents count including all subfolders
+     */
+    public function getTotalDocumentsCountAttribute(): int
+    {
+        $folderIds = $this->getAllDescendantFolderIds();
+        $folderIds[] = $this->id;
+        return Document::whereIn('folder_id', $folderIds)->count();
+    }
 }
