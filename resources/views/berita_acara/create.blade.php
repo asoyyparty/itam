@@ -509,7 +509,7 @@
                                 <span>AI Vision Scanner Surat Jalan</span>
                             </h2>
                             <span class="badge badge-primary px-2 py-1" style="border-radius: 6px; font-size: 0.72rem; background-color: #6366f1;">
-                                <i class="fas fa-bolt mr-1"></i> Gemini 3.6 Flash
+                                <i class="fas fa-bolt mr-1"></i> Gemini AI Vision
                             </span>
                         </div>
                         <div class="p-3">
@@ -590,6 +590,10 @@
                                     <input type="text" name="unit_penerima" id="unit_penerima" class="ba-input" value="{{ old('unit_penerima', 'IT Pabrik') }}" oninput="updatePreview()">
                                 </div>
                                 <div class="col-md-6 mb-2">
+                                    <label class="ba-label">Kepada (Pada Dokumen Asli)</label>
+                                    <input type="text" name="kepada" id="kepada" class="ba-input" value="{{ old('kepada', 'Abdul / Bagas (IT Pabrik)') }}" placeholder="Bagas / Abdul (IT Pabrik)">
+                                </div>
+                                <div class="col-md-6 mb-2">
                                     <label class="ba-label">No. Surat Jalan Vendor <span class="text-danger">*</span></label>
                                     <input type="text" name="nomor_surat" id="nomor_surat" class="ba-input" placeholder="045/LGT/VII/2026" required value="{{ old('nomor_surat', '045/LGT/VII/2026') }}" oninput="updatePreview()">
                                 </div>
@@ -604,6 +608,10 @@
                                 <div class="col-md-6 mb-2">
                                     <label class="ba-label">Tanggal Surat Jalan</label>
                                     <input type="date" name="tanggal_surat" id="tanggal_surat" class="ba-input" value="{{ old('tanggal_surat', date('Y-m-d')) }}" required oninput="updatePreview()">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="ba-label">Status Verifikasi / TTB</label>
+                                    <input type="text" name="status_verifikasi" id="status_verifikasi" class="ba-input" value="{{ old('status_verifikasi', 'TTB / LGT ok') }}" placeholder="TTB / SJ ok 14/10 2026">
                                 </div>
                             </div>
                         </div>
@@ -922,6 +930,8 @@
                 if (data.tanggal_verifikasi) document.getElementById('tanggal_verifikasi').value = data.tanggal_verifikasi;
                 if (data.nama_penerima) document.getElementById('nama_penerima').value = data.nama_penerima;
                 if (data.unit_penerima) document.getElementById('unit_penerima').value = data.unit_penerima;
+                if (data.kepada && document.getElementById('kepada')) document.getElementById('kepada').value = data.kepada;
+                if (data.status_verifikasi && document.getElementById('status_verifikasi')) document.getElementById('status_verifikasi').value = data.status_verifikasi;
 
                 // Fill items repeater
                 if (Array.isArray(data.items) && data.items.length > 0) {
@@ -965,8 +975,17 @@
                     });
                 }
 
-                document.getElementById('ocrSuccessAlert').style.display = 'block';
-                document.getElementById('ocrSuccessMsg').innerText = `AI Vision berhasil mengekstrak ${data.items ? data.items.length : 0} item barang ke Berita Acara OK!`;
+                const alertBox = document.getElementById('ocrSuccessAlert');
+                const msgBox = document.getElementById('ocrSuccessMsg');
+                alertBox.style.display = 'block';
+
+                if (data._is_fallback) {
+                    alertBox.className = 'alert alert-warning mt-2 mb-0';
+                    msgBox.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i> Data terbaca dengan mode standar (${data.items ? data.items.length : 0} item). Silakan periksa kembali rincian data Surat Jalan.`;
+                } else {
+                    alertBox.className = 'alert alert-success mt-2 mb-0';
+                    msgBox.innerHTML = `<i class="fas fa-check-circle mr-1"></i> AI Vision berhasil mengekstrak <strong>${data.items ? data.items.length : 0} item barang</strong> dari Surat Jalan No. <code>${escapeHtml(data.no_sj || '-')}</code>!`;
+                }
 
                 updatePreview();
             } else {

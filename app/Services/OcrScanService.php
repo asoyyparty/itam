@@ -115,8 +115,16 @@ Return ONLY raw JSON (no markdown, no code blocks) in this exact structure:
 }
 PROMPT;
 
-        // Primary Model: gemini-3.6-flash with retries (fallback to gemini-flash-latest, gemini-3.5-flash)
-        $modelsToTry = ['gemini-3.6-flash', 'gemini-flash-latest', 'gemini-3.5-flash'];
+        // Model priority order: gemini-3.1-flash-lite is fastest and highly available
+        $modelsToTry = [
+            'gemini-3.1-flash-lite',
+            'gemini-3.7-flash',
+            'gemini-3.8-flash',
+            'gemini-flash-lite-latest',
+            'gemini-2.5-flash',
+            'gemini-3.6-flash',
+            'gemini-flash-latest'
+        ];
 
         foreach ($modelsToTry as $model) {
             try {
