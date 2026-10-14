@@ -110,6 +110,15 @@ class Document extends Model
             case 'rar':
             case '7z':
                 return ['icon' => 'fas fa-file-archive', 'color' => '#f59e0b', 'bg' => 'rgba(245, 158, 11, 0.12)'];
+            case 'mp4':
+            case 'mkv':
+            case 'avi':
+            case 'mov':
+            case 'webm':
+                return ['icon' => 'fas fa-file-video', 'color' => '#8b5cf6', 'bg' => 'rgba(139, 92, 246, 0.12)'];
+            case 'txt':
+            case 'log':
+                return ['icon' => 'fas fa-file-lines', 'color' => '#94a3b8', 'bg' => 'rgba(148, 163, 184, 0.12)'];
             default:
                 return ['icon' => 'fas fa-file-alt', 'color' => '#6366f1', 'bg' => 'rgba(99, 102, 241, 0.12)'];
         }
@@ -121,7 +130,7 @@ class Document extends Model
     public function getIsPreviewableAttribute(): bool
     {
         $ext = strtolower($this->file_type);
-        return in_array($ext, ['pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'xls', 'xlsx', 'csv', 'doc', 'docx', 'zip']);
+        return in_array($ext, ['pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'xls', 'xlsx', 'csv', 'doc', 'docx', 'zip', 'mp4', 'webm', 'txt', 'log']);
     }
 
     /**

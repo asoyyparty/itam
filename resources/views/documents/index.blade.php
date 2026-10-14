@@ -1173,6 +1173,16 @@
                     <img id="imagePreviewImg" src="" alt="Scan Preview" style="max-width: 100%; max-height: 550px; border-radius: 10px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                 </div>
 
+                <!-- Video Player (MP4 / WebM) -->
+                <div id="videoPreviewContainer" class="text-center w-100" style="display: none;">
+                    <video id="videoPreviewPlayer" controls style="max-width: 100%; max-height: 550px; border-radius: 10px; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" src=""></video>
+                </div>
+
+                <!-- Plain Text Viewer -->
+                <div id="textPreviewContainer" class="w-100 p-2" style="display: none; max-height: 550px; overflow-y: auto;">
+                    <pre id="textPreviewContent" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(148, 163, 184, 0.15); border-radius: 10px; padding: 15px; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; white-space: pre-wrap; word-break: break-all; margin: 0;"></pre>
+                </div>
+
                 <!-- Excel Spreadsheet Viewer (Authentic Excel UI) -->
                 <div id="excelPreviewContainer" class="w-100" style="display: none;">
                     <div class="excel-spreadsheet-container">
@@ -1479,6 +1489,10 @@
         $('#previewDocumentModal').modal('show');
         
         // Reset state
+        const vid = document.getElementById('videoPreviewPlayer');
+        if (vid) { vid.pause(); vid.src = ''; }
+        document.getElementById('videoPreviewContainer').style.display = 'none';
+        document.getElementById('textPreviewContainer').style.display = 'none';
         document.getElementById('pdfPreviewFrame').style.display = 'none';
         document.getElementById('imagePreviewContainer').style.display = 'none';
         document.getElementById('excelPreviewContainer').style.display = 'none';
@@ -1631,6 +1645,21 @@
                                 document.getElementById('zipFileList').innerHTML = `<div class="text-center text-danger p-4">Gagal mengunduh berkas ZIP dari server.</div>`;
                             });
                     });
+                } else if (['mp4', 'webm', 'mov'].includes(ext)) {
+                    const video = document.getElementById('videoPreviewPlayer');
+                    video.src = data.file_url;
+                    document.getElementById('videoPreviewContainer').style.display = 'block';
+                } else if (['txt', 'log'].includes(ext)) {
+                    document.getElementById('textPreviewContainer').style.display = 'block';
+                    document.getElementById('textPreviewContent').innerText = 'Memuat isi berkas teks...';
+                    fetch(data.file_url)
+                        .then(res => res.text())
+                        .then(text => {
+                            document.getElementById('textPreviewContent').innerText = text;
+                        })
+                        .catch(() => {
+                            document.getElementById('textPreviewContent').innerText = 'Gagal memuat isi berkas teks.';
+                        });
                 } else {
                     document.getElementById('fallbackFileName').innerText = data.file_name;
                     document.getElementById('fallbackDownloadBtn').href = `/documents/${docId}/download`;
@@ -1646,6 +1675,12 @@
                 document.getElementById('previewDocTitle').innerText = 'Gagal memuat detail dokumen';
             });
     }
+
+    // Stop video playback when preview modal is closed
+    $('#previewDocumentModal').on('hidden.bs.modal', function () {
+        const vid = document.getElementById('videoPreviewPlayer');
+        if (vid) { vid.pause(); vid.src = ''; }
+    });
 
     // Confirm Delete Document using SweetAlert2
     function confirmDeleteDoc(id, title) {

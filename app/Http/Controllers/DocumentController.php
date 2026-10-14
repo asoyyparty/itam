@@ -307,7 +307,7 @@ class DocumentController extends Controller
             'document_date' => $document->document_date ? $document->document_date->format('d M Y') : '-',
             'description' => $document->description ?? '-',
             'tags' => $document->tags ?? '',
-            'file_url' => asset('storage/' . $document->file_path),
+            'file_url' => asset('storage/' . implode('/', array_map('rawurlencode', explode('/', $document->file_path)))),
             'is_previewable' => $document->is_previewable,
             'uploaded_by' => $document->uploadedBy->name ?? 'System',
             'file_icon' => $document->file_icon,
