@@ -167,6 +167,9 @@ Route::middleware('auth')->group(function () {
         Route::post('documents/categories', [DocumentController::class, 'storeCategory'])->name('documents.categories.store');
         Route::put('documents/categories/{category}', [DocumentController::class, 'updateCategory'])->name('documents.categories.update');
         Route::delete('documents/categories/{category}', [DocumentController::class, 'destroyCategory'])->name('documents.categories.destroy');
+        Route::post('documents/bulk-action', [DocumentController::class, 'bulkAction'])->name('documents.bulk-action');
+        Route::post('documents/{document}/move', [DocumentController::class, 'move'])->name('documents.move');
+        Route::post('documents/{document}/copy', [DocumentController::class, 'copy'])->name('documents.copy');
         Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
         Route::resource('documents', DocumentController::class);
     });

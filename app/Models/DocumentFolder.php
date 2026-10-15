@@ -81,4 +81,28 @@ class DocumentFolder extends Model
         $folderIds[] = $this->id;
         return Document::whereIn('folder_id', $folderIds)->count();
     }
+
+    /**
+     * Get all folders formatted with hierarchical path breadcrumbs
+     */
+    public static function getFormattedHierarchyList()
+    {
+        $all = self::all();
+        $map = $all->keyBy('id');
+
+        $buildPath = function ($folder) use (&$buildPath, $map) {
+            $path = [$folder->name];
+            $curr = $folder;
+            while ($curr && $curr->parent_id && isset($map[$curr->parent_id])) {
+                $curr = $map[$curr->parent_id];
+                array_unshift($path, $curr->name);
+            }
+            return implode(' / ', $path);
+        };
+
+        return $all->map(function ($folder) use ($buildPath) {
+            $folder->hierarchy_path = $buildPath($folder);
+            return $folder;
+        })->sortBy('hierarchy_path', SORT_NATURAL | SORT_FLAG_CASE)->values();
+    }
 }

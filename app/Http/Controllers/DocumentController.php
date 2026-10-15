@@ -144,7 +144,8 @@ class DocumentController extends Controller
 
         $documents = $documentsQuery->paginate(12)->withQueryString();
         $categoriesList = DocumentCategory::orderBy('name')->get();
-        $allFoldersList = DocumentFolder::orderBy('name')->get();
+        $formattedFoldersList = DocumentFolder::getFormattedHierarchyList();
+        $allFoldersList = $formattedFoldersList;
 
         return view('documents.index', compact(
             'documents',
@@ -153,6 +154,7 @@ class DocumentController extends Controller
             'breadcrumbs',
             'categoriesList',
             'allFoldersList',
+            'formattedFoldersList',
             'totalDocuments',
             'totalPdf',
             'totalExcel',
@@ -329,7 +331,7 @@ class DocumentController extends Controller
     }
 
     /**
-     * Show document detail JSON for preview modal
+     * Show document detail JSON for preview / edit modal
      */
     public function show(Document $document)
     {
@@ -338,18 +340,220 @@ class DocumentController extends Controller
             'document_number' => $document->document_number,
             'title' => $document->title,
             'category' => $document->category,
+            'category_id' => $document->category_id,
+            'folder_id' => $document->folder_id,
             'folder_name' => $document->folder->name ?? 'Root',
             'file_name' => $document->file_name,
             'file_type' => $document->file_type,
             'formatted_size' => $document->formatted_size,
             'document_date' => $document->document_date ? $document->document_date->format('d M Y') : '-',
-            'description' => $document->description ?? '-',
+            'document_date_raw' => $document->document_date ? $document->document_date->format('Y-m-d') : '',
+            'description' => $document->description ?? '',
             'tags' => $document->tags ?? '',
             'file_url' => asset('storage/' . implode('/', array_map('rawurlencode', explode('/', $document->file_path)))),
             'is_previewable' => $document->is_previewable,
             'uploaded_by' => $document->uploadedBy->name ?? 'System',
             'file_icon' => $document->file_icon,
         ]);
+    }
+
+    /**
+     * Update existing document details
+     */
+    public function update(Request $request, Document $document)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'folder_id' => 'nullable|exists:document_folders,id',
+            'document_date' => 'required|date',
+            'description' => 'nullable|string|max:1000',
+            'tags' => 'nullable|string|max:255',
+            'document_file' => 'nullable|file|max:20480|mimes:pdf,png,jpg,jpeg,gif,webp,doc,docx,xls,xlsx,zip,rar,7z',
+        ]);
+
+        $categoryModel = DocumentCategory::where('name', $validated['category'])->first();
+
+        $updateData = [
+            'title' => $validated['title'],
+            'category' => $validated['category'],
+            'category_id' => $categoryModel ? $categoryModel->id : null,
+            'folder_id' => !empty($validated['folder_id']) ? (int) $validated['folder_id'] : null,
+            'document_date' => $validated['document_date'],
+            'description' => $validated['description'] ?? null,
+            'tags' => $validated['tags'] ?? null,
+        ];
+
+        if ($request->hasFile('document_file')) {
+            $file = $request->file('document_file');
+            $originalName = $file->getClientOriginalName();
+            $ext = strtolower($file->getClientOriginalExtension());
+            $size = $file->getSize();
+
+            if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
+                Storage::disk('public')->delete($document->file_path);
+            }
+
+            $datePath = Carbon::now()->format('Y/m');
+            $storedPath = $file->store("documents/{$datePath}", 'public');
+
+            $updateData['file_path'] = $storedPath;
+            $updateData['file_name'] = $originalName;
+            $updateData['file_type'] = $ext;
+            $updateData['file_size'] = $size;
+        }
+
+        $document->update($updateData);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Dokumen berhasil diperbarui!',
+                'document' => $document->fresh(['folder', 'categoryModel'])
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Dokumen berhasil diperbarui!');
+    }
+
+    /**
+     * Move a single document to a target folder
+     */
+    public function move(Request $request, Document $document)
+    {
+        $validated = $request->validate([
+            'target_folder_id' => 'nullable|exists:document_folders,id',
+        ]);
+
+        $targetFolderId = !empty($validated['target_folder_id']) ? (int) $validated['target_folder_id'] : null;
+        $document->update(['folder_id' => $targetFolderId]);
+
+        $folderName = $targetFolderId ? (DocumentFolder::find($targetFolderId)->name ?? 'Folder') : 'Root / Arsip Dokumen';
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Dokumen '{$document->title}' berhasil dipindahkan ke {$folderName}."
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Dokumen berhasil dipindahkan ke {$folderName}.");
+    }
+
+    /**
+     * Copy / duplicate a document
+     */
+    public function copy(Request $request, Document $document)
+    {
+        $validated = $request->validate([
+            'title' => 'nullable|string|max:255',
+            'target_folder_id' => 'nullable|exists:document_folders,id',
+        ]);
+
+        $targetFolderId = array_key_exists('target_folder_id', $validated)
+            ? (!empty($validated['target_folder_id']) ? (int) $validated['target_folder_id'] : null)
+            : $document->folder_id;
+
+        $newTitle = !empty($validated['title']) ? trim($validated['title']) : ($document->title . ' (Salinan)');
+
+        $newStoredPath = $document->file_path;
+        if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
+            $ext = strtolower(pathinfo($document->file_path, PATHINFO_EXTENSION));
+            $datePath = Carbon::now()->format('Y/m');
+            $newFileName = Str::random(40) . ($ext ? '.' . $ext : '');
+            $newStoredPath = "documents/{$datePath}/{$newFileName}";
+            Storage::disk('public')->copy($document->file_path, $newStoredPath);
+        }
+
+        $documentNumber = Document::generateNextDocumentNumber();
+
+        $newDoc = Document::create([
+            'document_number' => $documentNumber,
+            'title' => $newTitle,
+            'category' => $document->category,
+            'category_id' => $document->category_id,
+            'folder_id' => $targetFolderId,
+            'file_path' => $newStoredPath,
+            'file_name' => $document->file_name,
+            'file_type' => $document->file_type,
+            'file_size' => $document->file_size,
+            'document_date' => $document->document_date,
+            'description' => $document->description,
+            'tags' => $document->tags,
+            'uploaded_by' => Auth::id(),
+        ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Dokumen '{$newDoc->title}' berhasil disalin!",
+                'document' => $newDoc
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Dokumen berhasil disalin dengan nomor {$newDoc->document_number}!");
+    }
+
+    /**
+     * Perform bulk operations (move, copy, delete) on multiple documents
+     */
+    public function bulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:move,copy,delete',
+            'document_ids' => 'required|array|min:1',
+            'document_ids.*' => 'exists:documents,id',
+            'target_folder_id' => 'nullable|exists:document_folders,id',
+        ]);
+
+        $docIds = $validated['document_ids'];
+        $targetFolderId = !empty($validated['target_folder_id']) ? (int) $validated['target_folder_id'] : null;
+        $targetFolderName = $targetFolderId ? (DocumentFolder::find($targetFolderId)->name ?? 'Folder') : 'Root / Arsip Dokumen';
+
+        if ($validated['action'] === 'move') {
+            Document::whereIn('id', $docIds)->update(['folder_id' => $targetFolderId]);
+            $msg = count($docIds) . " dokumen berhasil dipindahkan ke {$targetFolderName}.";
+        } elseif ($validated['action'] === 'copy') {
+            $docs = Document::whereIn('id', $docIds)->get();
+            $count = 0;
+            foreach ($docs as $doc) {
+                $newStoredPath = $doc->file_path;
+                if ($doc->file_path && Storage::disk('public')->exists($doc->file_path)) {
+                    $ext = strtolower(pathinfo($doc->file_path, PATHINFO_EXTENSION));
+                    $datePath = Carbon::now()->format('Y/m');
+                    $newFileName = Str::random(40) . ($ext ? '.' . $ext : '');
+                    $newStoredPath = "documents/{$datePath}/{$newFileName}";
+                    Storage::disk('public')->copy($doc->file_path, $newStoredPath);
+                }
+
+                Document::create([
+                    'document_number' => Document::generateNextDocumentNumber(),
+                    'title' => $doc->title . ' (Salinan)',
+                    'category' => $doc->category,
+                    'category_id' => $doc->category_id,
+                    'folder_id' => $targetFolderId,
+                    'file_path' => $newStoredPath,
+                    'file_name' => $doc->file_name,
+                    'file_type' => $doc->file_type,
+                    'file_size' => $doc->file_size,
+                    'document_date' => $doc->document_date,
+                    'description' => $doc->description,
+                    'tags' => $doc->tags,
+                    'uploaded_by' => Auth::id(),
+                ]);
+                $count++;
+            }
+            $msg = "{$count} dokumen berhasil disalin ke {$targetFolderName}.";
+        } elseif ($validated['action'] === 'delete') {
+            Document::whereIn('id', $docIds)->delete();
+            $msg = count($docIds) . ' dokumen berhasil dihapus.';
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $msg]);
+        }
+
+        return redirect()->back()->with('success', $msg);
     }
 
     /**
