@@ -494,7 +494,7 @@
                         </div>
                         <div class="col-md-6 form-group mb-3">
                             <label class="field-label">{{ __('messages.account_password') }}</label>
-                            <input type="text" name="cctv_password" class="field-input font-mono" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+                            <input type="text" name="cctv_password" class="field-input font-mono" placeholder="••••••••">
                         </div>
                     </div>
                 </div>

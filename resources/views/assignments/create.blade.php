@@ -74,7 +74,7 @@
                         <option value="">{{ __('messages.select_employee') }}...</option>
                         @foreach($employees as $employee)
                             <option value="{{ $employee->id }}" {{ old('employee_id') == $employee->id ? 'selected' : '' }}>
-                                [{{ $employee->employee_id }}] {{ $employee->name }} {{ $employee->department ? 'â€” '.$employee->department->name : '' }}
+                                [{{ $employee->employee_id }}] {{ $employee->name }}{{ $employee->department ? ' - '.$employee->department->name : '' }}
                             </option>
                         @endforeach
                     </select>
