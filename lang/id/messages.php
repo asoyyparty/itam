@@ -175,6 +175,7 @@ return [
     'pc_password' => 'Password PC',
     'hris_username' => 'Username HRIS',
     'hris_password' => 'Password HRIS',
+    'email_password' => 'Password Email',
     'cost' => 'Biaya',
     'field_key' => 'Kunci Kolom',
     'field_label' => 'Label Kolom (misal: Model CPU)',

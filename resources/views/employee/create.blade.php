@@ -218,6 +218,21 @@
 
                 <div class="col-md-6 form-group mb-4">
                     <label class="form-label form-label-title theme-text">
+                        <i class="fas fa-key mr-1 text-warning"></i> {{ __('messages.email_password') }}
+                    </label>
+                    <div class="input-group">
+                        <input type="password" id="email_password" name="email_password" class="form-control theme-input custom-emp-input border-right-0 @error('email_password') is-invalid @enderror" value="{{ old('email_password') }}" placeholder="{{ __('messages.email_password') }}..." autocomplete="off">
+                        <div class="input-group-append">
+                            <span class="input-group-text cursor-pointer" onclick="togglePassword('email_password', this)">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                    @error('email_password') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="col-md-6 form-group mb-4">
+                    <label class="form-label form-label-title theme-text">
                         <i class="fas fa-phone-alt mr-1 text-info"></i> {{ __('messages.phone') }}
                     </label>
                     <input type="text" name="phone" class="form-control theme-input custom-emp-input @error('phone') is-invalid @enderror" value="{{ old('phone') }}" placeholder="{{ __('messages.phone') }}..." autocomplete="off">

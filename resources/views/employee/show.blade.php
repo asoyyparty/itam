@@ -325,9 +325,25 @@
                                 <div class="meta-box-label"><i class="fas fa-phone-alt text-info"></i> {{ __('messages.phone') }}</div>
                                 <div class="meta-box-value">{{ $employee->phone ?? '-' }}</div>
                             </div>
-                            <div class="col-12 meta-box-item">
+                            <div class="col-6 meta-box-item">
                                 <div class="meta-box-label"><i class="fas fa-envelope text-info"></i> {{ __('messages.email') }}</div>
                                 <div class="meta-box-value" style="font-size: 0.86rem;">{{ $employee->email ?? '-' }}</div>
+                            </div>
+                            <div class="col-6 meta-box-item">
+                                <div class="meta-box-label"><i class="fas fa-key text-warning"></i> {{ __('messages.email_password') }}</div>
+                                <div class="meta-box-value d-flex align-items-center" style="font-size: 0.86rem;">
+                                    @if($employee->email_password)
+                                        <input type="password" value="{{ $employee->email_password }}" id="emp-email-pass" class="border-0 bg-transparent theme-text font-weight-bold p-0" readonly style="outline:none; width: 68px; font-family: var(--font-mono); font-size: 0.85rem;">
+                                        <button class="btn btn-xs btn-outline-warning toggle-email-pass-btn ml-1" type="button" style="border-radius: 6px; padding: 2px 6px;" title="Lihat Password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-xs btn-outline-warning copy-license-btn ml-1" data-license-key="{{ $employee->email_password }}" data-label="Password Email" title="Copy Password Email" style="border-radius: 6px; padding: 2px 6px;">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    @else
+                                        <span class="text-muted small">-</span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -787,6 +803,18 @@ $(document).ready(function() {
 
     $('.toggle-hris-btn').click(function() {
         var input = $('#emp-hris-pass');
+        var icon = $(this).find('i');
+        if (input.attr('type') === 'password') {
+            input.attr('type', 'text');
+            icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            input.attr('type', 'password');
+            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+
+    $('.toggle-email-pass-btn').click(function() {
+        var input = $('#emp-email-pass');
         var icon = $(this).find('i');
         if (input.attr('type') === 'password') {
             input.attr('type', 'text');

@@ -174,6 +174,7 @@ return [
     'pc_password' => 'PC Password',
     'hris_username' => 'HRIS Username',
     'hris_password' => 'HRIS Password',
+    'email_password' => 'Email Password',
     'cost' => 'Cost',
     'field_key' => 'Field Key',
     'field_label' => 'Field Label (e.g. CPU Model)',

@@ -15,10 +15,27 @@ class Employee extends Model
     use HasFactory;
 
     protected $fillable = [
-        'employee_id', 'name', 'email', 'phone', 'photo', 'department_id',
+        'employee_id', 'name', 'email', 'email_password', 'phone', 'photo', 'department_id',
         'status', 'supervisor_id', 'location_id', 'anydesk_id', 'anydesk_password',
         'login_username', 'login_password', 'hris_username', 'hris_password',
     ];
+
+    protected function emailPassword(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (empty($value)) {
+                    return null;
+                }
+                try {
+                    return Crypt::decryptString($value);
+                } catch (DecryptException $e) {
+                    return '[Decryption Failed]';
+                }
+            },
+            set: fn ($value) => empty($value) ? null : Crypt::encryptString($value),
+        );
+    }
 
     protected function loginPassword(): Attribute
     {
