@@ -66,10 +66,6 @@
     <!-- Hallmark Smart Filter Bar -->
     <div class="card-header border-0 py-3 px-3 px-md-4" style="border-bottom: 1px solid rgba(148, 163, 184, 0.12) !important;">
         <form action="{{ route('assignments.index') }}" method="GET" class="w-100" id="assignment-filter-form">
-            @if(request('status'))
-                <input type="hidden" name="status" value="{{ request('status') }}">
-            @endif
-
             <div class="smart-filter-grid">
                 <!-- Date Range Pill -->
                 <div class="assignment-date-range-pill">
@@ -90,8 +86,8 @@
                 <div class="filter-control-item" style="min-width: 170px;">
                     <select name="status" class="form-control custom-filter-select" onchange="this.form.submit()">
                         <option value="">{{ __('messages.all_status') }}</option>
-                        <option value="Assigned" {{ request('status') == 'Assigned' ? 'selected' : '' }}>â— {{ __('messages.assigned') }}</option>
-                        <option value="Returned" {{ request('status') == 'Returned' ? 'selected' : '' }}>âœ“ {{ __('messages.returned') }}</option>
+                        <option value="Assigned" {{ request('status') == 'Assigned' ? 'selected' : '' }}>{{ __('messages.assigned') }}</option>
+                        <option value="Returned" {{ request('status') == 'Returned' ? 'selected' : '' }}>{{ __('messages.returned') }}</option>
                     </select>
                 </div>
 
